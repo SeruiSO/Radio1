@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v202";
+﻿const CACHE_NAME = "radio-pwa-cache-v203";
 const urlsToCache = [
   "/",
   "index.html",
@@ -28,18 +28,29 @@ self.addEventListener("fetch", event => {
     caches.match(event.request)
       .then(response => {
         if (response) {
+          if (event.request.url.includes("stations.json")) {
+            return fetch(event.request).then(networkResponse => {
+              if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
+                return response;
+              }
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, networkResponse.clone());
+              });
+              return networkResponse;
+            }).catch(() => response);
+          }
           return response;
         }
-        return fetch(event.request).then(response => {
-          if (!response || response.status !== 200 || response.type !== "basic") {
-            return response;
+        return fetch(event.request).then(networkResponse => {
+          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
+            return networkResponse;
           }
-          const responseToCache = response.clone();
+          const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME)
             .then(cache => {
               cache.put(event.request, responseToCache);
             });
-          return response;
+          return networkResponse;
         }).catch(() => {
           return caches.match(event.request);
         });
@@ -72,7 +83,18 @@ self.addEventListener("activate", event => {
 let wasOnline = navigator.onLine;
 
 setInterval(() => {
-  fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
+  if (!navigator.onLine) {
+    if (wasOnline) {
+      wasOnline = false;
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ type: "NETWORK_STATUS", online: false });
+        });
+      });
+    }
+    return;
+  }
+  fetch("stations.json", { method: "HEAD", cache: "no-cache" })
     .then(() => {
       if (!wasOnline) {
         wasOnline = true;
@@ -93,4 +115,4 @@ setInterval(() => {
         });
       }
     });
-}, 5000); // Перевірка кожні 5 секунд
+}, 5000);
