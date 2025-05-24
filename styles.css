@@ -1,13 +1,13 @@
 /* Updated on May 24, 2025 */
 :root {
-  --body-bg: #1C2526;
-  --container-bg: #2E3A3B;
-  --accent: #4A90E2;
+  --body-bg: #1A1A1A;
+  --container-bg: #2A2A2A;
+  --accent: #B0B0B0;
   --text: #FFFFFF;
 }
 
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Inter', sans-serif;
   background: var(--body-bg);
   color: var(--text);
   margin: 0;
@@ -42,6 +42,7 @@ h1 {
   margin: 5px 0;
   text-align: center;
   color: var(--accent);
+  font-weight: 600;
   transition: color 0.3s ease;
 }
 
@@ -99,7 +100,7 @@ h1 {
 
 .current-station-info .station-name {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 800;
   display: inline-flex;
   align-items: center;
 }
@@ -130,30 +131,40 @@ h1 {
   color: #FF4D4D;
 }
 
+.controls-container {
+  position: sticky;
+  bottom: 0;
+  background: var(--container-bg);
+  border-top: 2px solid var(--accent);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
 .tabs {
   display: flex;
-  justify-content: space-between;
-  margin: 5px 0;
-  position: sticky;
-  bottom: 110px;
-  z-index: 10;
-  background: var(--container-bg);
-  padding: 5px;
-  border-radius: 5px;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
 }
 
 .tab-btn {
   flex: 1;
-  padding: 12px;
+  max-width: 80px;
+  padding: 10px;
   background: var(--container-bg);
   border: 1px solid var(--accent);
   border-radius: 5px;
   color: var(--text);
   cursor: pointer;
-  margin: 0 2px;
   transition: all 0.3s ease;
   text-align: center;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .tab-btn:hover {
@@ -199,7 +210,7 @@ h1 {
   cursor: pointer;
   transition: all 0.3s ease;
   border-radius: 8px;
-  font-weight: 500;
+  font-weight: 600;
   border: 1px solid var(--text);
   margin: 5px 0;
   color: var(--text);
@@ -233,24 +244,10 @@ h1 {
   color: #ffd700;
 }
 
-.controls-container {
-  position: sticky;
-  bottom: 0;
-  background: var(--container-bg);
-  border-top: 2px solid var(--accent);
-  padding: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  z-index: 10;
-  transition: background 0.3s ease, border-color 0.3s ease;
-}
-
 .controls {
   display: flex;
   justify-content: center;
-  gap: 50px;
+  gap: 20px;
 }
 
 .wave-progress {
@@ -304,33 +301,6 @@ h1 {
 
 .control-btn:active {
   transform: scale(0.95);
-}
-
-.volume-control {
-  width: 100px;
-  height: 8px;
-  background: var(--container-bg);
-  border: 1px solid var(--accent);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.volume-control::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  background: var(--accent);
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.volume-control::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: var(--accent);
-  border-radius: 50%;
-  cursor: pointer;
 }
 
 @media (max-width: 720px) {
@@ -408,12 +378,9 @@ h1 {
   }
 
   .tab-btn {
-    padding: 10px;
-    font-size: 12px;
-  }
-
-  .volume-control {
-    width: 80px;
+    padding: 8px;
+    font-size: 10px;
+    max-width: 70px;
   }
 }
 
