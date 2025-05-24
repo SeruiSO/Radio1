@@ -58,14 +58,14 @@ async function loadStations(attempt = 1) {
 
 // Теми
 const themes = {
-  dark: { bodyBg: "#1a1a1a", containerBg: "#252525", accent: "#4682b4", text: "#f5f5f5" },
+  dark: { bodyBg: "#000000", containerBg: "#252525", accent: "#4682b4", text: "#f5f5f5" },
   light: { bodyBg: "#e8ecef", containerBg: "#ffffff", accent: "#1e90ff", text: "#212121" },
-  neon: { bodyBg: "#0a0a1a", containerBg: "#1a1a2e", accent: "#40c4b4", text: "#e8e8e8" },
-  deepPurple: { bodyBg: "#1c0b2b", containerBg: "#2b1640", accent: "#e040fb", text: "#f5f5f5" },
-  midnightRed: { bodyBg: "#1a0f0f", containerBg: "#2a1b1b", accent: "#ff3d3d", text: "#f5e6e6" },
-  obsidianGreen: { bodyBg: "#0f1a17", containerBg: "#1b2b26", accent: "#00c853", text: "#e6f5e6" },
-  darkIndigo: { bodyBg: "#0d1b2a", containerBg: "#1b263b", accent: "#00b7eb", text: "#e6f0fa" },
-  shadowOrange: { bodyBg: "#1f1b18", containerBg: "#2e2722", accent: "#ff9100", text: "#f5efe6" }
+  neon: { bodyBg: "#000000", containerBg: "#1a1a2e", accent: "#40c4b4", text: "#e8e8e8" },
+  deepPurple: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#7b1fa2", text: "#f5f5f5" },
+  midnightRed: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#d32f2f", text: "#f5e6e6" },
+  obsidianGreen: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#388e3c", text: "#e6f5e6" },
+  darkIndigo: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#0288d1", text: "#e6f0fa" },
+  shadowOrange: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#f57c00", text: "#f5efe6" }
 };
 let currentTheme = localStorage.getItem("selectedTheme") || "dark";
 
