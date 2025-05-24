@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v207"; // Updated cache version
+﻿const CACHE_NAME = "radio-pwa-cache-v209"; // Updated cache version
 const urlsToCache = [
   "/",
   "index.html",
@@ -63,7 +63,7 @@ self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map(cacheName => {
+        cacheNames.map(cacheNames => {
           if (!cacheWhitelist.includes(cacheName)) {
             return caches.delete(cacheName);
           }

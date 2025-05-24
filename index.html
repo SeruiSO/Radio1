@@ -43,15 +43,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Radio S O</title>
-  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="theme-toggle" onclick="toggleTheme()">🌙</div>
+  <audio id="audioPlayer"></audio>
+
   <div class="container">
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     <h1>🎧 RADIO MUSIC</h1>
+
+    <div class="tabs">
+      <button class="tab-btn" onclick="switchTab('best')">BEST</button>
+      <button class="tab-btn" onclick="switchTab('techno')">TECHNO</button>
+      <button class="tab-btn" onclick="switchTab('trance')">TRANCE</button>
+      <button class="tab-btn" onclick="switchTab('ukraine')">UKRAINE</button>
+    </div>
+
     <div class="current-station-info" id="currentStationInfo">
       <div class="station-info-content">
         <div class="wave-progress">
@@ -67,19 +77,14 @@
           <div class="station-name">Обирайте станцію</div>
           <div class="station-genre">жанр: -</div>
           <div class="station-country">країна: -</div>
-          <div class="network-status" id="networkStatus">Офлайн</div>
-          <div class="error-message" id="errorMessage"></div>
+          <span class="network-indicator">Офлайн</span>
         </div>
       </div>
     </div>
+
     <div class="station-list" id="stationList"></div>
+
     <div class="controls-container">
-      <div class="tabs">
-        <button class="tab-btn" onclick="switchTab('best')">BEST</button>
-        <button class="tab-btn" onclick="switchTab('techno')">TECHNO</button>
-        <button class="tab-btn" onclick="switchTab('trance')">TRANCE</button>
-        <button class="tab-btn" onclick="switchTab('ukraine')">UKRAINE</button>
-      </div>
       <div class="controls">
         <button class="control-btn" onclick="prevStation()">⏮</button>
         <button class="control-btn" onclick="togglePlayPause()">▶</button>
@@ -87,7 +92,7 @@
       </div>
     </div>
   </div>
-  <audio id="audioPlayer"></audio>
+
   <script src="script.js"></script>
 </body>
 </html>

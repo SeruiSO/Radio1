@@ -65,11 +65,11 @@ async function loadStations(attempt = 1) {
 
 // Теми
 const themes = {
-  obsidianGlow: { bodyBg: "#0F172A", containerBg: "#1E293B", accent: "#A855F7", text: "#D1D5DB" },
-  nightEmerald: { bodyBg: "#022C22", containerBg: "#134E4A", accent: "#10B981", text: "#D1D5DB" },
-  darkCobalt: { bodyBg: "#1E3A8A", containerBg: "#1E40AF", accent: "#3B82F6", text: "#E5E7EB" },
-  shadowCrimson: { bodyBg: "#18181B", containerBg: "#27272A", accent: "#EF4444", text: "#D1D5DB" },
-  midnightOnyx: { bodyBg: "#111827", containerBg: "#1F2937", accent: "#F59E0B", text: "#E5E7EB" }
+  obsidianGlow: { bodyBg: "#0F172A", containerBg: "#1E293B", accent: "#A855F7", text: "#F3F4F6" },
+  turquoiseWave: { bodyBg: "#0F172A", containerBg: "#1E293B", accent: "#2DD4BF", text: "#F3F4F6" },
+  deepSapphire: { bodyBg: "#1E293B", containerBg: "#334155", accent: "#60A5FA", text: "#F3F4F6" },
+  emeraldPulse: { bodyBg: "#0F172A", containerBg: "#1E293B", accent: "#34D399", text: "#F3F4F6" },
+  midnightOnyx: { bodyBg: "#111827", containerBg: "#1F2937", accent: "#F59E0B", text: "#F3F4F6" }
 };
 let currentTheme = localStorage.getItem("selectedTheme") || "obsidianGlow";
 
@@ -84,7 +84,7 @@ function applyTheme(theme) {
 }
 
 function toggleTheme() {
-  const themesOrder = ["obsidianGlow", "nightEmerald", "darkCobalt", "shadowCrimson", "midnightOnyx"];
+  const themesOrder = ["obsidianGlow", "turquoiseWave", "deepSapphire", "emeraldPulse", "midnightOnyx"];
   const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
   applyTheme(nextTheme);
 }
