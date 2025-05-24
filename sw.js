@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v219"; // Updated cache version
+﻿const CACHE_NAME = "radio-pwa-cache-v221";
 const urlsToCache = [
   "/",
   "index.html",
@@ -28,29 +28,18 @@ self.addEventListener("fetch", event => {
     caches.match(event.request)
       .then(response => {
         if (response) {
-          if (event.request.url.includes("stations.json")) {
-            return fetch(event.request).then(networkResponse => {
-              if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
-                return response;
-              }
-              caches.open(CACHE_NAME).then(cache => {
-                cache.put(event.request, networkResponse.clone());
-              });
-              return networkResponse;
-            }).catch(() => response);
-          }
           return response;
         }
-        return fetch(event.request).then(networkResponse => {
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
-            return networkResponse;
+        return fetch(event.request).then(response => {
+          if (!response || response.status !== 200 || response.type !== "basic") {
+            return response;
           }
-          const responseToCache = networkResponse.clone();
+          const responseToCache = response.clone();
           caches.open(CACHE_NAME)
             .then(cache => {
               cache.put(event.request, responseToCache);
             });
-          return networkResponse;
+          return response;
         }).catch(() => {
           return caches.match(event.request);
         });
@@ -63,7 +52,7 @@ self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map(cacheNames => {
+        cacheNames.map(cacheName => {
           if (!cacheWhitelist.includes(cacheName)) {
             return caches.delete(cacheName);
           }
@@ -83,18 +72,7 @@ self.addEventListener("activate", event => {
 let wasOnline = navigator.onLine;
 
 setInterval(() => {
-  if (!navigator.onLine) {
-    if (wasOnline) {
-      wasOnline = false;
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-          client.postMessage({ type: "NETWORK_STATUS", online: false });
-        });
-      });
-    }
-    return;
-  }
-  fetch("stations.json", { method: "HEAD", cache: "no-cache" })
+  fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
     .then(() => {
       if (!wasOnline) {
         wasOnline = true;
@@ -115,4 +93,4 @@ setInterval(() => {
         });
       }
     });
-}, 5000);
+}, 1000); // Перевірка кожну секунду
