@@ -87,11 +87,11 @@ h1 {
 /* Градієнт для темних тем */
 [data-theme="dark"] .current-station-info,
 [data-theme="neon"] .current-station-info,
-[data-theme="deepPurple"] .current-station-info,
-[data-theme="midnightRed"] .current-station-info,
-[data-theme="obsidianGreen"] .current-station-info,
-[data-theme="darkIndigo"] .current-station-info,
-[data-theme="shadowOrange"] .current-station-info {
+[data-theme="softBlue"] .current-station-info,
+[data-theme="mutedGreen"] .current-station-info,
+[data-theme="pastelPink"] .current-station-info,
+[data-theme="lavenderGlow"] .current-station-info,
+[data-theme="aquaMist"] .current-station-info {
   background: linear-gradient(45deg, var(--container-bg), color-mix(in srgb, var(--container-bg) 80%, var(--accent) 20%));
 }
 

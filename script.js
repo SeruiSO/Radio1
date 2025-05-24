@@ -61,11 +61,11 @@ const themes = {
   dark: { bodyBg: "#000000", containerBg: "#252525", accent: "#4682b4", text: "#f5f5f5" },
   light: { bodyBg: "#e8ecef", containerBg: "#ffffff", accent: "#1e90ff", text: "#212121" },
   neon: { bodyBg: "#000000", containerBg: "#1a1a2e", accent: "#40c4b4", text: "#e8e8e8" },
-  deepPurple: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#7b1fa2", text: "#f5f5f5" },
-  midnightRed: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#d32f2f", text: "#f5e6e6" },
-  obsidianGreen: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#388e3c", text: "#e6f5e6" },
-  darkIndigo: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#0288d1", text: "#e6f0fa" },
-  shadowOrange: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#f57c00", text: "#f5efe6" }
+  softBlue: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#0288d1", text: "#e6f0fa" },
+  mutedGreen: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#4caf50", text: "#e6f5e6" },
+  pastelPink: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#f48fb1", text: "#f5e6e6" },
+  lavenderGlow: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#9575cd", text: "#f0e6fa" },
+  aquaMist: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#26a69a", text: "#e6f5f5" }
 };
 let currentTheme = localStorage.getItem("selectedTheme") || "dark";
 
@@ -81,7 +81,7 @@ function applyTheme(theme) {
 }
 
 function toggleTheme() {
-  const themesOrder = ["dark", "light", "neon", "deepPurple", "midnightRed", "obsidianGreen", "darkIndigo", "shadowOrange"];
+  const themesOrder = ["dark", "light", "neon", "softBlue", "mutedGreen", "pastelPink", "lavenderGlow", "aquaMist"];
   const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
   applyTheme(nextTheme);
 }
