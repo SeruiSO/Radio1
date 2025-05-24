@@ -1,9 +1,9 @@
 /* Updated on May 24, 2025 */
 :root {
-  --body-bg: #0D0D0D;
-  --container-bg: #1A1A1A;
-  --accent: #FFFFFF;
-  --text: #E0E0E0;
+  --body-bg: #1A2533;
+  --container-bg: #2C3A4D;
+  --accent: #3B82F6;
+  --text: #E5E7EB;
 }
 
 body {
@@ -128,6 +128,7 @@ h1 {
   font-size: 16px;
   font-weight: 400;
   margin-top: 5px;
+  color: #FF5555;
   transition: color 0.3s ease;
 }
 
@@ -136,11 +137,12 @@ h1 {
   justify-content: space-between;
   margin: 5px 0;
   position: sticky;
-  bottom: 110px;
-  z-index: 10;
+  top: 150px; /* Above controls-container */
+  z-index: 15;
   background: var(--container-bg);
   padding: 5px;
   border-radius: 5px;
+  order: -1; /* Place before station-list */
   transition: background 0.3s ease;
 }
 
@@ -245,7 +247,6 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
   z-index: 10;
   transition: background 0.3s ease, border-color 0.3s ease;
 }
@@ -254,6 +255,7 @@ h1 {
   display: flex;
   justify-content: center;
   gap: 50px;
+  flex-grow: 0; /* Prevent stretching */
 }
 
 .wave-progress {
