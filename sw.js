@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v227";
+﻿const CACHE_NAME = "radio-pwa-cache-v223";
 const urlsToCache = [
   "/",
   "index.html",
@@ -24,29 +24,27 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("fetch", event => {
-  if (event.request.url.includes(".mp3") || event.request.url.includes(".aac")) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match(event.request) || new Response(null, { status: 503 });
-      })
-    );
-  } else {
-    event.respondWith(
-      caches.match(event.request)
-        .then(response => {
-          if (response) {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request).then(response => {
+          if (!response || response.status !== 200 || response.type !== "basic") {
             return response;
           }
-          return fetch(event.request).then(fetchResponse => {
-            if (fetchResponse.status === 200 && fetchResponse.type === "basic") {
-              const responseToCache = fetchResponse.clone();
-              caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
-            }
-            return fetchResponse;
-          }).catch(() => caches.match(event.request));
-        })
-    );
-  }
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME)
+            .then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+          return response;
+        }).catch(() => {
+          return caches.match(event.request);
+        });
+      })
+  );
 });
 
 self.addEventListener("activate", event => {
@@ -95,4 +93,4 @@ setInterval(() => {
         });
       }
     });
-}, 5000); // Перевірка кожні 5 секунд
+}, 1000); // Перевірка кожну секунду
