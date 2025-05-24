@@ -65,13 +65,13 @@ async function loadStations(attempt = 1) {
 
 // Теми
 const themes = {
-  midnightBlue: { bodyBg: "#1A2533", containerBg: "#2C3A4D", accent: "#3B82F6", text: "#E5E7EB" },
-  softIvory: { bodyBg: "#F8F1E9", containerBg: "#EDE4DA", accent: "#6EE7B7", text: "#1F2937" },
-  slateGray: { bodyBg: "#2D3748", containerBg: "#4B5563", accent: "#F97316", text: "#D1D5DB" },
-  deepCharcoal: { bodyBg: "#111827", containerBg: "#1F2937", accent: "#EF4444", text: "#E5E7EB" },
-  mutedLavender: { bodyBg: "#EDE9FE", containerBg: "#DDD6FE", accent: "#1E3A8A", text: "#1F2937" }
+  obsidianGlow: { bodyBg: "#0F172A", containerBg: "#1E293B", accent: "#A855F7", text: "#D1D5DB" },
+  nightEmerald: { bodyBg: "#022C22", containerBg: "#134E4A", accent: "#10B981", text: "#D1D5DB" },
+  darkCobalt: { bodyBg: "#1E3A8A", containerBg: "#1E40AF", accent: "#3B82F6", text: "#E5E7EB" },
+  shadowCrimson: { bodyBg: "#18181B", containerBg: "#27272A", accent: "#EF4444", text: "#D1D5DB" },
+  midnightOnyx: { bodyBg: "#111827", containerBg: "#1F2937", accent: "#F59E0B", text: "#E5E7EB" }
 };
-let currentTheme = localStorage.getItem("selectedTheme") || "midnightBlue";
+let currentTheme = localStorage.getItem("selectedTheme") || "obsidianGlow";
 
 function applyTheme(theme) {
   const root = document.documentElement;
@@ -84,7 +84,7 @@ function applyTheme(theme) {
 }
 
 function toggleTheme() {
-  const themesOrder = ["midnightBlue", "softIvory", "slateGray", "deepCharcoal", "mutedLavender"];
+  const themesOrder = ["obsidianGlow", "nightEmerald", "darkCobalt", "shadowCrimson", "midnightOnyx"];
   const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
   applyTheme(nextTheme);
 }
