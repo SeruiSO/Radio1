@@ -85,7 +85,6 @@ const themes = {
   light: { bodyBg: "#e8ecef", containerBg: "#ffffff", accent: "#1e90ff", text: "#212121" },
   neon: { bodyBg: "#000000", containerBg: "#1a1a2e", accent: "#40c4b4", text: "#e8e8e8" },
   softBlue: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#0288d1", text: "#e6f0fa" },
-  mutedGreen: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#4caf50", text: "#e6f5e6" },
   pastelPink: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#f48fb1", text: "#f5e6e6" },
   lavenderGlow: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#9575cd", text: "#f0e6fa" },
   aquaMist: { bodyBg: "#000000", containerBg: "#1a1a1a", accent: "#26a69a", text: "#e6f5f5" }
@@ -101,10 +100,15 @@ function applyTheme(theme) {
   localStorage.setItem("selectedTheme", theme);
   currentTheme = theme;
   document.documentElement.setAttribute("data-theme", theme);
+  // Зміна кольору статусної панелі
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeColorMeta) {
+    themeColorMeta.setAttribute("content", themes[theme].accent);
+  }
 }
 
 function toggleTheme() {
-  const themesOrder = ["dark", "light", "neon", "softBlue", "mutedGreen", "pastelPink", "lavenderGlow", "aquaMist"];
+  const themesOrder = ["dark", "light", "neon", "softBlue", "pastelPink", "lavenderGlow", "aquaMist"];
   const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
   applyTheme(nextTheme);
 }
@@ -208,7 +212,7 @@ function handlePlaybackError() {
       tryAutoPlay();
     }, FAST_RETRY_INTERVAL);
   } else {
-    retryCount = 0; // Скидаємо retryCount при переході до повільного режиму
+    retryCount = 0;
     startRetryTimer();
   }
 }
