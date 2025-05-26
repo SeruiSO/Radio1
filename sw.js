@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v319";
+﻿const CACHE_NAME = "radio-pwa-cache-v343";
 const urlsToCache = [
   "/",
   "index.html",
@@ -71,15 +71,8 @@ self.addEventListener("activate", event => {
   );
 });
 
-// Моніторинг стану мережі та спроби відновлення
+// Моніторинг стану мережі
 let wasOnline = navigator.onLine;
-let lastPlaybackState = { isPlaying: false, currentIndex: 0, currentTab: "techno" };
-
-self.addEventListener("message", event => {
-  if (event.data.type === "UPDATE_PLAYBACK_STATE") {
-    lastPlaybackState = event.data.state;
-  }
-});
 
 setInterval(() => {
   fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
@@ -89,13 +82,6 @@ setInterval(() => {
         self.clients.matchAll().then(clients => {
           clients.forEach(client => {
             client.postMessage({ type: "NETWORK_STATUS", online: true });
-            if (lastPlaybackState.isPlaying) {
-              client.postMessage({
-                type: "TRY_PLAYBACK",
-                currentIndex: lastPlaybackState.currentIndex,
-                currentTab: lastPlaybackState.currentTab
-              });
-            }
           });
         });
       }
@@ -111,7 +97,7 @@ setInterval(() => {
         });
       }
     });
-}, 5000); // Перевірка кожні 5 секунд для фонового режиму
+}, 1000);
 
 // Періодичне оновлення кешу stations.json
 setInterval(() => {

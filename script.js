@@ -28,16 +28,6 @@ let retryStartTime = null;
 audio.preload = "auto";
 audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 
-// Оновлення стану відтворення в Service Worker
-function updatePlaybackState() {
-  if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.controller.postMessage({
-      type: "UPDATE_PLAYBACK_STATE",
-      state: { isPlaying, currentIndex, currentTab }
-    });
-  }
-}
-
 // Завантаження станцій
 async function loadStations(attempt = 1) {
   try {
@@ -67,7 +57,6 @@ async function loadStations(attempt = 1) {
     }
     currentIndex = parseInt(localStorage.getItem(`lastStation_${currentTab}`)) || 0;
     switchTab(currentTab);
-    updatePlaybackState();
   } catch (error) {
     console.error("Помилка завантаження станцій (спроба " + attempt + "):", error);
     if ("caches" in window) {
@@ -81,7 +70,6 @@ async function loadStations(attempt = 1) {
         }
         currentIndex = parseInt(localStorage.getItem(`lastStation_${currentTab}`)) || 0;
         switchTab(currentTab);
-        updatePlaybackState();
         return;
       }
     }
@@ -146,13 +134,6 @@ if ("serviceWorker" in navigator) {
       audio.pause();
       audio.src = stationItems[currentIndex].dataset.value;
       tryAutoPlay();
-    } else if (event.data.type === "TRY_PLAYBACK" && isPlaying && stationItems?.length && event.data.currentIndex < stationItems.length) {
-      console.log("Отримано повідомлення від Service Worker: спроба відновлення відтворення");
-      currentIndex = event.data.currentIndex;
-      currentTab = event.data.currentTab;
-      audio.pause();
-      audio.src = stationItems[currentIndex].dataset.value;
-      tryAutoPlay();
     }
   });
 }
@@ -200,7 +181,6 @@ function tryAutoPlay() {
       isAutoPlaying = false;
       document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
       clearRetryTimer();
-      updatePlaybackState();
     })
     .catch(error => {
       console.error("Помилка відтворення:", error);
@@ -228,7 +208,7 @@ function handlePlaybackError() {
       tryAutoPlay();
     }, FAST_RETRY_INTERVAL);
   } else {
-    retryCount = 0;
+    retryCount = 0; // Скидаємо retryCount при переході до повільного режиму
     startRetryTimer();
   }
 }
@@ -246,7 +226,6 @@ function switchTab(tab) {
   const activeBtn = document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`);
   if (activeBtn) activeBtn.classList.add("active");
   if (stationItems?.length && currentIndex < stationItems.length) tryAutoPlay();
-  updatePlaybackState();
 }
 
 // Оновлення списку станцій
@@ -320,7 +299,6 @@ function toggleFavorite(stationName) {
   localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
   if (currentTab === "best") switchTab("best");
   else updateStationList();
-  updatePlaybackState();
 }
 
 // Зміна станції
@@ -337,7 +315,6 @@ function changeStation(index) {
   updateCurrentStationInfo(item);
   localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
   tryAutoPlay();
-  updatePlaybackState();
 }
 
 // Оновлення інформації про станцію
@@ -389,7 +366,6 @@ function togglePlayPause() {
     clearRetryTimer();
   }
   localStorage.setItem("isPlaying", isPlaying);
-  updatePlaybackState();
 }
 
 // Обробники подій
@@ -458,7 +434,6 @@ audio.addEventListener("playing", () => {
   document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
   localStorage.setItem("isPlaying", isPlaying);
   clearRetryTimer();
-  updatePlaybackState();
 });
 
 audio.addEventListener("pause", () => {
@@ -467,7 +442,6 @@ audio.addEventListener("pause", () => {
   document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
   localStorage.setItem("isPlaying", isPlaying);
   startRetryTimer();
-  updatePlaybackState();
 });
 
 audio.addEventListener("error", () => handlePlaybackError());
@@ -514,7 +488,6 @@ if ("mediaSession" in navigator) {
 // Ініціалізація
 applyTheme(currentTheme);
 loadStations();
-updatePlaybackState();
 
 // Автовідтворення при завантаженні сторінки
 document.addEventListener("DOMContentLoaded", () => {
