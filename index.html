@@ -42,13 +42,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Radio Vibe</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Radio S O</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="theme-toggle" onclick="toggleTheme()">🌙</div>
+  <button class="theme-toggle">🌙</button>
   <div class="container">
     <h1>🎧 RADIO MUSIC</h1>
     <div class="current-station-info" id="currentStationInfo">
@@ -69,22 +69,34 @@
         </div>
       </div>
     </div>
-    <div class="station-list" id="stationList"></div>
-    <div class="tabs">
-      <button class="tab-btn" onclick="switchTab('best')">BEST</button>
-      <button class="tab-btn" onclick="switchTab('techno')">TECHNO</button>
-      <button class="tab-btn" onclick="switchTab('trance')">TRANCE</button>
-      <button class="tab-btn" onclick="switchTab('ukraine')">UKRAINE</button>
-    </div>
     <div class="controls-container">
       <div class="controls">
         <button class="control-btn" onclick="prevStation()">⏮</button>
         <button class="control-btn" onclick="togglePlayPause()">▶</button>
         <button class="control-btn" onclick="nextStation()">⏭</button>
       </div>
+      <div class="sleep-timer">
+        <select id="sleepTimer" onchange="setSleepTimer()">
+          <option value="0">Таймер сну: Вимкнено</option>
+          <option value="15">15 хвилин</option>
+          <option value="30">30 хвилин</option>
+          <option value="60">60 хвилин</option>
+        </select>
+      </div>
     </div>
+    <div class="equalizer-controls">
+      <label>Баси: <input type="range" id="bassControl" min="-12" max="12" value="0" step="0.1"></label>
+      <label>Високі: <input type="range" id="trebleControl" min="-12" max="12" value="0" step="0.1"></label>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('techno')">TECHNO</button>
+      <button class="tab-btn" onclick="switchTab('trance')">TRANCE</button>
+      <button class="tab-btn" onclick="switchTab('ukraine')">UKRAINE</button>
+      <button class="tab-btn" onclick="switchTab('best')">BEST</button>
+    </div>
+    <div class="station-list" id="stationList"></div>
   </div>
   <audio id="audioPlayer"></audio>
-  <script src="script.js"></script>
+  <script type="module" src="script.ts"></script>
 </body>
 </html>

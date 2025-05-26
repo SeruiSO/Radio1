@@ -1,4 +1,4 @@
-/* Updated on May 24, 2025 */
+/* Updated on May 26, 2025 */
 :root {
   --body-bg: #000000;
   --container-bg: #252525;
@@ -81,21 +81,26 @@ h1 {
   position: sticky;
   top: 0;
   z-index: 10;
-  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, opacity 0.5s ease;
 }
 
-/* Градієнт для темних тем */
+.current-station-info.transition {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 [data-theme="dark"] .current-station-info,
 [data-theme="neon"] .current-station-info,
-[data-theme="softBlue"] .current-station-info,
-[data-theme="mutedGreen"] .current-station-info,
-[data-theme="pastelPink"] .current-station-info,
-[data-theme="lavenderGlow"] .current-station-info,
-[data-theme="aquaMist"] .current-station-info {
+[data-theme="coralVibe"] .current-station-info,
+[data-theme="emeraldGlow"] .current-station-info,
+[data-theme="midnightBlue"] .current-station-info {
   background: linear-gradient(45deg, var(--container-bg), color-mix(in srgb, var(--container-bg) 80%, var(--accent) 20%));
 }
 
-/* Виправлення для світлої теми */
 [data-theme="light"] .current-station-info {
   background: var(--container-bg);
   color: var(--text);
@@ -256,12 +261,50 @@ h1 {
   gap: 50px;
 }
 
+.sleep-timer {
+  margin-left: 20px;
+}
+
+.sleep-timer select {
+  padding: 8px;
+  background: var(--container-bg);
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sleep-timer select:hover {
+  background: var(--accent);
+  color: #121212;
+}
+
+.equalizer-controls {
+  margin: 10px 0;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.equalizer-controls label {
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.equalizer-controls input[type="range"] {
+  width: 100px;
+  accent-color: var(--accent);
+}
+
 .wave-progress {
   display: flex;
   gap: 4px;
   height: 60px;
-  width: 84px; /* 7 bars * (10px width + 2px gap) */
-  order: -1; /* Place before station-text */
+  width: 84px;
+  order: -1;
 }
 
 .wave-bar {
@@ -378,6 +421,15 @@ h1 {
   .tab-btn {
     padding: 10px;
     font-size: 12px;
+  }
+
+  .equalizer-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .equalizer-controls input[type="range"] {
+    width: 80px;
   }
 }
 
