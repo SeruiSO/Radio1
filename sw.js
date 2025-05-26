@@ -1,12 +1,9 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v239";
+﻿const CACHE_NAME = "radio-pwa-cache-v317";
 const urlsToCache = [
   "/",
   "index.html",
   "styles.css",
-  "script.ts",
-  "audio.js",
-  "ui.js",
-  "storage.js",
+  "script.js",
   "stations.json",
   "manifest.json",
   "icon-192.png",
@@ -30,23 +27,25 @@ self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Cache First для статичних ресурсів
         if (response) {
           return response;
         }
-        return fetch(event.request).then(networkResponse => {
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
+        return fetch(event.request)
+          .then(networkResponse => {
+            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
+              return networkResponse;
+            }
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
             return networkResponse;
-          }
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          return networkResponse;
-        }).catch(() => {
-          return caches.match(event.request);
-        });
+          })
+          .catch(error => {
+            console.error(`Помилка запиту до ${event.request.url}:`, error);
+            return caches.match(event.request);
+          });
       })
   );
 });
@@ -72,29 +71,6 @@ self.addEventListener("activate", event => {
   );
 });
 
-// Background Sync для улюблених станцій
-self.addEventListener("sync", event => {
-  if (event.tag === "sync-favorites") {
-    event.waitUntil(syncFavorites());
-  }
-});
-
-async function syncFavorites() {
-  try {
-    const response = await fetch("stations.json", { cache: "no-cache" });
-    if (response.ok) {
-      const stations = await response.json();
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-          client.postMessage({ type: "SYNC_FAVORITES", stations });
-        });
-      });
-    }
-  } catch (error) {
-    console.error("Помилка синхронізації улюблених станцій:", error);
-  }
-}
-
 // Моніторинг стану мережі
 let wasOnline = navigator.onLine;
 
@@ -110,7 +86,8 @@ setInterval(() => {
         });
       }
     })
-    .catch(() => {
+    .catch(error => {
+      console.error("Помилка перевірки мережі:", error);
       if (wasOnline) {
         wasOnline = false;
         self.clients.matchAll().then(clients => {
@@ -121,3 +98,23 @@ setInterval(() => {
       }
     });
 }, 1000);
+
+// Періодичне оновлення кешу stations.json
+setInterval(() => {
+  caches.open(CACHE_NAME).then(cache => {
+    fetch("stations.json", { cache: "no-cache" })
+      .then(response => {
+        if (response.ok) {
+          cache.put("stations.json", response.clone());
+          self.clients.matchAll().then(clients => {
+            clients.forEach(client => {
+              client.postMessage({ type: "STATIONS_UPDATED", message: "Список станцій оновлено" });
+            });
+          });
+        }
+      })
+      .catch(error => {
+        console.error("Помилка оновлення кешу stations.json:", error);
+      });
+  });
+}, 60 * 60 * 1000); // Оновлення кожну годину
