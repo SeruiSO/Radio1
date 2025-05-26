@@ -1,4 +1,4 @@
-/* Updated on May 26, 2025 */
+/* Updated on May 24, 2025 */
 :root {
   --body-bg: #000000;
   --container-bg: #252525;
@@ -88,6 +88,7 @@ h1 {
 [data-theme="dark"] .current-station-info,
 [data-theme="neon"] .current-station-info,
 [data-theme="softBlue"] .current-station-info,
+[data-theme="mutedGreen"] .current-station-info,
 [data-theme="pastelPink"] .current-station-info,
 [data-theme="lavenderGlow"] .current-station-info,
 [data-theme="aquaMist"] .current-station-info {

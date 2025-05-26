@@ -42,17 +42,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#4682b4"> <!-- Додаємо для статусної панелі -->
-  <title>Radio S O</title>
+  <title>Radio Vibe</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="icon-192.png">
 </head>
 <body>
-  <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+  <div class="theme-toggle" onclick="toggleTheme()">🌙</div>
   <div class="container">
     <h1>🎧 RADIO MUSIC</h1>
-    <div class="current-station-info">
+    <div class="current-station-info" id="currentStationInfo">
       <div class="station-info-content">
         <div class="wave-progress">
           <div class="wave-bar"></div>
@@ -70,15 +69,14 @@
         </div>
       </div>
     </div>
+    <div class="station-list" id="stationList"></div>
     <div class="tabs">
       <button class="tab-btn" onclick="switchTab('best')">BEST</button>
       <button class="tab-btn" onclick="switchTab('techno')">TECHNO</button>
       <button class="tab-btn" onclick="switchTab('trance')">TRANCE</button>
       <button class="tab-btn" onclick="switchTab('ukraine')">UKRAINE</button>
     </div>
-    <div id="stationList" class="station-list"></div>
     <div class="controls-container">
-      <audio id="audioPlayer"></audio>
       <div class="controls">
         <button class="control-btn" onclick="prevStation()">⏮</button>
         <button class="control-btn" onclick="togglePlayPause()">▶</button>
@@ -86,6 +84,7 @@
       </div>
     </div>
   </div>
+  <audio id="audioPlayer"></audio>
   <script src="script.js"></script>
 </body>
 </html>
