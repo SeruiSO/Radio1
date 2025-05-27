@@ -14,7 +14,7 @@ let currentTab = localStorage.getItem("currentTab") || "techno";
 let currentIndex = 0;
 let favoriteStations = JSON.parse(localStorage.getItem("favoriteStations")) || [];
 let isPlaying = localStorage.getItem("isPlaying") === "true" || false;
-let stationLists = {}; // Початково порожній об’єкт
+let stationLists = {};
 let stationItems;
 let isAutoPlaying = false;
 
@@ -29,8 +29,6 @@ async function loadStations() {
   try {
     // Спроба завантажити свіжий stations.json
     const response = await fetch(`stations.json?t=${Date.now()}`, { cache: "no-cache" });
-    console.log(`Статус відповіді: ${response.status}`);
-    
     if (response.ok) {
       stationLists = await response.json();
       console.log("Новий stations.json успішно завантажено");
@@ -69,15 +67,9 @@ async function loadStations() {
     localStorage.setItem("currentTab", currentTab);
   }
   currentIndex = parseInt(localStorage.getItem(`lastStation_${currentTab}`)) || 0;
-  
-  // Виклик оновлення списку
+
+  // Виклик оновлення списку та інформації
   switchTab(currentTab);
-  
-  // Ініціалізація інформації про поточну станцію
-  if (stationItems?.length && currentIndex < stationItems.length) {
-    updateCurrentStationInfo(stationItems[currentIndex]);
-  }
-  
   console.timeEnd("loadStations");
 }
 
@@ -259,6 +251,7 @@ function switchTab(tab) {
   if (stationItems?.length && currentIndex < stationItems.length) {
     tryAutoPlay();
     updateCurrentStationInfo(stationItems[currentIndex]);
+    stationItems[currentIndex].scrollIntoView({ block: "center", behavior: "smooth" });
   }
 }
 
@@ -326,11 +319,9 @@ function toggleFavorite(stationName) {
     favoriteStations.unshift(stationName); // Додаємо на початок списку
   }
   localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-  // Оновлюємо список, якщо активна вкладка "best"
   if (currentTab === "best") {
     switchTab("best");
   } else {
-    // Оновлюємо зірочки в поточному списку
     updateStationList();
   }
 }
@@ -345,7 +336,6 @@ function changeStation(index) {
   audio.src = item.dataset.value;
   updateCurrentStationInfo(item);
   localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
-  // Прокрутка до поточної станції
   item.scrollIntoView({ block: "center", behavior: "smooth" });
   tryAutoPlay();
 }

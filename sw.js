@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v473"; // Оновлено версію кешу
+﻿const CACHE_NAME = "radio-pwa-cache-v474";
 const urlsToCache = [
   "/",
   "index.html",
@@ -34,10 +34,14 @@ self.addEventListener("fetch", event => {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => {
             cache.put(event.request, responseToCache);
+            console.log("stations.json оновлено в кеші");
           });
           return networkResponse;
         })
-        .catch(() => caches.match(event.request) || Response.error())
+        .catch(() => {
+          console.log("Завантаження stations.json з кешу");
+          return caches.match(event.request) || Response.error();
+        })
     );
   } else {
     event.respondWith(
