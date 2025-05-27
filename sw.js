@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v443"; // Оновлено версію кешу
+﻿const CACHE_NAME = "radio-pwa-cache-v444"; // Оновлено версію кешу
 const urlsToCache = [
   "/",
   "index.html",
@@ -29,7 +29,7 @@ self.addEventListener("fetch", event => {
       fetch(event.request, { cache: "no-cache" })
         .then(networkResponse => {
           if (!networkResponse || networkResponse.status !== 200) {
-            return caches.match(event.request);
+            return caches.match(event.request) || Response.error();
           }
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => {
@@ -37,7 +37,7 @@ self.addEventListener("fetch", event => {
           });
           return networkResponse;
         })
-        .catch(() => caches.match(event.request))
+        .catch(() => caches.match(event.request) || Response.error())
     );
   } else {
     event.respondWith(

@@ -9,26 +9,11 @@ if (!audio || !stationList || !playPauseBtn || !currentStationInfo) {
   throw new Error("Не вдалося ініціалізувати програму через відсутність DOM-елементів");
 }
 
-// Вбудований резервний список станцій
-const fallbackStations = {
-  techno: [
-    { value: "https://listen.technobase.fm/tunein-mp3", name: "TechnoBase.FM", genre: "Techno/Trance", emoji: "🎶", country: "Німеччина" },
-    { value: "https://stream.sunshine-live.de/techno/mp3-192/radoxo/", name: "Sunshine Live - Techno", genre: "Techno", emoji: "⚡", country: "Німеччина" }
-  ],
-  trance: [
-    { value: "https://listen.trancebase.fm/tunein-mp3", name: "TRANCEBASE.FM", genre: "Trance/Techno", emoji: "🎶", country: "Німеччина" }
-  ],
-  ukraine: [
-    { value: "https://online.kissfm.ua/KissFM", name: "Kiss FM", genre: "Танцювальна музика", emoji: "💃", country: "Україна" }
-  ],
-  best: []
-};
-
 let currentTab = localStorage.getItem("currentTab") || "techno";
 let currentIndex = 0;
 let favoriteStations = JSON.parse(localStorage.getItem("favoriteStations")) || [];
 let isPlaying = localStorage.getItem("isPlaying") === "true" || false;
-let stationLists = fallbackStations; // Ініціалізація резервним списком
+let stationLists = {}; // Початково порожній об’єкт
 let stationItems;
 let isAutoPlaying = false;
 
@@ -39,6 +24,7 @@ audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 // Завантаження станцій
 async function loadStations() {
   console.time("loadStations");
+  stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>"; // Показуємо спінер одразу
   try {
     const response = await fetch(`stations.json?t=${Date.now()}`, {
       cache: "no-cache",
@@ -62,7 +48,7 @@ async function loadStations() {
     } else {
       throw new Error(`HTTP ${response.status}`);
     }
-    // Оновлюємо вкладку після завантаження
+    // Оновлюємо вкладку після успішного завантаження
     const validTabs = [...Object.keys(stationLists), "best"];
     if (!validTabs.includes(currentTab)) {
       currentTab = validTabs[0] || "techno";
@@ -72,9 +58,7 @@ async function loadStations() {
     switchTab(currentTab);
   } catch (error) {
     console.error("Помилка завантаження станцій:", error);
-    console.warn("Використовується резервний список станцій");
-    // Залишаємо резервний список
-    switchTab(currentTab);
+    stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції</div>";
   } finally {
     console.timeEnd("loadStations");
   }
@@ -257,8 +241,6 @@ function updateStationList() {
     console.error("stationList не знайдено");
     return;
   }
-  stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
-
   let stations = currentTab === "best"
     ? favoriteStations
         .map(name => Object.values(stationLists).flat().find(s => s.name === name))
@@ -486,5 +468,4 @@ if ("mediaSession" in navigator) {
 
 // Ініціалізація
 applyTheme(currentTheme);
-switchTab(currentTab); // Відображаємо список одразу
-loadStations(); // Асинхронно завантажуємо повний список
+loadStations(); // Починаємо завантаження станцій
