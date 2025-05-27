@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v446"; // Оновлено версію кешу
+﻿const CACHE_NAME = "radio-pwa-cache-v447"; // Оновлено версію кешу
 const urlsToCache = [
   "/",
   "index.html",

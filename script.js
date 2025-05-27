@@ -118,7 +118,7 @@ const themes = {
     bodyBg: "#121212",
     containerBg: "#1A1A1A",
     accent: "#64FFDA",
-    text: "#E0F7FA",
+    text: "#E0E7FA",
     accentGradient: "#1A4B4B"
   },
   "starlit-amethyst": {
@@ -152,9 +152,7 @@ function applyTheme(theme) {
   // Оновлення кольору статус-бару
   const accentColor = themes[theme].accent;
   const themeColorMeta = document.querySelector('meta[name="theme-color"][data-dynamic]');
-  const msNavButtonMeta = document.querySelector('meta[name="msapplication-navbutton-color"][data-dynamic]');
   if (themeColorMeta) themeColorMeta.setAttribute("content", accentColor);
-  if (msNavButtonMeta) msNavButtonMeta.setAttribute("content", accentColor);
 
   // Для iOS: визначення світлої/темної теми на основі яскравості акцентного кольору
   const appleStatusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"][data-dynamic]');
@@ -171,7 +169,7 @@ function isLightColor(hex) {
   const g = (rgb >> 8) & 0xff;
   const b = rgb & 0xff;
   const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  return brightness > 128; // Поріг яскравості
+  return brightness > 128;
 }
 
 function toggleTheme() {
@@ -258,10 +256,10 @@ function switchTab(tab) {
   if (stationItems?.length && currentIndex < stationItems.length) tryAutoPlay();
 }
 
-// Оновлення списку
+// Оновлення списку станцій
 function updateStationList() {
   if (!stationList) {
-    console.error("stationList empty");
+    console.error("stationList не знайдено");
     return;
   }
   let stations = currentTab === "best"
@@ -273,7 +271,7 @@ function updateStationList() {
   if (!stations.length) {
     currentIndex = 0;
     stationItems = [];
-    stationList.innerHTML = `<div class='station-item empty'>${currentTab === "best" ? "Немає улюблених станцій" : "Немає станцій у цій категорії"} </div>`;
+    stationList.innerHTML = `<div class='station-item empty'>${currentTab === "best" ? "Немає улюблених станцій" : "Немає станцій у цій категорії"}</div>`;
     return;
   }
 
@@ -309,7 +307,7 @@ function updateStationList() {
   }
 }
 
-// Перемикання улюблених
+// Перемикання улюблених станцій
 function toggleFavorite(stationName) {
   if (favoriteStations.includes(stationName)) {
     favoriteStations = favoriteStations.filter(name => name !== stationName);
@@ -334,10 +332,10 @@ function changeStation(index) {
   tryAutoPlay();
 }
 
-// Оновлення інформації
+// Оновлення інформації про станцію
 function updateCurrentStationInfo(item) {
   if (!currentStationInfo) {
-    console.error("currentStationInfo empty");
+    console.error("currentStationInfo не знайдено");
     return;
   }
   const stationNameElement = currentStationInfo.querySelector(".station-name");
@@ -377,7 +375,7 @@ function nextStation() {
 
 function togglePlayPause() {
   if (!playPauseBtn || !audio) {
-    console.error("playPauseBtn or audio empty");
+    console.error("playPauseBtn або audio не знайдено");
     return;
   }
   if (audio.paused) {
