@@ -88,25 +88,11 @@ const themes = {
     text: "#EDE7F6",
     accentGradient: "#2E1A47"
   },
-  "cornflower-night": {
-    bodyBg: "#0A1A2B",
-    containerBg: "#1A2A3B",
-    accent: "#3F51B5",
-    text: "#BBDEFB",
-    accentGradient: "#1A2A5B"
-  },
   "turquoise-abyss": {
     bodyBg: "#121212",
     containerBg: "#1A1A1A",
     accent: "#26A69A",
     text: "#B2DFDB",
-    accentGradient: "#1A3C4B"
-  },
-  "mint-dusk": {
-    bodyBg: "#1A1A1A",
-    containerBg: "#252525",
-    accent: "#4DB6AC",
-    text: "#B2EBF2",
     accentGradient: "#1A3C4B"
   },
   "amaranth-glow": {
@@ -116,33 +102,47 @@ const themes = {
     text: "#F8BBD0",
     accentGradient: "#3C1A2E"
   },
-  "sapphire-void": {
-    bodyBg: "#0A1A2B",
-    containerBg: "#1A2A3B",
-    accent: "#0288D1",
+  "indigo-night": {
+    bodyBg: "#121212",
+    containerBg: "#1A1A1A",
+    accent: "#5C6BC0",
+    text: "#E8EAF6",
+    accentGradient: "#1A2A5B"
+  },
+  "mint-breeze": {
+    bodyBg: "#121212",
+    containerBg: "#1A1A1A",
+    accent: "#80CBC4",
+    text: "#B2DFDB",
+    accentGradient: "#1A3C4B"
+  },
+  "olive-dusk": {
+    bodyBg: "#1A1A1A",
+    containerBg: "#252525",
+    accent: "#8BC34A",
+    text: "#DCEDC8",
+    accentGradient: "#2E3C2F"
+  },
+  "sky-haze": {
+    bodyBg: "#121212",
+    containerBg: "#1A1A1A",
+    accent: "#4FC3F7",
     text: "#B3E5FC",
     accentGradient: "#1A3C5B"
   },
-  "peach-ember": {
+  "golden-shade": {
     bodyBg: "#1A1A1A",
     containerBg: "#252525",
-    accent: "#FF8A65",
-    text: "#FFCCBC",
+    accent: "#FFCA28",
+    text: "#FFF9C4",
     accentGradient: "#3C2F2F"
   },
-  "garnet-pulse": {
+  "plum-shadow": {
     bodyBg: "#121212",
     containerBg: "#1A1A1A",
-    accent: "#C62828",
-    text: "#FFCDD2",
-    accentGradient: "#3C1A1A"
-  },
-  "bronze-shade": {
-    bodyBg: "#1A1A1A",
-    containerBg: "#252525",
-    accent: "#A1887F",
-    text: "#EFEBE9",
-    accentGradient: "#3C2F2F"
+    accent: "#AB47BC",
+    text: "#E1BEE7",
+    accentGradient: "#2E1A47"
   },
   "creamy-dawn": {
     bodyBg: "#F5F5F5",
@@ -169,14 +169,14 @@ function applyTheme(theme) {
 function toggleTheme() {
   const themesOrder = [
     "lavender-mist",
-    "cornflower-night",
     "turquoise-abyss",
-    "mint-dusk",
     "amaranth-glow",
-    "sapphire-void",
-    "peach-ember",
-    "garnet-pulse",
-    "bronze-shade",
+    "indigo-night",
+    "mint-breeze",
+    "olive-dusk",
+    "sky-haze",
+    "golden-shade",
+    "plum-shadow",
     "creamy-dawn"
   ];
   const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];

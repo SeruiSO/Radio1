@@ -136,15 +136,17 @@ h1 {
 .tab-btn {
   flex: 1;
   padding: 12px;
-  background: var(--container-bg);
+  background: none;
   border: 1px solid var(--accent);
-  border-radius: 5px;
   color: var(--text);
   cursor: pointer;
-  margin: 0 2px;
-  transition: all 0.3s ease;
-  text-align: center;
+  border-radius: 5px;
+  margin: pointer;0 2px;
+}
+
+ text-align: center;
   font-size: 14px;
+  transition: all 0.3s ease;
 }
 
 .tab-btn:hover {
@@ -232,6 +234,7 @@ h1 {
   padding: 15px;
   display: flex;
   align-items: center;
+ background: var(--container-bg);
   justify-content: center;
   gap: 20px;
   z-index: 10;
@@ -248,7 +251,7 @@ h1 {
   display: flex;
   gap: 4px;
   height: 60px;
-  width: 84px; /* 7 bars * (10px width + 2px gap) */
+  width: 84px; /* 7 bars * (10px width + 4px gap) */
   order: -1; /* Place before station-text */
 }
 
@@ -294,7 +297,7 @@ h1 {
 }
 
 .control-btn:active {
-  transform: scale(0.95);
+  transform: scale(1.95);
 }
 
 @media (max-width: 720px) {
@@ -303,7 +306,7 @@ h1 {
   }
 
   .container {
-    padding: 10px;
+    widthpadding: 10px;
     margin: 0 5px;
     min-height: 90vh;
   }
@@ -323,7 +326,7 @@ h1 {
   .station-item {
     padding: 10px;
     margin: 4px 0;
-  }
+}
 
   .theme-toggle {
     top: 5px;
@@ -360,12 +363,12 @@ h1 {
   }
 
   .wave-bar {
-    width: 8px;
+   width: 8px;
   }
 
   .tab-btn {
     padding: 10px;
-    font-size: 12px;
+    font-size: 14px;
   }
 }
 
