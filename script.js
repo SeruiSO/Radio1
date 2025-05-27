@@ -1,4 +1,4 @@
-const audio = document.getElementById("audioPlayer");
+﻿const audio = document.getElementById("audioPlayer");
 const stationList = document.getElementById("stationList");
 const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
 const currentStationInfo = document.getElementById("currentStationInfo");
@@ -27,13 +27,11 @@ async function loadStations() {
   console.time("loadStations");
   stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
   try {
-    // Спроба завантажити свіжий stations.json
     const response = await fetch(`stations.json?t=${Date.now()}`, { cache: "no-cache" });
     if (response.ok) {
       stationLists = await response.json();
       console.log("Новий stations.json успішно завантажено");
-      // Оновлюємо кеш
-      caches.open("radio-pwa-cache-v463").then(cache => {
+      caches.open("radio-pwa-cache-v504").then(cache => {
         cache.put("stations.json", response.clone());
         console.log("stations.json збережено в кеш");
       });
@@ -42,7 +40,6 @@ async function loadStations() {
     }
   } catch (error) {
     console.error("Помилка завантаження станцій з мережі:", error);
-    // Спроба використати кешовану версію
     const cachedData = await caches.match("stations.json");
     if (cachedData) {
       stationLists = await cachedData.json();
@@ -54,7 +51,6 @@ async function loadStations() {
     }
   }
 
-  // Перевірка валідності даних
   if (!stationLists || typeof stationLists !== "object" || !Object.keys(stationLists).length) {
     console.error("Дані stations.json некоректні або порожні");
     stationList.innerHTML = "<div class='station-item empty'>Помилка даних станцій</div>";
@@ -68,7 +64,6 @@ async function loadStations() {
   }
   currentIndex = parseInt(localStorage.getItem(`lastStation_${currentTab}`)) || 0;
 
-  // Виклик оновлення списку та автовідтворення
   switchTab(currentTab);
   if (stationItems?.length && currentIndex < stationItems.length) {
     updateCurrentStationInfo(stationItems[currentIndex]);
@@ -185,10 +180,9 @@ function toggleTheme() {
   applyTheme(nextTheme);
 }
 
-// Додаємо обробник події для кнопки зміни теми
 themeToggle.addEventListener("click", toggleTheme);
 
-// Налаштування Service Worker
+// Service Worker
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").then(registration => {
     registration.update();
@@ -216,11 +210,7 @@ if ("serviceWorker" in navigator) {
 
 // Автовідтворення
 function tryAutoPlay() {
-  if (!navigator.onLine) {
-    console.log("Пристрій офлайн, пропускаємо відтворення");
-    return;
-  }
-  if (!isPlaying || !stationItems?.length || currentIndex >= stationItems.length || isAutoPlaying) {
+  if (!navigator.onLine || isAutoPlaying || !isPlaying || !stationItems?.length || currentIndex >= stationItems.length) {
     document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
     return;
   }
@@ -271,7 +261,6 @@ function updateStationList() {
       .map(name => Object.values(stationLists).flat().find(s => s.name === name))
       .filter(s => s);
   } else {
-    // Сортуємо станції: спочатку улюблені, потім решта в оригінальному порядку
     const originalStations = stationLists[currentTab] || [];
     const favoriteInTab = originalStations.filter(s => favoriteStations.includes(s.name));
     const nonFavorite = originalStations.filter(s => !favoriteStations.includes(s.name));
@@ -300,7 +289,6 @@ function updateStationList() {
   stationList.appendChild(fragment);
   stationItems = stationList.querySelectorAll(".station-item");
 
-  // Прокрутка до поточної станції
   if (stationItems.length && currentIndex < stationItems.length) {
     stationItems[currentIndex].scrollIntoView({ block: "center", behavior: "smooth" });
     updateCurrentStationInfo(stationItems[currentIndex]);
@@ -316,14 +304,8 @@ function updateStationList() {
     if (favoriteBtn) {
       const stationName = favoriteBtn.parentElement.dataset.name;
       toggleFavorite(stationName);
-      const newIndex = Array.from(stationItems).findIndex(item => item.dataset.name === stationName);
-      if (newIndex !== -1) changeStation(newIndex); // Відтворити виділену станцію
     }
   };
-
-  if (stationItems.length && currentIndex < stationItems.length) {
-    changeStation(currentIndex);
-  }
 }
 
 // Перемикання улюблених станцій
@@ -331,12 +313,12 @@ function toggleFavorite(stationName) {
   if (favoriteStations.includes(stationName)) {
     favoriteStations = favoriteStations.filter(name => name !== stationName);
   } else {
-    favoriteStations.unshift(stationName); // Додаємо на початок списку
+    favoriteStations.unshift(stationName);
   }
   localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-  updateStationList(); // Оновлюємо поточний список
+  updateStationList();
   if (currentTab === "best") {
-    switchTab("best"); // Оновлюємо вкладку "Best"
+    switchTab("best");
   }
 }
 
@@ -356,37 +338,23 @@ function changeStation(index) {
 
 // Оновлення інформації про станцію
 function updateCurrentStationInfo(item) {
-  if (!currentStationInfo) {
-    console.error("currentStationInfo не знайдено");
-    return;
-  }
-  const stationNameElement = currentStationInfo.querySelector(".station-name");
-  const stationGenreElement = currentStationInfo.querySelector(".station-genre");
-  const stationCountryElement = currentStationInfo.querySelector(".station-country");
+  const stationNameElement = document.getElementById("stationName");
+  const stationGenreElement = document.getElementById("stationGenre");
+  const stationCountryElement = document.getElementById("stationCountry");
 
   if (!stationNameElement || !stationGenreElement || !stationCountryElement) {
-    console.error("Один із елементів інформації про станцію не знайдено", {
-      stationNameElement,
-      stationGenreElement,
-      stationCountryElement
-    });
+    console.error("Один із елементів інформації про станцію не знайдено");
     return;
   }
 
-  console.log("Оновлення інформації:", {
-    name: item.dataset.name,
-    genre: item.dataset.genre,
-    country: item.dataset.country
-  });
-
-  stationNameElement.textContent = item.dataset.name || "Невідома станція";
-  stationGenreElement.textContent = `Жанр: ${item.dataset.genre || "Невідомий"}`;
-  stationCountryElement.textContent = `Країна: ${item.dataset.country || "Невідома"}`;
+  stationNameElement.textContent = item.dataset.name || "Обирайте станцію";
+  stationGenreElement.textContent = `Жанр: ${item.dataset.genre || "-"}`;
+  stationCountryElement.textContent = `Країна: ${item.dataset.country || "-"}`;
 
   if ("mediaSession" in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: item.dataset.name || "Невідома станція",
-      artist: `${item.dataset.genre || "Невідомий"} | ${item.dataset.country || "Невідома"}`,
+      title: item.dataset.name || "Обирайте станцію",
+      artist: `${item.dataset.genre || "-"} | ${item.dataset.country || "-"}`,
       album: "Radio Music"
     });
   }
