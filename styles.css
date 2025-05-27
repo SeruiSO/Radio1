@@ -2,8 +2,8 @@
 :root {
   --body-bg: #0A0A0A;
   --container-bg: #121212;
-  --accent: #00F0FF;
-  --text: #F0F0F0;
+  --accent: #00D4FF;
+  --text: #E0F7FA;
   --accent-gradient: #003C4B;
 }
 
@@ -20,7 +20,7 @@ body {
   overflow-x: hidden;
   padding-top: 10px;
   box-sizing: border-box;
-  transition: background 0.4s ease, color 0.4s ease;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -28,14 +28,13 @@ body {
   width: 100%;
   background: var(--container-bg);
   padding: 15px;
-  border-radius: 15px;
+  border-radius: 12px;
   border: 1px solid var(--accent);
   margin: 0 10px;
   min-height: 90vh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  transition: background 0.4s ease, border-color 0.4s ease;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 h1 {
@@ -43,7 +42,7 @@ h1 {
   margin: 5px 0;
   text-align: center;
   color: var(--accent);
-  transition: color 0.4s ease;
+  transition: color 0.3s ease;
 }
 
 .theme-toggle {
@@ -60,19 +59,20 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all: 0.3s ease;
+  font-size: 20px;
+  transition: transform 0.2s ease, border-color 0.3s ease;
 }
 
 .theme-toggle:hover {
+  transform: scale(1.1);
   background: var(--accent);
   color: #0A0A0A;
-  transform: scale(1.1);
 }
 
 .current-station-info {
   background: linear-gradient(45deg, var(--container-bg), var(--accent-gradient));
-  padding: 20px;
-  border-radius: 12px;
+  padding: 15px;
+  border-radius: 10px;
   margin: 10px 0;
   color: var(--text);
   border: 2px solid var(--accent);
@@ -83,19 +83,17 @@ h1 {
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
-  transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .current-station-info:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.5);
+  transform: translateY(-2px);
 }
 
 .station-info-content {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   width: 100%;
 }
 
@@ -106,78 +104,85 @@ h1 {
 }
 
 .current-station-info .station-name {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
-  display: inline-flex;
-  align-items: center;
+  will-change: transform;
+  transition: transform 0.2s ease;
 }
 
-.current-station-info .station-genre {
-  font-size: 18px;
-  font-weight: 400;
-  margin-top: 5px;
+.current-station-info .station-name:hover {
+  animation: glitch 0.3s linear;
 }
 
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+.current-station-info .station-genre,
 .current-station-info .station-country {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .tabs {
   display: flex;
   justify-content: space-between;
-  margin: 10px 0;
+  margin: 8px 0;
   position: sticky;
   bottom: 110px;
   z-index: 10;
   background: var(--container-bg);
   padding: 5px;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .tab-btn {
   flex: 1;
-  padding: 12px;
+  padding: 10px;
   background: var(--container-bg);
-  border: 2px solid var(--accent);
-  border-radius: 5px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
   color: var(--text);
   cursor: pointer;
   margin: 0 2px;
   text-align: center;
-  font-size: 14px;
-  transition: all 0.3s ease;
+  font-size: 13px;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .tab-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .tab-btn.active {
   background: var(--accent);
-  border-color: var(--accent);
   color: #0A0A0A;
 }
 
 .station-list {
-  max-height: 500px;
-  overflow-y: auto;
   background: var(--container-bg);
-  border: 2px solid var(--accent);
-  border-radius: 10px;
-  margin: 10px 0 5px;
-  padding: 10px;
+  border: 10px solid var(--accent);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 8px;
+  overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) var(--container-bg);
   flex-grow: 1;
-  transition: border-color 0.4s ease;
+  max-height: 400px;
+  transition: border-color 0.3s ease;
 }
 
 .station-list::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .station-list::-webkit-scrollbar-track {
@@ -186,38 +191,35 @@ h1 {
 
 .station-list::-webkit-scrollbar-thumb {
   background: var(--accent);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 .station-item {
-  padding: 12px;
-  cursor: pointer;
-  border-radius: 8px;
-  font-weight: 500;
-  border: 1px solid var(--text);
-  margin: 5px 0;
-  color: var(--text);
-  background: var(--container-bg);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: all 0.3s ease;
+  padding: 8px;
+  margin: 10px;
+  border-radius: 5px;
+  border: var(--container-bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .station-item:hover, .station-item.selected {
   background: var(--accent) !important;
-  border: 2px solid var(--accent) !important;
   color: #0A0A0A;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .station-item .favorite-btn {
   background: none;
   border: none;
   color: var(--text);
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
 }
 
 .station-item .favorite-btn.favorited {
@@ -232,157 +234,152 @@ h1 {
   position: sticky;
   bottom: 0;
   background: var(--container-bg);
-  border-top: 2px solid var(--accent);
-  padding: 15px;
+  border-top: 1px solid var(--accent);
+  padding: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  z-index: 10;
-  transition: background 0.4s ease, border-color 0.4s ease;
+  gap: 16px;
+  z-index: 20;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .controls {
   display: flex;
   justify-content: center;
-  gap: 50px;
+  gap: 12px;
 }
 
 .wave-progress {
   display: flex;
   gap: 4px;
-  height: 60px;
-  width: 84px; /* 7 bars * (10px width + 2px gap) */
+  height: 20px;
+  width: 40px;
   order: -1;
 }
 
 .wave-bar {
-  width: 10px;
+  width: 4px;
   background: var(--accent);
-  border-radius: 5px;
-  animation: waveAnimation 1.2s infinite ease-in-out;
+  border-radius: 2px;
+  animation: wave 0.6s ease-in-out infinite;
   animation-play-state: paused;
-  transition: background 0.4s ease;
+  transition: background 0.3s ease;
 }
 
-.wave-bar:nth-child(2) { animation-delay: 0.2s; }
-.wave-bar:nth-child(3) { animation-delay: 0.3s; }
-.wave-bar:nth-child(4) { animation-delay: 0.4s; }
-.wave-bar:nth-child(5) { animation-delay: 0.5s; }
-.wave-bar:nth-child(6) { animation-delay: 0.6s; }
-.wave-bar:nth-child(7) { animation-delay: 0.7s; }
+.wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.wave-bar:nth-child(4) { animation-delay: 0.3s; }
+.wave-bar:nth-child(5) { animation-delay: 0.4s; }
+.wave-bar:nth-child(6) { animation-delay: 0.5s; }
+.wave-bar:nth-child(7) { animation-delay: 0.6s; }
 
-@keyframes waveAnimation {
-  0%, 100% { transform: scaleY(0.3); }
-  50% { transform: scaleY(1); }
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.5); }
+  50% { transform: scaleY(1.2); }
 }
 
 .control-btn {
-  width: 80px;
-  height: 80px;
-  font-size: 32px;
+  width: 50px;
+  height: 50px;
   background: var(--container-bg);
   color: var(--text);
-  border: 4px solid var(--accent);
-  border-radius: 15px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-}
+  font-size: 20px;
+  transition: transform 0.2s ease, background 0.3s ease;
+  will-change: transform;
 
 .control-btn:hover {
+  transform: scale(1.15);
   background: var(--accent);
   color: #0A0A0A;
-  transform: scale(1.15);
 }
 
 .control-btn:active {
   transform: scale(0.95);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 480px) {
   h1 {
-    font-size: 2em;
+    font-size: 1.8em;
   }
 
   .container {
-    padding: 10px;
-    margin: 0 5px;
-    min-height: 90vh;
+    padding: 8px;
+    margin: 0 4px;
   }
 
   .control-btn {
-    width: 70px;
-    height: 70px;
-    font-size: 24px;
-    border-width: 2px;
-    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    border-width: 1px;
   }
 
   .station-list {
-    max-height: 400px;
-    margin: 8px 0;
-    padding: 8px;
+    max-height: 300px;
+    padding: 6px;
+    margin: 6px 0;
   }
 
   .station-item {
-    padding: 10px;
-    margin: 4px 0;
+    padding: 6px;
+    margin: 2px 0;
   }
 
   .theme-toggle {
-    top: 5px;
-    left: 5px;
+    top: 6px;
+    left: 6px;
+    height: 32px;
+    width: 32px;
+    font-size: 16px;
     padding: 4px;
-    height: 35px;
-    width: 35px;
   }
 
   .current-station-info {
-    padding: 12px;
-    height: auto;
+    padding: 8px;
   }
 
   .current-station-info .station-name {
-    font-size: 24px;
-  }
+    font-size: 18px;
+    }
 
-  .current-station-info .station-genre {
-    font-size: 16px;
-  }
-
+  .current-station-info .station-genre,
   .current-station-info .station-country {
-    font-size: 16px;
-  }
+    font-size: 12px;
+    }
 
   .station-info-content {
-    gap: 10px;
+    gap: 6px;
   }
 
   .wave-progress {
-    width: 70px;
-    height: 50px;
+    width: 32px;
+    height: 16px;
   }
 
   .wave-bar {
-    width: 8px;
+    width: 3px;
   }
 
   .tab-btn {
-    padding: 10px;
+    padding: 6px;
     font-size: 12px;
     border-width: 1px;
   }
 }
 
-@media (max-height: 1600px) {
+@media (max-height: 600px) {
   .container {
     min-height: 85vh;
   }
 
   .station-list {
-    max-height: 450px;
+    max-height: 250px;
   }
 }

@@ -17,9 +17,9 @@ let stationLists = {};
 let stationItems;
 let retryCount = 0;
 const MAX_RETRIES = 3;
-const FAST_RETRY_INTERVAL = 1000; // Спроби кожну секунду
-const SLOW_RETRY_INTERVAL = 5000; // Спроби кожні 5 секунд
-const FAST_RETRY_DURATION = 30000; // 30 секунд для частих спроб
+const FAST_RETRY_INTERVAL = 1000;
+const SLOW_RETRY_INTERVAL = 5000;
+const FAST_RETRY_DURATION = 30000;
 let isAutoPlaying = false;
 let retryTimer = null;
 let retryStartTime = null;
@@ -81,78 +81,88 @@ async function loadStations(attempt = 1) {
 
 // Теми
 const themes = {
-  "neon-pulse": {
+  "neon-spark": {
     bodyBg: "#0A0A0A",
     containerBg: "#121212",
-    accent: "#00F0FF",
-    text: "#F0F0F0",
-    accentGradient: "#003C4B"
+    accent: "#00D4FF",
+    text: "#E0F7FA",
+    accentGradient: "#003C4B",
+    icon: "⚡️"
   },
-  "lime-surge": {
+  "vapor-pink": {
     bodyBg: "#0A0A0A",
     containerBg: "#121212",
-    accent: "#B2FF59",
-    text: "#E8F5E9",
-    accentGradient: "#2E4B2F"
-  },
-  "flamingo-flash": {
-    bodyBg: "#0A0A0A",
-    containerBg: "#121212",
-    accent: "#FF4081",
+    accent: "#FF2E63",
     text: "#FCE4EC",
-    accentGradient: "#4B1A2E"
+    accentGradient: "#4B1A2E",
+    icon: "🌸"
   },
-  "violet-vortex": {
-    bodyBg: "#121212",
-    containerBg: "#1A1A1A",
-    accent: "#7C4DFF",
-    text: "#EDE7F6",
-    accentGradient: "#2E1A47"
-  },
-  "aqua-glow": {
-    bodyBg: "#0A0A0A",
-    containerBg: "#121212",
-    accent: "#26C6DA",
-    text: "#B2EBF2",
-    accentGradient: "#1A3C4B"
-  },
-  "cosmic-indigo": {
-    bodyBg: "#121212",
-    containerBg: "#1A1A1A",
-    accent: "#3F51B5",
-    text: "#BBDEFB",
-    accentGradient: "#1A2A5B"
-  },
-  "mystic-jade": {
-    bodyBg: "#0A0A0A",
-    containerBg: "#121212",
-    accent: "#26A69A",
-    text: "#B2DFDB",
-    accentGradient: "#1A3C4B"
-  },
-  "aurora-haze": {
+  "tech-mint": {
     bodyBg: "#121212",
     containerBg: "#1A1A1A",
     accent: "#64FFDA",
-    text: "#E0F7FA",
-    accentGradient: "#1A4B4B"
+    text: "#B2DFDB",
+    accentGradient: "#1A3C4B",
+    icon: "💧"
   },
-  "starlit-amethyst": {
+  "pulse-purple": {
     bodyBg: "#0A0A0A",
     containerBg: "#121212",
     accent: "#B388FF",
     text: "#E1BEE7",
-    accentGradient: "#2E1A47"
+    accentGradient: "#2E1A47",
+    icon: "🔮"
   },
-  "lunar-frost": {
-    bodyBg: "#F5F7FA",
+  "astro-cyan": {
+    bodyBg: "#0A0A0A",
+    containerBg: "#121212",
+    accent: "#18FFFF",
+    text: "#E0F7FA",
+    accentGradient: "#003C4B",
+    icon: "🌠"
+  },
+  "retro-wave": {
+    bodyBg: "#121212",
+    containerBg: "#1A1A1A",
+    accent: "#FFAB40",
+    text: "#FFF9C4",
+    accentGradient: "#3C2F2F",
+    icon: "📼"
+  },
+  "night-teal": {
+    bodyBg: "#0A0A0A",
+    containerBg: "#121212",
+    accent: "#26A69A",
+    text: "#B2DFDB",
+    accentGradient: "#1A3C4B",
+    icon: "🌙"
+  },
+  "glow-indigo": {
+    bodyBg: "#121212",
+    containerBg: "#1A1A1A",
+    accent: "#3F51B5",
+    text: "#BBDEFB",
+    accentGradient: "#1A2A5B",
+    icon: "🌌"
+  },
+  "future-lime": {
+    bodyBg: "#0A0A0A",
+    containerBg: "#121212",
+    accent: "#B2FF59",
+    text: "#E8F5E9",
+    accentGradient: "#2E4B2F",
+    icon: "🚀"
+  },
+  "crystal-light": {
+    bodyBg: "#F0F4F8",
     containerBg: "#FFFFFF",
     accent: "#40C4FF",
     text: "#212121",
-    accentGradient: "#B3E5FC"
+    accentGradient: "#B3E5FC",
+    icon: "💎"
   }
 };
-let currentTheme = localStorage.getItem("selectedTheme") || "neon-pulse";
+let currentTheme = localStorage.getItem("selectedTheme") || "neon-spark";
 
 function applyTheme(theme) {
   const root = document.documentElement;
@@ -164,20 +174,24 @@ function applyTheme(theme) {
   localStorage.setItem("selectedTheme", theme);
   currentTheme = theme;
   document.documentElement.setAttribute("data-theme", theme);
+  const themeToggle = document.querySelector(".theme-toggle");
+  if (themeToggle) {
+    themeToggle.innerHTML = themes[theme].icon;
+  }
 }
 
 function toggleTheme() {
   const themesOrder = [
-    "neon-pulse",
-    "lime-surge",
-    "flamingo-flash",
-    "violet-vortex",
-    "aqua-glow",
-    "cosmic-indigo",
-    "mystic-jade",
-    "aurora-haze",
-    "starlit-amethyst",
-    "lunar-frost"
+    "neon-spark",
+    "vapor-pink",
+    "tech-mint",
+    "pulse-purple",
+    "astro-cyan",
+    "retro-wave",
+    "night-teal",
+    "glow-indigo",
+    "future-lime",
+    "crystal-light"
   ];
   const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
   applyTheme(nextTheme);
@@ -199,7 +213,6 @@ if ("serviceWorker" in navigator) {
     });
   });
 
-  // Обробка повідомлень від Service Worker
   navigator.serviceWorker.addEventListener("message", event => {
     if (event.data.type === "NETWORK_STATUS" && event.data.online && isPlaying && stationItems?.length && currentIndex < stationItems.length) {
       console.log("Отримано повідомлення від Service Worker: мережа відновлена");
@@ -220,12 +233,12 @@ function clearRetryTimer() {
   }
 }
 
-// Запуск періодичних перевірок (повільний режим, кожні 5 секунд)
+// Запуск періодичних перевірок
 function startRetryTimer() {
   clearRetryTimer();
   retryTimer = setInterval(() => {
     if (navigator.onLine && isPlaying && stationItems?.length && currentIndex < stationItems.length && !isAutoPlaying && audio.paused) {
-      console.log("Періодична спроба відновлення відтворення (повільний режим)");
+      console.log("Періодична спроба відновлення відтворення");
       audio.pause();
       audio.src = stationItems[currentIndex].dataset.value;
       tryAutoPlay();
@@ -282,7 +295,7 @@ function handlePlaybackError() {
       tryAutoPlay();
     }, FAST_RETRY_INTERVAL);
   } else {
-    retryCount = 0; // Скидаємо retryCount при переході до повільного режиму
+    retryCount = 0;
     startRetryTimer();
   }
 }
@@ -378,19 +391,17 @@ function toggleFavorite(stationName) {
 // Зміна станції
 function changeStation(index) {
   if (index < 0 || index >= stationItems.length || stationItems[index].classList.contains("empty")) return;
-  if (currentTab !== null) {
-    retryCount = 0;
-    retryStartTime = null;
-    clearRetryTimer();
-    const item = stationItems[index];
-    stationItems?.forEach(i => i.classList.remove("selected"));
-    item.classList.add("selected");
-    currentIndex = index;
-    audio.src = item.dataset.value;
-    updateCurrentStationInfo(item);
-    localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
-    tryAutoPlay();
-  }
+  retryCount = 0;
+  retryStartTime = null;
+  clearRetryTimer();
+  const item = stationItems[index];
+  stationItems.forEach(i => i.classList.remove("selected"));
+  item.classList.add("selected");
+  currentIndex = index;
+  audio.src = item.dataset.value;
+  updateCurrentStationInfo(item);
+  localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
+  tryAutoPlay();
 }
 
 // Оновлення інформації про станцію
@@ -399,23 +410,13 @@ function updateCurrentStationInfo(item) {
     console.error("currentStationInfo не знайдено");
     return;
   }
-  const stationNameElement = currentStationInfo.querySelector(".station-name");
-  const stationGenreElement = currentStationInfo.querySelector(".station-genre");
-  const stationCountryElement = currentStationInfo.querySelector(".station-country");
-
-  if (stationNameElement) {
-    stationNameElement.textContent = item.dataset.name || "Unknown";
-  }
-  if (stationGenreElement) {
-    stationGenreElement.textContent = `Genre: ${item.dataset.genre || "Unknown"}`;
-  }
-  if (stationCountryElement) {
-    stationCountryElement.textContent = `Country: ${item.dataset.country || "Unknown"}`;
-  }
+  currentStationInfo.querySelector(".station-name").textContent = item.dataset.name || "Немає даних";
+  currentStationInfo.querySelector(".station-genre").textContent = `жанр: ${item.dataset.genre || "-"}`;
+  currentStationInfo.querySelector(".station-country").textContent = `країна: ${item.dataset.country || "-"}`;
   if ("mediaSession" in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: item.dataset.name || "Unknown Station",
-      artist: `${item.dataset.genre || "Unknown"} | ${item.dataset.country || "Unknown"}`,
+      title: item.dataset.name || "Невідома станція",
+      artist: `${item.dataset.genre || "-"} | ${item.dataset.country || "-"}`,
       album: "Radio Music"
     });
   }
