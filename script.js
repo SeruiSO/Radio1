@@ -81,78 +81,78 @@ async function loadStations(attempt = 1) {
 
 // Теми
 const themes = {
-  "midnight-neon": {
+  "lavender-mist": {
     bodyBg: "#121212",
     containerBg: "#1A1A1A",
-    accent: "#39FF14",
-    text: "#E0E0E0",
-    accentGradient: "#1A3C34"
-  },
-  "cyber-plum": {
-    bodyBg: "#1A1A2B",
-    containerBg: "#252535",
-    accent: "#9C27B0",
-    text: "#D1C4E9",
+    accent: "#B39DDB",
+    text: "#EDE7F6",
     accentGradient: "#2E1A47"
   },
-  "ocean-abyss": {
+  "cornflower-night": {
+    bodyBg: "#0A1A2B",
+    containerBg: "#1A2A3B",
+    accent: "#3F51B5",
+    text: "#BBDEFB",
+    accentGradient: "#1A2A5B"
+  },
+  "turquoise-abyss": {
+    bodyBg: "#121212",
+    containerBg: "#1A1A1A",
+    accent: "#26A69A",
+    text: "#B2DFDB",
+    accentGradient: "#1A3C4B"
+  },
+  "mint-dusk": {
+    bodyBg: "#1A1A1A",
+    containerBg: "#252525",
+    accent: "#4DB6AC",
+    text: "#B2EBF2",
+    accentGradient: "#1A3C4B"
+  },
+  "amaranth-glow": {
+    bodyBg: "#121212",
+    containerBg: "#1A1A1A",
+    accent: "#D81B60",
+    text: "#F8BBD0",
+    accentGradient: "#3C1A2E"
+  },
+  "sapphire-void": {
     bodyBg: "#0A1A2B",
     containerBg: "#1A2A3B",
     accent: "#0288D1",
     text: "#B3E5FC",
     accentGradient: "#1A3C5B"
   },
-  "forest-dusk": {
-    bodyBg: "#121212",
-    containerBg: "#1A1A1A",
-    accent: "#2E7D32",
-    text: "#C8E6C9",
-    accentGradient: "#1A3C34"
-  },
-  "crimson-night": {
+  "peach-ember": {
     bodyBg: "#1A1A1A",
     containerBg: "#252525",
-    accent: "#D32F2F",
-    text: "#FFCDD2",
-    accentGradient: "#3C1A1A"
-  },
-  "chrome-void": {
-    bodyBg: "#121212",
-    containerBg: "#1A1A1A",
-    accent: "#B0BEC5",
-    text: "#ECEFF1",
-    accentGradient: "#2E2E2E"
-  },
-  "electric-pulse": {
-    bodyBg: "#0A1A2B",
-    containerBg: "#1A2A3B",
-    accent: "#00B7EB",
-    text: "#B3E5FC",
-    accentGradient: "#1A3C5B"
-  },
-  "ash-ember": {
-    bodyBg: "#1A1A1A",
-    containerBg: "#252525",
-    accent: "#FF5722",
+    accent: "#FF8A65",
     text: "#FFCCBC",
     accentGradient: "#3C2F2F"
   },
-  "pink-haze": {
+  "garnet-pulse": {
     bodyBg: "#121212",
     containerBg: "#1A1A1A",
-    accent: "#F06292",
-    text: "#F8BBD0",
-    accentGradient: "#3C1A2E"
+    accent: "#C62828",
+    text: "#FFCDD2",
+    accentGradient: "#3C1A1A"
   },
-  "soft-dawn": {
-    bodyBg: "#ECEFF1",
+  "bronze-shade": {
+    bodyBg: "#1A1A1A",
+    containerBg: "#252525",
+    accent: "#A1887F",
+    text: "#EFEBE9",
+    accentGradient: "#3C2F2F"
+  },
+  "creamy-dawn": {
+    bodyBg: "#F5F5F5",
     containerBg: "#FFFFFF",
-    accent: "#7E57C2",
+    accent: "#9575CD",
     text: "#212121",
     accentGradient: "#D1C4E9"
   }
 };
-let currentTheme = localStorage.getItem("selectedTheme") || "midnight-neon";
+let currentTheme = localStorage.getItem("selectedTheme") || "lavender-mist";
 
 function applyTheme(theme) {
   const root = document.documentElement;
@@ -168,16 +168,16 @@ function applyTheme(theme) {
 
 function toggleTheme() {
   const themesOrder = [
-    "midnight-neon",
-    "cyber-plum",
-    "ocean-abyss",
-    "forest-dusk",
-    "crimson-night",
-    "chrome-void",
-    "electric-pulse",
-    "ash-ember",
-    "pink-haze",
-    "soft-dawn"
+    "lavender-mist",
+    "cornflower-night",
+    "turquoise-abyss",
+    "mint-dusk",
+    "amaranth-glow",
+    "sapphire-void",
+    "peach-ember",
+    "garnet-pulse",
+    "bronze-shade",
+    "creamy-dawn"
   ];
   const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
   applyTheme(nextTheme);
