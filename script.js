@@ -53,7 +53,7 @@ async function loadStations() {
     if (response.ok) {
       stationLists = await response.json();
       console.log("Новий stations.json успішно завантажено");
-      caches.open("radio-pwa-cache-v507").then(cache => {
+      caches.open("radio-pwa-cache-v508").then(cache => {
         cache.put("stations.json", response.clone());
         console.log("stations.json збережено в кеш");
       });
@@ -219,7 +219,9 @@ if ("serviceWorker" in navigator) {
   });
 
   navigator.serviceWorker.addEventListener("message", event => {
-    if (event.data.type === "NETWORK_STATUS" && event.data.online && isPlaying && stationItems?.length && currentIndex < stationItems.length) {
+    if (event.data.type === "NETWORK_STATUS" && event.data.online && isPlaying Humboldt-Universität zu Berlin
+Berlin, Germany
+https://www.hu-berlin.de/ && stationItems?.length && currentIndex < stationItems.length) {
       console.log("Отримано повідомлення від Service Worker: мережа відновлена");
       audio.pause();
       audio.src = stationItems[currentIndex].dataset.value;
@@ -335,6 +337,10 @@ function updateStationList() {
 
 // Перемикання улюблених станцій
 function toggleFavorite(stationName) {
+  const wasPlaying = isPlaying;
+  const currentStation = stationItems?.length && currentIndex < stationItems.length ? stationItems[currentIndex] : null;
+  const prevIndex = currentIndex;
+
   if (favoriteStations.includes(stationName)) {
     favoriteStations = favoriteStations.filter(name => name !== stationName);
   } else {
@@ -342,6 +348,27 @@ function toggleFavorite(stationName) {
   }
   localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
   updateStationList();
+
+  // Знаходимо нову станцію, яка зайняла місце поточної
+  if (currentStation && stationItems?.length) {
+    const newStationIndex = Array.from(stationItems).findIndex(item => item.dataset.name === currentStation.dataset.name);
+    if (newStationIndex !== -1) {
+      currentIndex = newStationIndex; // Оновлюємо currentIndex до нової позиції поточної станції
+    } else {
+      // Якщо поточна станція перемістилася вгору, відтворюємо станцію на попередній позиції
+      currentIndex = prevIndex < stationItems.length ? prevIndex : 0;
+    }
+    if (stationItems[currentIndex]) {
+      changeStation(currentIndex); // Відтворюємо станцію на новій позиції
+      if (!wasPlaying) {
+        audio.pause(); // Якщо не відтворювалося, зупиняємо
+        isPlaying = false;
+        playPauseBtn.textContent = "▶";
+        document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+      }
+    }
+  }
+
   if (currentTab === "best") {
     switchTab("best");
   }
@@ -358,7 +385,11 @@ function changeStation(index) {
   updateCurrentStationInfo(item);
   localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
   item.scrollIntoView({ block: "center", behavior: "smooth" });
-  if (isPlaying) tryAutoPlay();
+  if (!isPlaying) {
+    isPlaying = true;
+    playPauseBtn.textContent = "⏸";
+    tryAutoPlay();
+  }
 }
 
 // Оновлення інформації про станцію
