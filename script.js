@@ -32,7 +32,31 @@ async function loadStations() {
   console.time("loadStations");
   stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
 
-  // Спочатку перевіряємо кеш
+  // Спочатку пробуємо завантажити з локального файлу
+  try {
+    const response = await fetch(`stations.json?t=${Date.now()}`, { cache: "no-cache" });
+    if (response.ok) {
+      stationLists = await response.json();
+      console.log("stations.json завантажено з локального файлу");
+      if (validateStationData(stationLists)) {
+        // Зберігаємо в кеш
+        caches.open("radio-pwa-cache-v601").then(cache => {
+          cache.put("stations.json", response.clone());
+          console.log("stations.json збережено в кеш");
+        });
+        initializeStations();
+        return;
+      } else {
+        throw new Error("Дані stations.json некоректні");
+      }
+    } else {
+      throw new Error(`HTTP ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Помилка завантаження stations.json з локального файлу:", error);
+  }
+
+  // Якщо локальний файл недоступний, перевіряємо кеш
   try {
     const cachedData = await caches.match("stations.json");
     if (cachedData) {
@@ -47,28 +71,9 @@ async function loadStations() {
     console.error("Помилка завантаження кешу:", error);
   }
 
-  // Якщо кеш недоступний або невалідний, пробуємо мережу
-  try {
-    const response = await fetch(`stations.json?t=${Date.now()}`, { cache: "no-cache" });
-    if (response.ok) {
-      stationLists = await response.json();
-      console.log("Новий stations.json успішно завантажено");
-      caches.open("radio-pwa-cache-v508").then(cache => {
-        cache.put("stations.json", response.clone());
-        console.log("stations.json збережено в кеш");
-      });
-      if (validateStationData(stationLists)) {
-        initializeStations();
-      } else {
-        throw new Error("Дані stations.json некоректні");
-      }
-    } else {
-      throw new Error(`HTTP ${response.status}`);
-    }
-  } catch (error) {
-    console.error("Помилка завантаження станцій з мережі:", error);
-    stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції</div>";
-  }
+  // Якщо обидва варіанти не спрацювали
+  console.error("Не вдалося завантажити станції");
+  stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції</div>";
   console.timeEnd("loadStations");
 }
 
@@ -94,76 +99,16 @@ function initializeStations() {
 
 // Теми
 const themes = {
-  "neon-pulse": {
-    bodyBg: "#0A0A0A",
-    containerBg: "#121212",
-    accent: "#00F0FF",
-    text: "#F0F0F0",
-    accentGradient: "#003C4B"
-  },
-  "lime-surge": {
-    bodyBg: "#0A0A0A",
-    containerBg: "#121212",
-    accent: "#B2FF59",
-    text: "#E8F5E9",
-    accentGradient: "#2E4B2F"
-  },
-  "flamingo-flash": {
-    bodyBg: "#0A0A0A",
-    containerBg: "#121212",
-    accent: "#FF4081",
-    text: "#FCE4EC",
-    accentGradient: "#4B1A2E"
-  },
-  "violet-vortex": {
-    bodyBg: "#121212",
-    containerBg: "#1A1A1A",
-    accent: "#7C4DFF",
-    text: "#EDE7F6",
-    accentGradient: "#2E1A47"
-  },
-  "aqua-glow": {
-    bodyBg: "#0A0A0A",
-    containerBg: "#121212",
-    accent: "#26C6DA",
-    text: "#B2EBF2",
-    accentGradient: "#1A3C4B"
-  },
-  "cosmic-indigo": {
-    bodyBg: "#121212",
-    containerBg: "#1A1A1A",
-    accent: "#3F51B5",
-    text: "#BBDEFB",
-    accentGradient: "#1A2A5A"
-  },
-  "mystic-jade": {
-    bodyBg: "#0A0A0A",
-    containerBg: "#121212",
-    accent: "#26A69A",
-    text: "#B2DFDB",
-    accentGradient: "#1A3C4B"
-  },
-  "aurora-haze": {
-    bodyBg: "#121212",
-    containerBg: "#1A1A1A",
-    accent: "#64FFDA",
-    text: "#E0F7FA",
-    accentGradient: "#1A4B4B"
-  },
-  "starlit-amethyst": {
-    bodyBg: "#0A0A0A",
-    containerBg: "#121212",
-    accent: "#B388FF",
-    text: "#E1BEE7",
-    accentGradient: "#2E1A47"
-  },
-  "lunar-frost": {
-    bodyBg: "#F5F7FA",
-    containerBg: "#FFFFFF",
-    accent: "#40C4FF",
-    text: "#212121",
-    accentGradient: "#B3E5FC"
-  }
+  "neon-pulse": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#00F0FF", text: "#F0F0F0", accentGradient: "#003C4B" },
+  "lime-surge": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#B2FF59", text: "#E8F5E9", accentGradient: "#2E4B2F" },
+  "flamingo-flash": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#FF4081", text: "#FCE4EC", accentGradient: "#4B1A2E" },
+  "violet-vortex": { bodyBg: "#121212", containerBg: "#1A1A1A", accent: "#7C4DFF", text: "#EDE7F6", accentGradient: "#2E1A47" },
+  "aqua-glow": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#26C6DA", text: "#B2EBF2", accentGradient: "#1A3C4B" },
+  "cosmic-indigo": { bodyBg: "#121212", containerBg: "#1A1A1A", accent: "#3F51B5", text: "#BBDEFB", accentGradient: "#1A2A5A" },
+  "mystic-jade": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#26A69A", text: "#B2DFDB", accentGradient: "#1A3C4B" },
+  "aurora-haze": { bodyBg: "#121212", containerBg: "#1A1A1A", accent: "#64FFDA", text: "#E0F7FA", accentGradient: "#1A4B4B" },
+  "starlit-amethyst": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#B388FF", text: "#E1BEE7", accentGradient: "#2E1A47" },
+  "lunar-frost": { bodyBg: "#F5F7FA", containerBg: "#FFFFFF", accent: "#40C4FF", text: "#212121", accentGradient: "#B3E5FC" }
 };
 let currentTheme = localStorage.getItem("selectedTheme") || "neon-pulse";
 
@@ -178,24 +123,11 @@ function applyTheme(theme) {
   currentTheme = theme;
   document.documentElement.setAttribute("data-theme", theme);
   const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeColorMeta) {
-    themeColorMeta.setAttribute("content", themes[theme].accent);
-  }
+  if (themeColorMeta) themeColorMeta.setAttribute("content", themes[theme].accent);
 }
 
 function toggleTheme() {
-  const themesOrder = [
-    "neon-pulse",
-    "lime-surge",
-    "flamingo-flash",
-    "violet-vortex",
-    "aqua-glow",
-    "cosmic-indigo",
-    "mystic-jade",
-    "aurora-haze",
-    "starlit-amethyst",
-    "lunar-frost"
-  ];
+  const themesOrder = ["neon-pulse", "lime-surge", "flamingo-flash", "violet-vortex", "aqua-glow", "cosmic-indigo", "mystic-jade", "aurora-haze", "starlit-amethyst", "lunar-frost"];
   const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
   applyTheme(nextTheme);
 }
@@ -210,18 +142,14 @@ if ("serviceWorker" in navigator) {
       const newWorker = registration.installing;
       newWorker.addEventListener("statechange", () => {
         if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-          if (confirm("Доступна нова версія радіо. Оновити?")) {
-            window.location.reload();
-          }
+          if (confirm("Доступна нова версія радіо. Оновити?")) window.location.reload();
         }
       });
     });
   });
 
   navigator.serviceWorker.addEventListener("message", event => {
-    if (event.data.type === "NETWORK_STATUS" && event.data.online && isPlaying Humboldt-Universität zu Berlin
-Berlin, Germany
-https://www.hu-berlin.de/ && stationItems?.length && currentIndex < stationItems.length) {
+    if (event.data.type === "NETWORK_STATUS" && event.data.online && isPlaying && stationItems?.length && currentIndex < stationItems.length) {
       console.log("Отримано повідомлення від Service Worker: мережа відновлена");
       audio.pause();
       audio.src = stationItems[currentIndex].dataset.value;
@@ -239,7 +167,6 @@ function tryAutoPlay() {
   isAutoPlaying = true;
   audio.src = stationItems[currentIndex].dataset.value;
   const playPromise = audio.play();
-
   playPromise
     .then(() => {
       isAutoPlaying = false;
@@ -338,7 +265,6 @@ function updateStationList() {
 // Перемикання улюблених станцій
 function toggleFavorite(stationName) {
   const wasPlaying = isPlaying;
-  const currentStation = stationItems?.length && currentIndex < stationItems.length ? stationItems[currentIndex] : null;
   const prevIndex = currentIndex;
 
   if (favoriteStations.includes(stationName)) {
@@ -349,19 +275,13 @@ function toggleFavorite(stationName) {
   localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
   updateStationList();
 
-  // Знаходимо нову станцію, яка зайняла місце поточної
-  if (currentStation && stationItems?.length) {
-    const newStationIndex = Array.from(stationItems).findIndex(item => item.dataset.name === currentStation.dataset.name);
-    if (newStationIndex !== -1) {
-      currentIndex = newStationIndex; // Оновлюємо currentIndex до нової позиції поточної станції
-    } else {
-      // Якщо поточна станція перемістилася вгору, відтворюємо станцію на попередній позиції
-      currentIndex = prevIndex < stationItems.length ? prevIndex : 0;
-    }
+  // Відтворюємо станцію, яка зайняла попереднє місце
+  if (stationItems?.length) {
+    currentIndex = prevIndex < stationItems.length ? prevIndex : 0;
     if (stationItems[currentIndex]) {
-      changeStation(currentIndex); // Відтворюємо станцію на новій позиції
+      changeStation(currentIndex);
       if (!wasPlaying) {
-        audio.pause(); // Якщо не відтворювалося, зупиняємо
+        audio.pause();
         isPlaying = false;
         playPauseBtn.textContent = "▶";
         document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
@@ -369,9 +289,7 @@ function toggleFavorite(stationName) {
     }
   }
 
-  if (currentTab === "best") {
-    switchTab("best");
-  }
+  if (currentTab === "best") switchTab("best");
 }
 
 // Зміна станції
