@@ -42,17 +42,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#00F0FF">
   <title>Radio S O</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#00F0FF">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="theme-toggle">🌙</div>
   <div class="container">
+    <div class="theme-toggle">🌙</div>
     <h1>🎧 RADIO MUSIC</h1>
-    <div class="current-station-info" id="currentStationInfo">
+    <div class="current-station-info">
       <div class="station-info-content">
         <div class="wave-progress">
           <div class="wave-bar"></div>
@@ -70,13 +70,13 @@
         </div>
       </div>
     </div>
-    <div class="tabs">
-      <div class="tab-btn" onclick="switchTab('best')">BEST</div>
-      <div class="tab-btn" onclick="switchTab('techno')">TECHNO</div>
-      <div class="tab-btn" onclick="switchTab('trance')">TRANCE</div>
-      <div class="tab-btn" onclick="switchTab('ukraine')">UKRAINE</div>
-    </div>
     <div class="station-list" id="stationList"></div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('best')">BEST</button>
+      <button class="tab-btn" onclick="switchTab('techno')">TECHNO</button>
+      <button class="tab-btn" onclick="switchTab('trance')">TRANCE</button>
+      <button class="tab-btn" onclick="switchTab('ukraine')">UKRAINE</button>
+    </div>
     <div class="controls-container">
       <div class="controls">
         <button class="control-btn" onclick="prevStation()">⏮</button>
@@ -84,8 +84,8 @@
         <button class="control-btn" onclick="nextStation()">⏭</button>
       </div>
     </div>
-    <audio id="audioPlayer"></audio>
   </div>
+  <audio id="audioPlayer" preload="auto"></audio>
   <script src="script.js"></script>
 </body>
 </html>

@@ -40,7 +40,7 @@ async function loadStations() {
       console.log("stations.json завантажено з локального файлу");
       if (validateStationData(stationLists)) {
         // Зберігаємо в кеш
-        caches.open("radio-pwa-cache-v602").then(cache => {
+        caches.open("radio-pwa-cache-v603").then(cache => {
           cache.put("stations.json", response.clone());
           console.log("stations.json збережено в кеш");
         });
