@@ -1,4 +1,4 @@
-const audio = document.getElementById("audioPlayer");
+﻿const audio = document.getElementById("audioPlayer");
 const stationList = document.getElementById("stationList");
 const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
 const currentStationInfo = document.getElementById("currentStationInfo");
@@ -14,7 +14,7 @@ let currentTab = localStorage.getItem("currentTab") || "techno";
 let currentIndex = 0;
 let favoriteStations = JSON.parse(localStorage.getItem("favoriteStations")) || [];
 let isPlaying = localStorage.getItem("isPlaying") === "true" || false;
-let stationLists = {}; // Початково порожній об’єкт
+let stationLists = {};
 let stationItems;
 let isAutoPlaying = false;
 
@@ -172,7 +172,7 @@ function toggleTheme() {
   applyTheme(nextTheme);
 }
 
-// Додаємо обробник події для кнопки зміни теми
+// Додаємо обробник події для кнопки зміни тем
 themeToggle.addEventListener("click", toggleTheme);
 
 // Налаштування Service Worker
@@ -180,7 +180,7 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").then(registration => {
     registration.update();
     registration.addEventListener("updatefound", () => {
-      const newWorker = registration.installing;
+      const newWorker = document.installing;
       newWorker.addEventListener("statechange", () => {
         if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
           if (confirm("Доступна нова версія радіо. Оновити?")) {
@@ -196,6 +196,9 @@ if ("serviceWorker" in navigator) {
       console.log("Отримано повідомлення від Service Worker: мережа відновлена");
       audio.pause();
       audio.src = stationItems[currentIndex].dataset.value;
+      tryAutoPlay();
+    } else if (event.data.type === "BLUETOOTH_RECONNECT") {
+      console.log("Отримано повідомлення від Service Worker: Bluetooth підключено");
       tryAutoPlay();
     }
   });
@@ -218,13 +221,71 @@ function tryAutoPlay() {
   playPromise
     .then(() => {
       isAutoPlaying = false;
+      isPlaying = true;
+      playPauseBtn.textContent = "⏸";
       document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+      localStorage.setItem("isPlaying", isPlaying);
+      localStorage.setItem("lastActivity", Date.now());
     })
     .catch(error => {
       console.error("Помилка відтворення:", error);
       isAutoPlaying = false;
       document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
     });
+}
+
+// Відстеження підключення Bluetooth
+function setupBluetoothAutoPlay() {
+  if ("mediaDevices" in navigator) {
+    navigator.mediaDevices.ondevicechange = async () => {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioOutputs = devices.filter(device => device.kind === "audiooutput");
+        const hasBluetooth = audioOutputs.some(device => device.label.toLowerCase().includes("bluetooth"));
+
+        if (hasBluetooth && stationItems?.length && currentIndex < stationItems.length) {
+          console.log("Виявлено підключення Bluetooth-пристрою");
+          localStorage.setItem("lastActivity", Date.now());
+          if (!isPlaying) {
+            isPlaying = true;
+            tryAutoPlay();
+          }
+          // Надсилаємо повідомлення до Service Worker
+          navigator.serviceWorker.controller?.postMessage({
+            type: "BLUETOOTH_STATUS",
+            connected: true
+          });
+        } else if (!hasBluetooth) {
+          console.log("Bluetooth-пристрій відключено");
+          navigator.serviceWorker.controller?.postMessage({
+            type: "BLUETOOTH_STATUS",
+            connected: false
+          });
+        }
+      } catch (error) {
+        console.error("Помилка при відстеженні аудіопристроїв:", error);
+      }
+    };
+  }
+
+  // Обробка команд із Bluetooth через Media Session API
+  if ("mediaSession" in navigator) {
+    navigator.mediaSession.setActionHandler("play", () => {
+      if (stationItems?.length && currentIndex < stationItems.length) {
+        console.log("Команда 'play' із Bluetooth-пристрою");
+        isPlaying = true;
+        localStorage.setItem("lastActivity", Date.now());
+        tryAutoPlay();
+      }
+    });
+    navigator.mediaSession.setActionHandler("pause", () => {
+      audio.pause();
+      isPlaying = false;
+      playPauseBtn.textContent = "▶";
+      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+      localStorage.setItem("isPlaying", isPlaying);
+    });
+  }
 }
 
 // Перемикання вкладок
@@ -376,6 +437,7 @@ function togglePlayPause() {
     document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
   }
   localStorage.setItem("isPlaying", isPlaying);
+  localStorage.setItem("lastActivity", Date.now());
 }
 
 // Обробники подій
@@ -426,6 +488,7 @@ audio.addEventListener("playing", () => {
   playPauseBtn.textContent = "⏸";
   document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
   localStorage.setItem("isPlaying", isPlaying);
+  localStorage.setItem("lastActivity", Date.now());
 });
 
 audio.addEventListener("pause", () => {
@@ -472,6 +535,9 @@ if ("mediaSession" in navigator) {
   navigator.mediaSession.setActionHandler("previoustrack", prevStation);
   navigator.mediaSession.setActionHandler("nexttrack", nextStation);
 }
+
+// Ініціалізація Bluetooth
+setupBluetoothAutoPlay();
 
 // Ініціалізація
 applyTheme(currentTheme);

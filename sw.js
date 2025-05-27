@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v462"; // Оновлено версію кешу
+﻿const CACHE_NAME = "radio-pwa-cache-v517"; // Оновлено версію кешу
 const urlsToCache = [
   "/",
   "index.html",
@@ -71,8 +71,16 @@ self.addEventListener("activate", event => {
   );
 });
 
-// Моніторинг стану мережі
+// Моніторинг стану мережі та Bluetooth
 let wasOnline = navigator.onLine;
+let isBluetoothConnected = false;
+
+self.addEventListener("message", event => {
+  if (event.data.type === "BLUETOOTH_STATUS") {
+    isBluetoothConnected = event.data.connected;
+    console.log(`Bluetooth status updated: ${isBluetoothConnected}`);
+  }
+});
 
 setInterval(() => {
   fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
@@ -97,4 +105,21 @@ setInterval(() => {
         });
       }
     });
-}, 1000);
+
+  // Перевірка тривалої неактивності та Bluetooth
+  if (isBluetoothConnected) {
+    self.clients.matchAll().then(clients => {
+      if (!clients.length) {
+        // Якщо немає активних клієнтів, показуємо повідомлення
+        self.registration.showNotification("", {
+          tag: "bluetooth-reconnect",
+          silent: true
+        });
+      } else {
+        clients.forEach(client => {
+          client.postMessage({ type: "BLUETOOTH_RECONNECT" });
+        });
+      }
+    });
+  }
+}, 10000); // Перевірка кожні 10 секунд
