@@ -68,8 +68,11 @@ async function loadStations() {
   }
   currentIndex = parseInt(localStorage.getItem(`lastStation_${currentTab}`)) || 0;
 
-  // Виклик оновлення списку та інформації
+  // Виклик оновлення списку та автовідтворення
   switchTab(currentTab);
+  if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
+    tryAutoPlay();
+  }
   console.timeEnd("loadStations");
 }
 
@@ -249,9 +252,9 @@ function switchTab(tab) {
   const activeBtn = document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`);
   if (activeBtn) activeBtn.classList.add("active");
   if (stationItems?.length && currentIndex < stationItems.length) {
-    tryAutoPlay();
     updateCurrentStationInfo(stationItems[currentIndex]);
     stationItems[currentIndex].scrollIntoView({ block: "center", behavior: "smooth" });
+    if (isPlaying) tryAutoPlay();
   }
 }
 
@@ -261,11 +264,18 @@ function updateStationList() {
     console.error("stationList не знайдено");
     return;
   }
-  let stations = currentTab === "best"
-    ? favoriteStations
-        .map(name => Object.values(stationLists).flat().find(s => s.name === name))
-        .filter(s => s)
-    : stationLists[currentTab] || [];
+  let stations = [];
+  if (currentTab === "best") {
+    stations = favoriteStations
+      .map(name => Object.values(stationLists).flat().find(s => s.name === name))
+      .filter(s => s);
+  } else {
+    // Сортуємо станції: спочатку улюблені, потім решта в оригінальному порядку
+    const originalStations = stationLists[currentTab] || [];
+    const favoriteInTab = originalStations.filter(s => favoriteStations.includes(s.name));
+    const nonFavorite = originalStations.filter(s => !favoriteStations.includes(s.name));
+    stations = [...favoriteInTab, ...nonFavorite];
+  }
 
   if (!stations.length) {
     currentIndex = 0;
@@ -292,6 +302,7 @@ function updateStationList() {
   // Прокрутка до поточної станції
   if (stationItems.length && currentIndex < stationItems.length) {
     stationItems[currentIndex].scrollIntoView({ block: "center", behavior: "smooth" });
+    updateCurrentStationInfo(stationItems[currentIndex]);
   }
 
   stationList.onclick = e => {
@@ -319,10 +330,9 @@ function toggleFavorite(stationName) {
     favoriteStations.unshift(stationName); // Додаємо на початок списку
   }
   localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
+  updateStationList(); // Оновлюємо поточний список
   if (currentTab === "best") {
-    switchTab("best");
-  } else {
-    updateStationList();
+    switchTab("best"); // Оновлюємо вкладку "Best"
   }
 }
 

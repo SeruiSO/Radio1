@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v474";
+﻿const CACHE_NAME = "radio-pwa-cache-v501";
 const urlsToCache = [
   "/",
   "index.html",
@@ -29,6 +29,7 @@ self.addEventListener("fetch", event => {
       fetch(event.request, { cache: "no-cache" })
         .then(networkResponse => {
           if (!networkResponse || networkResponse.status !== 200) {
+            console.warn("Мережевий запит для stations.json не вдався, використовується кеш");
             return caches.match(event.request) || Response.error();
           }
           const responseToCache = networkResponse.clone();
