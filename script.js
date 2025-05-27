@@ -2,9 +2,10 @@ const audio = document.getElementById("audioPlayer");
 const stationList = document.getElementById("stationList");
 const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
 const currentStationInfo = document.getElementById("currentStationInfo");
+const themeToggle = document.querySelector(".theme-toggle");
 
 // Перевірка існування DOM-елементів
-if (!audio || !stationList || !playPauseBtn || !currentStationInfo) {
+if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle) {
   console.error("Один із необхідних DOM-елементів не знайдено");
   throw new Error("Не вдалося ініціалізувати програму через відсутність DOM-елементів");
 }
@@ -24,7 +25,7 @@ audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 // Завантаження станцій
 async function loadStations() {
   console.time("loadStations");
-  stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>"; // Показуємо спінер одразу
+  stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
   try {
     const response = await fetch(`stations.json?t=${Date.now()}`, {
       cache: "no-cache",
@@ -48,7 +49,6 @@ async function loadStations() {
     } else {
       throw new Error(`HTTP ${response.status}`);
     }
-    // Оновлюємо вкладку після успішного завантаження
     const validTabs = [...Object.keys(stationLists), "best"];
     if (!validTabs.includes(currentTab)) {
       currentTab = validTabs[0] || "techno";
@@ -149,7 +149,6 @@ function applyTheme(theme) {
   localStorage.setItem("selectedTheme", theme);
   currentTheme = theme;
   document.documentElement.setAttribute("data-theme", theme);
-  // Update status bar color to match the theme's accent color
   const themeColorMeta = document.querySelector('meta[name="theme-color"]');
   if (themeColorMeta) {
     themeColorMeta.setAttribute("content", themes[theme].accent);
@@ -172,6 +171,9 @@ function toggleTheme() {
   const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
   applyTheme(nextTheme);
 }
+
+// Додаємо обробник події для кнопки зміни теми
+themeToggle.addEventListener("click", toggleTheme);
 
 // Налаштування Service Worker
 if ("serviceWorker" in navigator) {
@@ -471,6 +473,6 @@ if ("mediaSession" in navigator) {
   navigator.mediaSession.setActionHandler("nexttrack", nextStation);
 }
 
-// І Wireless
+// Ініціалізація
 applyTheme(currentTheme);
-loadStations(); // Починаємо завантаження станцій
+loadStations();
