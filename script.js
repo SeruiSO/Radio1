@@ -70,8 +70,9 @@ async function loadStations() {
 
   // Виклик оновлення списку та автовідтворення
   switchTab(currentTab);
-  if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
-    tryAutoPlay();
+  if (stationItems?.length && currentIndex < stationItems.length) {
+    updateCurrentStationInfo(stationItems[currentIndex]);
+    if (isPlaying) tryAutoPlay();
   }
   console.timeEnd("loadStations");
 }
@@ -313,7 +314,10 @@ function updateStationList() {
       changeStation(currentIndex);
     }
     if (favoriteBtn) {
-      toggleFavorite(favoriteBtn.parentElement.dataset.name);
+      const stationName = favoriteBtn.parentElement.dataset.name;
+      toggleFavorite(stationName);
+      const newIndex = Array.from(stationItems).findIndex(item => item.dataset.name === stationName);
+      if (newIndex !== -1) changeStation(newIndex); // Відтворити виділену станцію
     }
   };
 
@@ -347,7 +351,7 @@ function changeStation(index) {
   updateCurrentStationInfo(item);
   localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
   item.scrollIntoView({ block: "center", behavior: "smooth" });
-  tryAutoPlay();
+  if (isPlaying) tryAutoPlay();
 }
 
 // Оновлення інформації про станцію
@@ -361,9 +365,19 @@ function updateCurrentStationInfo(item) {
   const stationCountryElement = currentStationInfo.querySelector(".station-country");
 
   if (!stationNameElement || !stationGenreElement || !stationCountryElement) {
-    console.error("Один із елементів інформації про станцію не знайдено");
+    console.error("Один із елементів інформації про станцію не знайдено", {
+      stationNameElement,
+      stationGenreElement,
+      stationCountryElement
+    });
     return;
   }
+
+  console.log("Оновлення інформації:", {
+    name: item.dataset.name,
+    genre: item.dataset.genre,
+    country: item.dataset.country
+  });
 
   stationNameElement.textContent = item.dataset.name || "Невідома станція";
   stationGenreElement.textContent = `Жанр: ${item.dataset.genre || "Невідомий"}`;
