@@ -106,7 +106,7 @@ const themes = {
     containerBg: "#1A1A1A",
     accent: "#3F51B5",
     text: "#BBDEFB",
-    accentGradient: "#1A2A5B"
+    accentGradient: "#1A2A5A"
   },
   "mystic-jade": {
     bodyBg: "#0A0A0A",
@@ -149,6 +149,11 @@ function applyTheme(theme) {
   localStorage.setItem("selectedTheme", theme);
   currentTheme = theme;
   document.documentElement.setAttribute("data-theme", theme);
+  // Update status bar color to match the theme's accent color
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeColorMeta) {
+    themeColorMeta.setAttribute("content", themes[theme].accent);
+  }
 }
 
 function toggleTheme() {
@@ -466,6 +471,6 @@ if ("mediaSession" in navigator) {
   navigator.mediaSession.setActionHandler("nexttrack", nextStation);
 }
 
-// Ініціалізація
+// І Wireless
 applyTheme(currentTheme);
 loadStations(); // Починаємо завантаження станцій
