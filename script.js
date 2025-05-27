@@ -40,7 +40,7 @@ async function loadStations() {
       console.log("stations.json завантажено з локального файлу");
       if (validateStationData(stationLists)) {
         // Зберігаємо в кеш
-        caches.open("radio-pwa-cache-v601").then(cache => {
+        caches.open("radio-pwa-cache-v602").then(cache => {
           cache.put("stations.json", response.clone());
           console.log("stations.json збережено в кеш");
         });
@@ -170,12 +170,21 @@ function tryAutoPlay() {
   playPromise
     .then(() => {
       isAutoPlaying = false;
+      isPlaying = true;
+      playPauseBtn.textContent = "⏸";
       document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+      localStorage.setItem("isPlaying", isPlaying);
     })
     .catch(error => {
       console.error("Помилка відтворення:", error);
       isAutoPlaying = false;
+      isPlaying = false;
+      playPauseBtn.textContent = "▶";
       document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+      // Retry after a short delay to handle transient issues
+      setTimeout(() => {
+        if (isPlaying && !isAutoPlaying) tryAutoPlay();
+      }, 1000);
     });
 }
 
@@ -253,6 +262,7 @@ function updateStationList() {
     const favoriteBtn = e.target.closest(".favorite-btn");
     if (item && !item.classList.contains("empty")) {
       currentIndex = Array.from(stationItems).indexOf(item);
+      isPlaying = true; // Ensure playback starts when selecting a station
       changeStation(currentIndex);
     }
     if (favoriteBtn) {
@@ -303,11 +313,9 @@ function changeStation(index) {
   updateCurrentStationInfo(item);
   localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
   item.scrollIntoView({ block: "center", behavior: "smooth" });
-  if (!isPlaying) {
-    isPlaying = true;
-    playPauseBtn.textContent = "⏸";
-    tryAutoPlay();
-  }
+  isPlaying = true; // Ensure playback starts when changing station
+  playPauseBtn.textContent = "⏸";
+  tryAutoPlay();
 }
 
 // Оновлення інформації про станцію
@@ -425,6 +433,10 @@ audio.addEventListener("pause", () => {
 
 audio.addEventListener("error", () => {
   document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+  // Retry playback on error
+  if (isPlaying && !isAutoPlaying) {
+    setTimeout(() => tryAutoPlay(), 1000);
+  }
 });
 
 audio.addEventListener("volumechange", () => {
