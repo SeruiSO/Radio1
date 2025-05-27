@@ -40,34 +40,34 @@
         </script><!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="transparent" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="transparent">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Radio S O</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
   <div class="container">
     <button class="theme-toggle">🌗</button>
     <h1>Radio S O</h1>
-    <div class="current-station-info">
+    <div class="current-station-info" id="currentStationInfo">
       <div class="station-info-content">
         <div class="station-text">
-          <div class="station-name">Немає даних</div>
+          <div class="station-name">Обирайте станцію</div>
           <div class="station-genre">жанр: -</div>
           <div class="station-country">країна: -</div>
         </div>
       </div>
     </div>
     <div class="tabs">
-      <button class="tab-btn" onclick="switchTab('techno')">Techno</button>
-      <button class="tab-btn" onclick="switchTab('trance')">Trance</button>
-      <button class="tab-btn" onclick="switchTab('ukraine')">Ukraine</button>
-      <button class="tab-btn" onclick="switchTab('best')">Best</button>
+      <button class="tab-btn" onclick="switchTab('best')">BEST</button>
+      <button class="tab-btn" onclick="switchTab('techno')">TECHNO</button>
+      <button class="tab-btn" onclick="switchTab('trance')">TRANCE</button>
+      <button class="tab-btn" onclick="switchTab('ukraine')">UKRAINE</button>
     </div>
     <div class="station-list" id="stationList"></div>
     <div class="controls-container">
