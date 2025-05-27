@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v504";
+﻿const CACHE_NAME = "radio-pwa-cache-v507";
 const urlsToCache = [
   "/",
   "index.html",
@@ -26,22 +26,33 @@ self.addEventListener("install", event => {
 self.addEventListener("fetch", event => {
   if (event.request.url.includes("stations.json")) {
     event.respondWith(
-      fetch(event.request, { cache: "no-cache" })
-        .then(networkResponse => {
-          if (!networkResponse || networkResponse.status !== 200) {
-            console.warn("Мережевий запит для stations.json не вдався, використовується кеш");
-            return caches.match(event.request) || Response.error();
+      caches.match(event.request)
+        .then(cachedResponse => {
+          if (cachedResponse) {
+            console.log("Завантаження stations.json з кешу");
+            return cachedResponse;
           }
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-            console.log("stations.json оновлено в кеші");
-          });
-          return networkResponse;
+          return fetch(event.request, { cache: "no-cache" })
+            .then(networkResponse => {
+              if (!networkResponse || networkResponse.status !== 200) {
+                console.warn("Мережевий запит для stations.json не вдався");
+                return Response.error();
+              }
+              const responseToCache = networkResponse.clone();
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, responseToCache);
+                console.log("stations.json оновлено в кеші");
+              });
+              return networkResponse;
+            })
+            .catch(error => {
+              console.error("Помилка мережевого запиту для stations.json:", error);
+              return Response.error();
+            });
         })
-        .catch(() => {
-          console.log("Завантаження stations.json з кешу");
-          return caches.match(event.request) || Response.error();
+        .catch(error => {
+          console.error("Помилка доступу до кешу для stations.json:", error);
+          return Response.error();
         })
     );
   } else {

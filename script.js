@@ -22,54 +22,74 @@ let isAutoPlaying = false;
 audio.preload = "auto";
 audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 
+// Ініціалізація інформації про станцію
+function initStationInfo() {
+  updateCurrentStationInfo({ dataset: { name: "Обирайте станцію", genre: "-", country: "-" } });
+}
+
 // Завантаження станцій
 async function loadStations() {
   console.time("loadStations");
   stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
+
+  // Спочатку перевіряємо кеш
+  try {
+    const cachedData = await caches.match("stations.json");
+    if (cachedData) {
+      stationLists = await cachedData.json();
+      console.log("Використовується кешована версія stations.json");
+      if (validateStationData(stationLists)) {
+        initializeStations();
+        return;
+      }
+    }
+  } catch (error) {
+    console.error("Помилка завантаження кешу:", error);
+  }
+
+  // Якщо кеш недоступний або невалідний, пробуємо мережу
   try {
     const response = await fetch(`stations.json?t=${Date.now()}`, { cache: "no-cache" });
     if (response.ok) {
       stationLists = await response.json();
       console.log("Новий stations.json успішно завантажено");
-      caches.open("radio-pwa-cache-v504").then(cache => {
+      caches.open("radio-pwa-cache-v507").then(cache => {
         cache.put("stations.json", response.clone());
         console.log("stations.json збережено в кеш");
       });
+      if (validateStationData(stationLists)) {
+        initializeStations();
+      } else {
+        throw new Error("Дані stations.json некоректні");
+      }
     } else {
       throw new Error(`HTTP ${response.status}`);
     }
   } catch (error) {
     console.error("Помилка завантаження станцій з мережі:", error);
-    const cachedData = await caches.match("stations.json");
-    if (cachedData) {
-      stationLists = await cachedData.json();
-      console.log("Використовується кешована версія stations.json");
-    } else {
-      console.error("Кеш не знайдено, не вдалося завантажити станції");
-      stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції</div>";
-      return;
-    }
+    stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції</div>";
   }
+  console.timeEnd("loadStations");
+}
 
-  if (!stationLists || typeof stationLists !== "object" || !Object.keys(stationLists).length) {
-    console.error("Дані stations.json некоректні або порожні");
-    stationList.innerHTML = "<div class='station-item empty'>Помилка даних станцій</div>";
-    return;
-  }
+// Перевірка валідності даних станцій
+function validateStationData(data) {
+  return data && typeof data === "object" && Object.keys(data).length > 0;
+}
 
+// Ініціалізація станцій
+function initializeStations() {
   const validTabs = [...Object.keys(stationLists), "best"];
   if (!validTabs.includes(currentTab)) {
     currentTab = validTabs[0] || "techno";
     localStorage.setItem("currentTab", currentTab);
   }
   currentIndex = parseInt(localStorage.getItem(`lastStation_${currentTab}`)) || 0;
-
   switchTab(currentTab);
   if (stationItems?.length && currentIndex < stationItems.length) {
     updateCurrentStationInfo(stationItems[currentIndex]);
     if (isPlaying) tryAutoPlay();
   }
-  console.timeEnd("loadStations");
 }
 
 // Теми
@@ -246,6 +266,8 @@ function switchTab(tab) {
     updateCurrentStationInfo(stationItems[currentIndex]);
     stationItems[currentIndex].scrollIntoView({ block: "center", behavior: "smooth" });
     if (isPlaying) tryAutoPlay();
+  } else {
+    updateCurrentStationInfo({ dataset: { name: "Обирайте станцію", genre: "-", country: "-" } });
   }
 }
 
@@ -271,6 +293,7 @@ function updateStationList() {
     currentIndex = 0;
     stationItems = [];
     stationList.innerHTML = `<div class='station-item empty'>${currentTab === "best" ? "Немає улюблених станцій" : "Немає станцій у цій категорії"}</div>`;
+    updateCurrentStationInfo({ dataset: { name: "Обирайте станцію", genre: "-", country: "-" } });
     return;
   }
 
@@ -292,6 +315,8 @@ function updateStationList() {
   if (stationItems.length && currentIndex < stationItems.length) {
     stationItems[currentIndex].scrollIntoView({ block: "center", behavior: "smooth" });
     updateCurrentStationInfo(stationItems[currentIndex]);
+  } else {
+    updateCurrentStationInfo({ dataset: { name: "Обирайте станцію", genre: "-", country: "-" } });
   }
 
   stationList.onclick = e => {
@@ -471,8 +496,11 @@ window.addEventListener("offline", () => {
   console.log("Втрачено з'єднання з мережею");
 });
 
-// Ініціалізація слухачів
+// Ініціалізація
+applyTheme(currentTheme);
+initStationInfo();
 addEventListeners();
+loadStations();
 
 // Очищення слухачів перед оновленням сторінки
 window.addEventListener("beforeunload", () => {
@@ -486,7 +514,3 @@ if ("mediaSession" in navigator) {
   navigator.mediaSession.setActionHandler("previoustrack", prevStation);
   navigator.mediaSession.setActionHandler("nexttrack", nextStation);
 }
-
-// Ініціалізація
-applyTheme(currentTheme);
-loadStations();
