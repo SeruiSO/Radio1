@@ -28,15 +28,17 @@ function resetStationInfo() {
   const stationGenreElement = currentStationInfo.querySelector(".station-genre");
   const stationCountryElement = currentStationInfo.querySelector(".station-country");
   if (stationNameElement) stationNameElement.textContent = "Обирайте станцію";
+  else console.error("Елемент .station-name не знайдено в currentStationInfo");
   if (stationGenreElement) stationGenreElement.textContent = "жанр: -";
+  else console.error("Елемент .station-genre не знайдено в currentStationInfo");
   if (stationCountryElement) stationCountryElement.textContent = "країна: -";
+  else console.error("Елемент .station-country не знайдено в currentStationInfo");
 }
 
 // Завантаження станцій
 async function loadStations() {
   console.time("loadStations");
   stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
-  resetStationInfo(); // Скидаємо інформацію при початку завантаження
   try {
     const response = await fetch(`stations.json?t=${Date.now()}`, {
       cache: "no-cache",
@@ -45,10 +47,18 @@ async function loadStations() {
       }
     });
     console.log(`Статус відповіді: ${response.status}`);
-    if (response.ok) {
+    if (response.status === 304) {
+      const cachedData = await caches.match("stations.json");
+      if (cachedData) {
+        stationLists = await cachedData.json();
+        console.log("Використовується кешована версія stations.json");
+      } else {
+        throw new Error("Кеш не знайдено");
+      }
+    } else if (response.ok) {
       stationLists = await response.json();
       localStorage.setItem("stationsLastModified", response.headers.get("Last-Modified") || "");
-      console.log("Новий stations.json успішно завантажено:", stationLists);
+      console.log("Новий stations.json успішно завантажено");
     } else {
       throw new Error(`HTTP ${response.status}`);
     }
@@ -62,7 +72,6 @@ async function loadStations() {
   } catch (error) {
     console.error("Помилка завантаження станцій:", error);
     stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції</div>";
-    resetStationInfo(); // Скидаємо інформацію при помилці
   } finally {
     console.timeEnd("loadStations");
   }
@@ -239,7 +248,6 @@ function switchTab(tab) {
   const savedIndex = parseInt(localStorage.getItem(`lastStation_${tab}`)) || 0;
   const maxIndex = tab === "best" ? favoriteStations.length : stationLists[tab]?.length || 0;
   currentIndex = savedIndex < maxIndex ? savedIndex : 0;
-  console.log(`Перемикання на вкладку: ${tab}, currentIndex: ${currentIndex}, maxIndex: ${maxIndex}`); // Дебаг
   updateStationList();
   document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
   const activeBtn = document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`);
@@ -259,13 +267,10 @@ function updateStationList() {
         .filter(s => s)
     : stationLists[currentTab] || [];
 
-  console.log(`Оновлення списку станцій для ${currentTab}, кількість: ${stations.length}`); // Дебаг
-
   if (!stations.length) {
     currentIndex = 0;
     stationItems = [];
     stationList.innerHTML = `<div class='station-item empty'>${currentTab === "best" ? "Немає улюблених станцій" : "Немає станцій у цій категорії"}</div>`;
-    resetStationInfo(); // Скидаємо інформацію, якщо немає станцій
     return;
   }
 
@@ -278,14 +283,11 @@ function updateStationList() {
     item.dataset.genre = station.genre;
     item.dataset.country = station.country;
     item.innerHTML = `${station.emoji} ${station.name}<button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button>`;
-    console.log(`Станція ${index}:`, station); // Дебаг
     fragment.appendChild(item);
   });
   stationList.innerHTML = "";
   stationList.appendChild(fragment);
   stationItems = stationList.querySelectorAll(".station-item");
-
-  console.log(`Створено ${stationItems.length} елементів stationItems, currentIndex: ${currentIndex}`); // Дебаг
 
   stationList.onclick = e => {
     const item = e.target.closest(".station-item");
@@ -299,11 +301,8 @@ function updateStationList() {
     }
   };
 
-  if (stationItems.length && currentIndex < stationItems.length && !stationItems[currentIndex].classList.contains("empty")) {
+  if (stationItems.length && currentIndex < stationItems.length) {
     changeStation(currentIndex);
-  } else {
-    console.warn("Немає коректного currentIndex або stationItems порожні"); // Дебаг
-    resetStationInfo();
   }
 }
 
@@ -321,17 +320,12 @@ function toggleFavorite(stationName) {
 
 // Зміна станції
 function changeStation(index) {
-  if (index < 0 || index >= stationItems.length || stationItems[index].classList.contains("empty")) {
-    console.warn(`Некоректний індекс: ${index}, довжина stationItems: ${stationItems.length}`); // Дебаг
-    resetStationInfo();
-    return;
-  }
+  if (index < 0 || index >= stationItems.length || stationItems[index].classList.contains("empty")) return;
   const item = stationItems[index];
   stationItems?.forEach(i => i.classList.remove("selected"));
   item.classList.add("selected");
   currentIndex = index;
   audio.src = item.dataset.value;
-  console.log("Зміна станції, дані:", item.dataset); // Дебаг
   updateCurrentStationInfo(item);
   localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
   tryAutoPlay();
@@ -347,22 +341,22 @@ function updateCurrentStationInfo(item) {
   const stationGenreElement = currentStationInfo.querySelector(".station-genre");
   const stationCountryElement = currentStationInfo.querySelector(".station-country");
 
-  console.log("Оновлення currentStationInfo з даними:", item.dataset); // Дебаг
+  console.log("Оновлення currentStationInfo з даними:", item.dataset); // Дебаг-лог
 
   if (stationNameElement) {
     stationNameElement.textContent = item.dataset.name || "Unknown";
   } else {
-    console.error("station-name element not found");
+    console.error("Елемент .station-name не знайдено в currentStationInfo");
   }
   if (stationGenreElement) {
-    stationGenreElement.textContent = `Genre: ${item.dataset.genre || "Unknown"}`;
+    stationGenreElement.textContent = `жанр: ${item.dataset.genre || "Unknown"}`;
   } else {
-    console.error("station-genre element not found");
+    console.error("Елемент .station-genre не знайдено в currentStationInfo");
   }
   if (stationCountryElement) {
-    stationCountryElement.textContent = `Country: ${item.dataset.country || "Unknown"}`;
+    stationCountryElement.textContent = `країна: ${item.dataset.country || "Unknown"}`;
   } else {
-    console.error("station-country element not found");
+    console.error("Елемент .station-country не знайдено в currentStationInfo");
   }
   if ("mediaSession" in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
