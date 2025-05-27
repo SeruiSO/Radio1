@@ -1,9 +1,10 @@
-/* Updated on May 24, 2025 */
+/* Updated on May 27, 2025 */
 :root {
-  --body-bg: #000000;
-  --container-bg: #252525;
-  --accent: #4682b4;
-  --text: #f5f5f5;
+  --body-bg: #121212;
+  --container-bg: #1A1A1A;
+  --accent: #39FF14;
+  --text: #E0E0E0;
+  --accent-gradient: #1A3C34;
 }
 
 body {
@@ -68,12 +69,12 @@ h1 {
 }
 
 .current-station-info {
-  background: var(--container-bg);
+  background: linear-gradient(45deg, var(--container-bg), var(--accent-gradient));
   padding: 15px;
   border-radius: 10px;
   margin: 10px 0;
   color: var(--text);
-  border: 1px solid var(--accent);
+  border: 2px solid var(--accent);
   text-align: left;
   height: auto;
   display: flex;
@@ -81,24 +82,11 @@ h1 {
   position: sticky;
   top: 0;
   z-index: 10;
-  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
 }
 
-/* Градієнт для темних тем */
-[data-theme="dark"] .current-station-info,
-[data-theme="neon"] .current-station-info,
-[data-theme="softBlue"] .current-station-info,
-[data-theme="mutedGreen"] .current-station-info,
-[data-theme="pastelPink"] .current-station-info,
-[data-theme="lavenderGlow"] .current-station-info,
-[data-theme="aquaMist"] .current-station-info {
-  background: linear-gradient(45deg, var(--container-bg), color-mix(in srgb, var(--container-bg) 80%, var(--accent) 20%));
-}
-
-/* Виправлення для світлої теми */
-[data-theme="light"] .current-station-info {
-  background: var(--container-bg);
-  color: var(--text);
+.current-station-info:hover {
+  transform: translateY(-2px);
 }
 
 .station-info-content {

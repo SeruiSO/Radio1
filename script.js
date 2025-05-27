@@ -81,18 +81,78 @@ async function loadStations(attempt = 1) {
 
 // Теми
 const themes = {
-  "midnight-lavender": { bodyBg: "#000000", containerBg: "#252525", accent: "#C3A8FF", text: "#F5F5F5" },
-  "pure-snow": { bodyBg: "#E8ECEF", containerBg: "#FFFFFF", accent: "#FF9999", text: "#212121" },
-  "mint-breeze": { bodyBg: "#000000", containerBg: "#1A1A2E", accent: "#A8E6CF", text: "#E8E8E8" },
-  "peach-sunset": { bodyBg: "#E8ECEF", containerBg: "#FFFFFF", accent: "#FFCC99", text: "#212121" },
-  "ebony-coral": { bodyBg: "#000000", containerBg: "#1A1A1A", accent: "#FF8A80", text: "#F5E6E6" },
-  "olive-night": { bodyBg: "#000000", containerBg: "#1A1A1A", accent: "#8A9A5B", text: "#E6F5E6" },
-  "steel-dawn": { bodyBg: "#E8ECEF", containerBg: "#FFFFFF", accent: "#4A6572", text: "#212121" },
-  "charcoal-ember": { bodyBg: "#000000", containerBg: "#1A1A1A", accent: "#A52A2A", text: "#F5F5F5" },
-  "slate-horizon": { bodyBg: "#E8ECEF", containerBg: "#FFFFFF", accent: "#4682B4", text: "#212121" },
-  "iron-forest": { bodyBg: "#000000", containerBg: "#1A1A1A", accent: "#355E3B", text: "#E6F5E6" }
+  "midnight-neon": {
+    bodyBg: "#121212",
+    containerBg: "#1A1A1A",
+    accent: "#39FF14",
+    text: "#E0E0E0",
+    accentGradient: "#1A3C34"
+  },
+  "cyber-plum": {
+    bodyBg: "#1A1A2B",
+    containerBg: "#252535",
+    accent: "#9C27B0",
+    text: "#D1C4E9",
+    accentGradient: "#2E1A47"
+  },
+  "ocean-abyss": {
+    bodyBg: "#0A1A2B",
+    containerBg: "#1A2A3B",
+    accent: "#0288D1",
+    text: "#B3E5FC",
+    accentGradient: "#1A3C5B"
+  },
+  "forest-dusk": {
+    bodyBg: "#121212",
+    containerBg: "#1A1A1A",
+    accent: "#2E7D32",
+    text: "#C8E6C9",
+    accentGradient: "#1A3C34"
+  },
+  "crimson-night": {
+    bodyBg: "#1A1A1A",
+    containerBg: "#252525",
+    accent: "#D32F2F",
+    text: "#FFCDD2",
+    accentGradient: "#3C1A1A"
+  },
+  "chrome-void": {
+    bodyBg: "#121212",
+    containerBg: "#1A1A1A",
+    accent: "#B0BEC5",
+    text: "#ECEFF1",
+    accentGradient: "#2E2E2E"
+  },
+  "electric-pulse": {
+    bodyBg: "#0A1A2B",
+    containerBg: "#1A2A3B",
+    accent: "#00B7EB",
+    text: "#B3E5FC",
+    accentGradient: "#1A3C5B"
+  },
+  "ash-ember": {
+    bodyBg: "#1A1A1A",
+    containerBg: "#252525",
+    accent: "#FF5722",
+    text: "#FFCCBC",
+    accentGradient: "#3C2F2F"
+  },
+  "pink-haze": {
+    bodyBg: "#121212",
+    containerBg: "#1A1A1A",
+    accent: "#F06292",
+    text: "#F8BBD0",
+    accentGradient: "#3C1A2E"
+  },
+  "soft-dawn": {
+    bodyBg: "#ECEFF1",
+    containerBg: "#FFFFFF",
+    accent: "#7E57C2",
+    text: "#212121",
+    accentGradient: "#D1C4E9"
+  }
 };
-let currentTheme = localStorage.getItem("selectedTheme") || "midnight-lavender";
+let currentTheme = localStorage.getItem("selectedTheme") || "midnight-neon";
 
 function applyTheme(theme) {
   const root = document.documentElement;
@@ -100,6 +160,7 @@ function applyTheme(theme) {
   root.style.setProperty("--container-bg", themes[theme].containerBg);
   root.style.setProperty("--accent", themes[theme].accent);
   root.style.setProperty("--text", themes[theme].text);
+  root.style.setProperty("--accent-gradient", themes[theme].accentGradient);
   localStorage.setItem("selectedTheme", theme);
   currentTheme = theme;
   document.documentElement.setAttribute("data-theme", theme);
@@ -107,16 +168,16 @@ function applyTheme(theme) {
 
 function toggleTheme() {
   const themesOrder = [
-    "midnight-lavender",
-    "pure-snow",
-    "mint-breeze",
-    "peach-sunset",
-    "ebony-coral",
-    "olive-night",
-    "steel-dawn",
-    "charcoal-ember",
-    "slate-horizon",
-    "iron-forest"
+    "midnight-neon",
+    "cyber-plum",
+    "ocean-abyss",
+    "forest-dusk",
+    "crimson-night",
+    "chrome-void",
+    "electric-pulse",
+    "ash-ember",
+    "pink-haze",
+    "soft-dawn"
   ];
   const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
   applyTheme(nextTheme);
