@@ -197,8 +197,8 @@ if ("serviceWorker" in navigator) {
       audio.pause();
       audio.src = stationItems[currentIndex].dataset.value;
       tryAutoPlay();
-    } else if (event.data.type === "BLUETOOTH_RECONNECT") {
-      console.log("Отримано повідомлення від Service Worker: Bluetooth підключено");
+    } else if (event.data.type === "BLUETOOTH_RECONNECT" || event.data.type === "NETWORK_RECONNECT") {
+      console.log(`Отримано повідомлення від Service Worker: ${event.data.type === "BLUETOOTH_RECONNECT" ? "Bluetooth" : "Мережа"} підключено`);
       tryAutoPlay();
     }
   });
@@ -231,6 +231,13 @@ function tryAutoPlay() {
       console.error("Помилка відтворення:", error);
       isAutoPlaying = false;
       document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+      // Якщо вкладка неактивна, надсилаємо повідомлення до Service Worker
+      if (document.hidden && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: "REQUEST_RECONNECT",
+          reason: error.name === "NotAllowedError" ? "media" : "network"
+        });
+      }
     });
 }
 
@@ -486,7 +493,7 @@ audio.addEventListener("playing", () => {
   isPlaying = true;
   playPauseBtn.textContent = "⏸";
   document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
-  localStorage.setProperty("lastActivity", Date.now());
+  localStorage.setItem("lastActivity", Date.now());
   localStorage.setItem("isPlaying", isPlaying);
 });
 
