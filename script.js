@@ -13,7 +13,7 @@ let currentTab = localStorage.getItem("currentTab") || "techno";
 let currentIndex = 0;
 let favoriteStations = JSON.parse(localStorage.getItem("favoriteStations")) || [];
 let isPlaying = localStorage.getItem("isPlaying") === "true" || false;
-let stationLists = {};
+let stationLists = {}; // Початково порожній об’єкт
 let stationItems;
 let isAutoPlaying = false;
 
@@ -24,7 +24,7 @@ audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 // Завантаження станцій
 async function loadStations() {
   console.time("loadStations");
-  stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
+  stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>"; // Показуємо спінер одразу
   try {
     const response = await fetch(`stations.json?t=${Date.now()}`, {
       cache: "no-cache",
@@ -48,6 +48,7 @@ async function loadStations() {
     } else {
       throw new Error(`HTTP ${response.status}`);
     }
+    // Оновлюємо вкладку після успішного завантаження
     const validTabs = [...Object.keys(stationLists), "best"];
     if (!validTabs.includes(currentTab)) {
       currentTab = validTabs[0] || "techno";
@@ -118,7 +119,7 @@ const themes = {
     bodyBg: "#121212",
     containerBg: "#1A1A1A",
     accent: "#64FFDA",
-    text: "#E0E7FA",
+    text: "#E0F7FA",
     accentGradient: "#1A4B4B"
   },
   "starlit-amethyst": {
@@ -148,28 +149,6 @@ function applyTheme(theme) {
   localStorage.setItem("selectedTheme", theme);
   currentTheme = theme;
   document.documentElement.setAttribute("data-theme", theme);
-
-  // Оновлення кольору статус-бару
-  const accentColor = themes[theme].accent;
-  const themeColorMeta = document.querySelector('meta[name="theme-color"][data-dynamic]');
-  if (themeColorMeta) themeColorMeta.setAttribute("content", accentColor);
-
-  // Для iOS: визначення світлої/темної теми на основі яскравості акцентного кольору
-  const appleStatusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"][data-dynamic]');
-  if (appleStatusBarMeta) {
-    const isLightTheme = isLightColor(accentColor);
-    appleStatusBarMeta.setAttribute("content", isLightTheme ? "default" : "black-translucent");
-  }
-}
-
-// Функція для визначення, чи є колір світлим (на основі яскравості)
-function isLightColor(hex) {
-  const rgb = parseInt(hex.replace("#", ""), 16);
-  const r = (rgb >> 16) & 0xff;
-  const g = (rgb >> 8) & 0xff;
-  const b = rgb & 0xff;
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  return brightness > 128;
 }
 
 function toggleTheme() {
@@ -474,7 +453,7 @@ window.addEventListener("offline", () => {
 // Ініціалізація слухачів
 addEventListeners();
 
-// Очищення слухачів перед оновленням
+// Очищення слухачів перед оновленням сторінки
 window.addEventListener("beforeunload", () => {
   removeEventListeners();
 });
@@ -489,4 +468,4 @@ if ("mediaSession" in navigator) {
 
 // Ініціалізація
 applyTheme(currentTheme);
-loadStations();
+loadStations(); // Починаємо завантаження станцій
