@@ -1,4 +1,4 @@
-﻿const audio = document.getElementById("audioPlayer");
+const audio = document.getElementById("audioPlayer");
 const stationList = document.getElementById("stationList");
 const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
 const currentStationInfo = document.getElementById("currentStationInfo");
@@ -14,7 +14,7 @@ let currentTab = localStorage.getItem("currentTab") || "techno";
 let currentIndex = 0;
 let favoriteStations = JSON.parse(localStorage.getItem("favoriteStations")) || [];
 let isPlaying = localStorage.getItem("isPlaying") === "true" || false;
-let stationLists = {};
+let stationLists = {}; // Початково порожній об’єкт
 let stationItems;
 let isAutoPlaying = false;
 
@@ -172,7 +172,7 @@ function toggleTheme() {
   applyTheme(nextTheme);
 }
 
-// Додаємо обробник події для кнопки зміни тем
+// Додаємо обробник події для кнопки зміни теми
 themeToggle.addEventListener("click", toggleTheme);
 
 // Налаштування Service Worker
@@ -180,7 +180,7 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").then(registration => {
     registration.update();
     registration.addEventListener("updatefound", () => {
-      const newWorker = document.installing;
+      const newWorker = registration.installing;
       newWorker.addEventListener("statechange", () => {
         if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
           if (confirm("Доступна нова версія радіо. Оновити?")) {
@@ -437,7 +437,6 @@ function togglePlayPause() {
     document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
   }
   localStorage.setItem("isPlaying", isPlaying);
-  localStorage.setItem("lastActivity", Date.now());
 }
 
 // Обробники подій
@@ -487,8 +486,8 @@ audio.addEventListener("playing", () => {
   isPlaying = true;
   playPauseBtn.textContent = "⏸";
   document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+  localStorage.setProperty("lastActivity", Date.now());
   localStorage.setItem("isPlaying", isPlaying);
-  localStorage.setItem("lastActivity", Date.now());
 });
 
 audio.addEventListener("pause", () => {

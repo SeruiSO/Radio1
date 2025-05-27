@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v517"; // Оновлено версію кешу
+﻿const CACHE_NAME = "radio-pwa-cache-v518"; // Оновлено версію кешу
 const urlsToCache = [
   "/",
   "index.html",
@@ -15,8 +15,8 @@ self.addEventListener("install", event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log("Кешування файлів:", urlsToCache);
-        return cache.addAll(urlsToCache).catch(error => {
-          console.error("Помилка кешування:", error);
+        cache.addAll(urlsToCache).catch(error => {
+          console.error("Ошибка кэширования:", error);
         });
       })
       .then(() => self.skipWaiting())
@@ -37,16 +37,18 @@ self.addEventListener("fetch", event => {
           });
           return networkResponse;
         })
-        .catch(() => caches.match(event.request) || Response.error())
-    );
+        .catch(() => caches.match(event.request))
+        || Response.error())
+      );
+    })
   } else {
     event.respondWith(
       caches.match(event.request)
         .then(response => response || fetch(event.request))
         .catch(() => caches.match(event.request))
-    );
+      );
   }
-});
+  });
 
 self.addEventListener("activate", event => {
   const cacheWhitelist = [CACHE_NAME];
@@ -71,7 +73,7 @@ self.addEventListener("activate", event => {
   );
 });
 
-// Моніторинг стану мережі та Bluetooth
+// Моніторинг стану мережі
 let wasOnline = navigator.onLine;
 let isBluetoothConnected = false;
 
@@ -83,14 +85,14 @@ self.addEventListener("message", event => {
 });
 
 setInterval(() => {
-  fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
+  fetch("https://www.google.com/", { method: "HEAD", mode: "no-cors" })
     .then(() => {
       if (!wasOnline) {
         wasOnline = true;
         self.clients.matchAll().then(clients => {
           clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: true });
-          });
+            client.postMessage({ type: "NETWORK_STATUS", online: true }));
+          })
         });
       }
     })
@@ -100,26 +102,26 @@ setInterval(() => {
         wasOnline = false;
         self.clients.matchAll().then(clients => {
           clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: false });
+            client.postMessage({ type: "NETWORK_STATUS", online: false }));
           });
         });
       }
     });
 
-  // Перевірка тривалої неактивності та Bluetooth
-  if (isBluetoothConnected) {
-    self.clients.matchAll().then(clients => {
-      if (!clients.length) {
-        // Якщо немає активних клієнтів, показуємо повідомлення
-        self.registration.showNotification("", {
-          tag: "bluetooth-reconnect",
-          silent: true
-        });
-      } else {
-        clients.forEach(client => {
-          client.postMessage({ type: "BLUETOOTH_RECONNECT" });
-        });
-      }
-    });
-  }
-}, 10000); // Перевірка кожні 10 секунд
+  // Проверка Перевірка тривалого неактивності та Bluetooth
+    if (isBluetoothConnected) {
+      self.clients.matchAll().then(clients => {
+        if (!clients.length) {
+          // Якщо немає активних клієнтів, показуємо повідомлення
+          self.registration.showNotification("", {
+            tag: "bluetooth-reconnect",
+            silent: true
+          });
+        } else {
+          clients.forEach(client => {
+            client.postMessage({ type: "BLUETOOTH_RECONNECT" });
+          });
+        }
+      });
+    }
+  }, 1000); // Перевірка кожну секунду, як у вихідному коді
