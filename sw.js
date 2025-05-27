@@ -26,12 +26,15 @@ self.addEventListener("install", event => {
 self.addEventListener("fetch", event => {
   if (event.request.url.includes("stations.json")) {
     event.respondWith(
-      fetch(event.request, { cache: "no-cache" })
+      fetch(event.request, { cache: "no-store" })
         .then(networkResponse => {
-          if (!networkResponse || networkResponse.status !== 200) {
+          if (!networkResponse || !networkResponse.ok) {
             console.warn("Мережевий запит для stations.json не вдався, перевіряємо кеш");
             return caches.match(event.request).then(cachedResponse => {
-              return cachedResponse || Response.error();
+              return cachedResponse || new Response(JSON.stringify({ error: "Не вдалося завантажити stations.json" }), {
+                status: 503,
+                statusText: "Service Unavailable"
+              });
             });
           }
           const responseToCache = networkResponse.clone();
@@ -44,7 +47,10 @@ self.addEventListener("fetch", event => {
         .catch(() => {
           console.log("Завантаження stations.json з кешу");
           return caches.match(event.request).then(cachedResponse => {
-            return cachedResponse || Response.error();
+            return cachedResponse || new Response(JSON.stringify({ error: "Не вдалося завантажити stations.json" }), {
+              status: 503,
+              statusText: "Service Unavailable"
+            });
           });
         })
     );

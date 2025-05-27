@@ -32,9 +32,9 @@ async function loadStations() {
   console.time("loadStations");
   stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
 
-  // Спочатку пробуємо завантажити з локального файлу
+  // Спочатку пробуємо завантажити з локального файлу через мережу
   try {
-    const response = await fetch(`stations.json?t=${Date.now()}`, { cache: "no-cache" });
+    const response = await fetch(`stations.json?t=${Date.now()}`, { cache: "no-store" });
     if (response.ok) {
       stationLists = await response.json();
       console.log("stations.json завантажено з локального файлу");
@@ -45,6 +45,7 @@ async function loadStations() {
           console.log("stations.json збережено в кеш");
         });
         initializeStations();
+        stationList.innerHTML = "";
         return;
       } else {
         throw new Error("Дані stations.json некоректні");
@@ -56,7 +57,7 @@ async function loadStations() {
     console.error("Помилка завантаження stations.json з локального файлу:", error);
   }
 
-  // Якщо локальний файл недоступний, перевіряємо кеш
+  // Якщо мережевий запит не вдався, перевіряємо кеш
   try {
     const cachedData = await caches.match("stations.json");
     if (cachedData) {
@@ -64,6 +65,7 @@ async function loadStations() {
       console.log("Використовується кешована версія stations.json");
       if (validateStationData(stationLists)) {
         initializeStations();
+        stationList.innerHTML = "";
         return;
       }
     }
@@ -73,7 +75,7 @@ async function loadStations() {
 
   // Якщо обидва варіанти не спрацювали
   console.error("Не вдалося завантажити станції");
-  stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції</div>";
+  stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції. Перевірте підключення до мережі.</div>";
   console.timeEnd("loadStations");
 }
 
@@ -399,6 +401,10 @@ const eventListeners = {
       audio.src = stationItems[currentIndex].dataset.value;
       tryAutoPlay();
     }
+  },
+  online: () => {
+    console.log("Мережа відновлена, повторна спроба завантаження станцій");
+    loadStations();
   }
 };
 
@@ -407,6 +413,7 @@ function addEventListeners() {
   document.addEventListener("keydown", eventListeners.keydown);
   document.addEventListener("visibilitychange", eventListeners.visibilitychange);
   document.addEventListener("resume", eventListeners.resume);
+  window.addEventListener("online", eventListeners.online);
 }
 
 // Очищення слухачів
@@ -414,6 +421,7 @@ function removeEventListeners() {
   document.removeEventListener("keydown", eventListeners.keydown);
   document.removeEventListener("visibilitychange", eventListeners.visibilitychange);
   document.removeEventListener("resume", eventListeners.resume);
+  window.removeEventListener("online", eventListeners.online);
 }
 
 // Додаємо слухачі подій
