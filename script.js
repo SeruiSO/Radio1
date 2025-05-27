@@ -1,7 +1,7 @@
 const audio = document.getElementById("audioPlayer");
-const stationList = document.getElementById("stationList");
+const stationList = document.getElementById("station-list");
 const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
-const currentStationInfo = document.getElementById("currentStationInfo");
+const currentStationInfo = document.getElementById("current-station-info");
 let currentTab = localStorage.getItem("currentTab") || "techno";
 let currentIndex = 0;
 let favoriteStations = JSON.parse(localStorage.getItem("favoriteStations")) || [];
@@ -58,38 +58,68 @@ async function loadStations(attempt = 1) {
 
 // Теми
 const themes = {
-  dark: {
-    bodyBg: "rgba(30, 30, 40, 0.9)",
-    containerBg: "rgba(50, 50, 70, 0.4)",
-    accent: "#A3BFFA",
-    text: "#E2E8F0"
+  "midnight-lavender": {
+    bodyBg: "#000000",
+    containerBg: "rgba(203, 182, 255, 0.6)",
+    accent: "#C3A8FF",
+    text: "#FFFFFF"
   },
-  light: {
-    bodyBg: "rgba(230, 230, 230, 0.9)",
-    containerBg: "rgba(255, 255, 255, 0.4)",
-    accent: "#BEE3F8",
-    text: "#333333"
+  "pure-snow": {
+    bodyBg: "#FFFFFF",
+    containerBg: "rgba(255, 182, 193, 0.6)",
+    accent: "#FF9999",
+    text: "#000000"
   },
-  neon: {
-    bodyBg: "rgba(20, 30, 50, 0.9)",
-    containerBg: "rgba(40, 60, 80, 0.4)",
-    accent: "#9AE6B4",
-    text: "#E8E8E8"
+  "mint-breeze": {
+    bodyBg: "#000000",
+    containerBg: "rgba(175, 245, 218, 0.6)",
+    accent: "#A8E6CF",
+    text: "#FFFFFF"
   },
-  "light-alt": {
-    bodyBg: "rgba(245, 240, 220, 0.9)",
-    containerBg: "rgba(255, 250, 240, 0.4)",
-    accent: "#FEEBC8",
-    text: "#4A4A4A"
+  "peach-sunset": {
+    bodyBg: "#FFFFFF",
+    containerBg: "rgba(255, 204, 153, 0.6)",
+    accent: "#FFCC99",
+    text: "#000000"
   },
-  "dark-alt": {
-    bodyBg: "rgba(30, 40, 50, 0.9)",
-    containerBg: "rgba(50, 70, 90, 0.4)",
-    accent: "#C6F6D5",
-    text: "#E2E8F0"
+  "ebony-coral": {
+    bodyBg: "#000000",
+    containerBg: "rgba(255, 111, 97, 0.6)",
+    accent: "#FF8A80",
+    text: "#FFFFFF"
+  },
+  "olive-dark": {
+    bodyBg: "#000000",
+    containerBg: "rgba(107, 142, 35, 0.6)",
+    accent: "#8A9A5B",
+    text: "#FFFFFF"
+  },
+  "steel-dawn": {
+    bodyBg: "#FFFFFF",
+    containerBg: "rgba(70, 86, 96, 0.6)",
+    accent: "#4A6572",
+    text: "#000000"
+  },
+  "charcoal-ember": {
+    bodyBg: "#000000",
+    containerBg: "rgba(139, 0, 0, 0.6)",
+    accent: "#A52A2A",
+    text: "#FFFFFF"
+  },
+  "slate-dark": {
+    bodyBg: "#FFFFFF",
+    containerBg: "rgba(47, 79, 79, 0.6)",
+    accent: "#4682B4",
+    text: "#000000"
+  },
+  "iron-forest": {
+    bodyBg: "#000000",
+    containerBg: "rgba(34, 53, 38, 0.6)",
+    accent: "#355E3B",
+    text: "#FFFFFF"
   }
 };
-let currentTheme = localStorage.getItem("selectedTheme") || "dark";
+let currentTheme = localStorage.getItem("selectedTheme") || "midnight-lavender";
 
 function applyTheme(theme) {
   const root = document.documentElement;
@@ -103,8 +133,19 @@ function applyTheme(theme) {
 }
 
 function toggleTheme() {
-  const themesOrder = ["dark", "light", "neon", "light-alt", "dark-alt"];
-  const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % 5];
+  const themesOrder = [
+    "midnight-lavender",
+    "pure-snow",
+    "mint-breeze",
+    "peach-sunset",
+    "ebony-coral",
+    "olive-dark",
+    "steel-dawn",
+    "charcoal-ember",
+    "slate-dark",
+    "iron-forest"
+  ];
+  const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
   applyTheme(nextTheme);
 }
 
@@ -143,21 +184,19 @@ function clearRetryTimer() {
   }
 }
 
-function startRetryTimer() {
-  clearRetryTimer();
-  retryTimer = setInterval(() => {
-    if (navigator.onLine && isPlaying && stationItems?.length && currentIndex < stationItems.length && !isAutoPlaying && audio.paused) {
-      console.log("Періодична спроба відновлення відтворення (повільний режим)");
+function startRetry() {
+  clearInterval(() => {
+    if (navigator.onLine && isPlaying && stationItems?.?.length && currentIndex < stationItems?.length && !isAutoPlaying && audio.paused?) {
+      console.log("audio play retry (slow)");
       audio.pause();
-      audio.src = stationItems[currentIndex].dataset.value;
-      tryAutoPlay();
+      audio.src = tryAutoPlay();
     }
-  }, SLOW_RETRY_INTERVAL);
+  }, SLOW_RETRY);
 }
 
 function tryAutoPlay() {
   if (!isPlaying || !stationItems?.length || currentIndex >= stationItems.length || isAutoPlaying) {
-    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animation = "none");
     return;
   }
   isAutoPlaying = true;
@@ -169,20 +208,23 @@ function tryAutoPlay() {
       retryCount = 0;
       retryStartTime = null;
       isAutoPlaying = false;
-      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animation = "wave 1.5s infinite ease-in-out");
       clearRetryTimer();
     })
     .catch(error => {
-      console.error("Помилка відтворення:", error);
+      console.error("Playback error:", error);
       isAutoPlaying = false;
       handlePlaybackError();
     });
 }
 
 function handlePlaybackError() {
-  document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+  document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animation = "none");
   if (!retryStartTime) {
-    retryStartTime = Date.now();
+    retryStartTime = setTimeout(() => {
+      audio.pause();
+      tryAutoPlay();
+    }, FAST_RETRY_INTERVAL);
   }
   const elapsedTime = Date.now() - retryStartTime;
 
@@ -194,7 +236,7 @@ function handlePlaybackError() {
     }, FAST_RETRY_INTERVAL);
   } else {
     retryCount = 0;
-    startRetryTimer();
+    startRetry();
   }
 }
 
@@ -324,12 +366,12 @@ function togglePlayPause() {
     isPlaying = true;
     tryAutoPlay();
     playPauseBtn.textContent = "⏸";
-    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animation = "wave 1.5s infinite ease-in-out");
   } else {
     audio.pause();
     isPlaying = false;
     playPauseBtn.textContent = "▶";
-    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animation = "none");
     clearRetryTimer();
   }
   localStorage.setItem("isPlaying", isPlaying);
@@ -347,7 +389,7 @@ document.addEventListener("keydown", e => {
 audio.addEventListener("playing", () => {
   isPlaying = true;
   playPauseBtn.textContent = "⏸";
-  document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+  document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animation = "wave 1.5s infinite ease-in-out");
   localStorage.setItem("isPlaying", isPlaying);
   clearRetryTimer();
 });
@@ -355,9 +397,9 @@ audio.addEventListener("playing", () => {
 audio.addEventListener("pause", () => {
   isPlaying = false;
   playPauseBtn.textContent = "▶";
-  document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+  document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animation = "none");
   localStorage.setItem("isPlaying", isPlaying);
-  startRetryTimer();
+  startRetry();
 });
 
 audio.addEventListener("error", () => handlePlaybackError());
@@ -376,7 +418,7 @@ window.addEventListener("online", () => {
     audio.src = stationItems[currentIndex].dataset.value;
     tryAutoPlay();
   }
-  startRetryTimer();
+  startRetry();
 });
 
 window.addEventListener("offline", () => {
@@ -393,22 +435,19 @@ document.addEventListener("visibilitychange", () => {
     retryCount = 0;
     retryStartTime = null;
     audio.pause();
-    audio.src = stationItems[currentIndex].dataset.value;
+    audio.srcObject = stationItems[currentIndex].dataset.value;
     tryAutoPlay();
   }
-  if (document.hidden && isPlaying && navigator.onLine) {
-    if (!audio.paused) {
-      console.log("Аудіо відтворюється у фоновому режимі, пропускаємо startRetryTimer");
-      return;
-    }
-    startRetryTimer();
+  if (document.hidden && isPlaying && !audio.paused && navigator.onLine) {
+    console.log("paused, skipping...");
+    startRetry();
   }
 });
 
 document.addEventListener("resume", () => {
-  if (isPlaying && navigator.connection?.type !== "none") {
+  if (navigator.onLine && isPlaying) {
     if (!audio.paused) {
-      console.log("Аудіо вже відтворюється після resume, пропускаємо tryAutoPlay");
+      console.log("audio playing after resume, skipping...");
       return;
     }
     retryCount = 0;
@@ -434,8 +473,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isPlaying && stationItems?.length && currentIndex < stationItems.length && !stationItems[currentIndex].classList.contains("empty")) {
       tryAutoPlay();
     }
-    if (isPlaying && navigator.onLine && audio.paused) {
-      startRetryTimer();
-    }
+    startRetry();
   }, 0);
 });

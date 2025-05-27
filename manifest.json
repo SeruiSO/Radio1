@@ -3,7 +3,7 @@
   "short_name": "Radio S O",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1a1a",
+  "background_color": "#000000",
   "theme_color": "transparent",
   "icons": [
     {
