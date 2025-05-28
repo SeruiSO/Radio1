@@ -93,6 +93,10 @@ async function loadStations(attempt = 1, maxAttempts = 3) {
     currentIndex = parseInt(localStorage.getItem(`lastStation_${currentTab}`)) || 0;
     switchTab(currentTab);
     updateNetworkStatus("Онлайн");
+    // Автовідтворення після завантаження станцій
+    if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
+      tryAutoPlay();
+    }
   } catch (error) {
     console.error(`Помилка завантаження станцій (спроба ${attempt}):`, error);
     if (attempt < maxAttempts) {
@@ -202,9 +206,10 @@ if ("serviceWorker" in navigator) {
 function tryAutoPlay() {
   if (!navigator.onLine) {
     console.log("Пристрій офлайн, пропускаємо відтворення");
+    updateNetworkStatus("Офлайн");
     return;
   }
-  if (!isPlaying || !stationItems?.length || currentIndex >= stationItems.length || isAutoPlaying || !audio.paused) {
+  if (!isPlaying || !stationItems?.length || currentIndex >= stationItems.length || isAutoPlaying) {
     document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
     return;
   }
@@ -231,15 +236,10 @@ function tryAutoPlay() {
       lastPlayPromise = null;
     })
     .catch(error => {
-      if (error.name === "NotAllowedError") {
-        console.warn("Автовідтворення заблоковано браузером:", error);
-      } else if (error.name !== "AbortError") {
-        console.error("Помилка відтворення:", error);
-      }
+      console.warn("Помилка автовідтворення:", error);
       isAutoPlaying = false;
       document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
-      // Не змінювати статус мережі для AbortError
-      if (error.name !== "AbortError" && !navigator.onLine) {
+      if (error.name !== "AbortError") {
         updateNetworkStatus("Офлайн");
       }
       lastPlayPromise = null;
@@ -319,7 +319,9 @@ function switchTab(tab) {
   document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
   const activeBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
   if (activeBtn) activeBtn.classList.add("active");
-  if (stationItems?.length && currentIndex < stationItems.length) tryAutoPlay();
+  if (stationItems?.length && currentIndex < stationItems.length) {
+    debouncedChangeStation(currentIndex); // Ensure station is selected and played
+  }
 }
 
 // Оновлення списку станцій
