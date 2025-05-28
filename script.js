@@ -8,6 +8,7 @@ let stationItems = [];
 let isAutoPlaying = false;
 let lastPlayPromise = null;
 let changeStationTimeout = null;
+let animationFrameId = null;
 
 // DOM-елементи
 const audio = document.getElementById("audioPlayer");
@@ -19,6 +20,7 @@ const currentStationInfo = document.querySelector(".current-station-info");
 const networkStatus = currentStationInfo?.querySelector(".network-status");
 const themeToggle = document.querySelector(".theme-toggle");
 const tabButtons = document.querySelectorAll(".tab-btn");
+const waveBars = document.querySelectorAll(".wave-bar");
 
 // Перевірка існування DOM-елементів
 if (!audio || !stationList || !playPauseBtn || !prevBtn || !nextBtn || !currentStationInfo || !networkStatus || !themeToggle || !tabButtons.length) {
@@ -48,6 +50,22 @@ function validateLocalStorage() {
   }
 }
 validateLocalStorage();
+
+// Анімація wave-bar через requestAnimationFrame
+function animateWaveBars() {
+  if (!isPlaying || audio.paused) {
+    waveBars.forEach(bar => bar.style.transform = "scaleY(0.3)");
+    return;
+  }
+  const now = performance.now();
+  waveBars.forEach((bar, index) => {
+    const delay = index * 100; // Delay in ms
+    const phase = (now + delay) % 600; // 600ms cycle (matches 0.6s CSS animation)
+    const scale = 0.3 + 0.7 * (Math.sin((phase / 600) * 2 * Math.PI) + 1) / 2; // Scale from 0.3 to 1.0
+    bar.style.transform = `scaleY(${scale})`;
+  });
+  animationFrameId = requestAnimationFrame(animateWaveBars);
+}
 
 // Завантаження станцій з повторними спробами
 async function loadStations(attempt = 1, maxAttempts = 3) {
@@ -93,9 +111,9 @@ async function loadStations(attempt = 1, maxAttempts = 3) {
     currentIndex = parseInt(localStorage.getItem(`lastStation_${currentTab}`)) || 0;
     switchTab(currentTab);
     updateNetworkStatus("Онлайн");
-    // Автовідтворення після завантаження станцій
+    // Запускаємо автовідтворення після повного оновлення списку
     if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
-      tryAutoPlay();
+      changeStation(currentIndex);
     }
   } catch (error) {
     console.error(`Помилка завантаження станцій (спроба ${attempt}):`, error);
@@ -191,13 +209,13 @@ if ("serviceWorker" in navigator) {
       updateNetworkStatus(event.data.online ? "Онлайн" : "Офлайн");
       if (event.data.online && isPlaying && stationItems?.length && currentIndex < stationItems.length) {
         console.log("Мережа відновлена, перезапуск відтворення");
-        audio.pause();
-        audio.src = stationItems[currentIndex].dataset.value;
-        tryAutoPlay();
+        changeStation(currentIndex);
       }
     } else if (event.data.type === "NETWORK_RECONNECT" || event.data.type === "BLUETOOTH_RECONNECT") {
       console.log(`Отримано повідомлення від Service Worker: ${event.data.type}`);
-      tryAutoPlay();
+      if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
+        changeStation(currentIndex);
+      }
     }
   });
 }
@@ -207,17 +225,20 @@ function tryAutoPlay() {
   if (!navigator.onLine) {
     console.log("Пристрій офлайн, пропускаємо відтворення");
     updateNetworkStatus("Офлайн");
+    cancelAnimationFrame(animationFrameId);
+    waveBars.forEach(bar => bar.style.transform = "scaleY(0.3)");
     return;
   }
   if (!isPlaying || !stationItems?.length || currentIndex >= stationItems.length || isAutoPlaying) {
-    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+    cancelAnimationFrame(animationFrameId);
+    waveBars.forEach(bar => bar.style.transform = "scaleY(0.3)");
     return;
   }
   isAutoPlaying = true;
 
-  // Скасувати попередній запит відтворення
   if (lastPlayPromise) {
     audio.pause();
+    lastPlayPromise = null;
   }
 
   audio.src = stationItems[currentIndex].dataset.value;
@@ -229,7 +250,7 @@ function tryAutoPlay() {
       isAutoPlaying = false;
       isPlaying = true;
       playPauseBtn.textContent = "⏸";
-      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+      animationFrameId = requestAnimationFrame(animateWaveBars);
       localStorage.setItem("isPlaying", isPlaying);
       localStorage.setItem("lastActivity", Date.now());
       updateNetworkStatus("Онлайн");
@@ -238,7 +259,8 @@ function tryAutoPlay() {
     .catch(error => {
       console.warn("Помилка автовідтворення:", error);
       isAutoPlaying = false;
-      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+      cancelAnimationFrame(animationFrameId);
+      waveBars.forEach(bar => bar.style.transform = "scaleY(0.3)");
       if (error.name !== "AbortError") {
         updateNetworkStatus("Офлайн");
       }
@@ -301,7 +323,8 @@ function setupBluetooth() {
       audio.pause();
       isPlaying = false;
       playPauseBtn.textContent = "▶";
-      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+      cancelAnimationFrame(animationFrameId);
+      waveBars.forEach(bar => bar.style.transform = "scaleY(0.3)");
       localStorage.setItem("isPlaying", isPlaying);
     });
   }
@@ -320,7 +343,7 @@ function switchTab(tab) {
   const activeBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
   if (activeBtn) activeBtn.classList.add("active");
   if (stationItems?.length && currentIndex < stationItems.length) {
-    debouncedChangeStation(currentIndex); // Ensure station is selected and played
+    changeStation(currentIndex);
   }
 }
 
@@ -373,7 +396,7 @@ function updateStationList() {
   };
 
   if (stationItems.length && currentIndex < stationItems.length) {
-    debouncedChangeStation(currentIndex);
+    changeStation(currentIndex);
   }
 }
 
@@ -399,7 +422,7 @@ function debouncedChangeStation(index) {
   }
   changeStationTimeout = setTimeout(() => {
     changeStation(index);
-  }, 300);
+  }, 100); // Reduced from 300ms to 100ms
 }
 
 // Зміна станції
@@ -468,12 +491,13 @@ function togglePlayPause() {
     isPlaying = true;
     tryAutoPlay();
     playPauseBtn.textContent = "⏸";
-    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+    animationFrameId = requestAnimationFrame(animateWaveBars);
   } else {
     audio.pause();
     isPlaying = false;
     playPauseBtn.textContent = "▶";
-    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+    cancelAnimationFrame(animationFrameId);
+    waveBars.forEach(bar => bar.style.transform = "scaleY(0.3)");
     localStorage.setItem("isPlaying", isPlaying);
   }
   localStorage.setItem("isPlaying", isPlaying);
@@ -502,18 +526,12 @@ const eventListeners = {
   },
   visibilitychange: () => {
     if (!document.hidden && isPlaying && navigator.onLine) {
-      if (!audio.paused) return;
-      audio.pause();
-      audio.src = stationItems[currentIndex].dataset.value;
-      tryAutoPlay();
+      changeStation(currentIndex);
     }
   },
   resume: () => {
     if (isPlaying && navigator.connection?.type !== "none") {
-      if (!audio.paused) return;
-      audio.pause();
-      audio.src = stationItems[currentIndex].dataset.value;
-      tryAutoPlay();
+      changeStation(currentIndex);
     }
   }
 };
@@ -536,7 +554,7 @@ function removeEventListeners() {
 audio.addEventListener("playing", () => {
   isPlaying = true;
   playPauseBtn.textContent = "⏸";
-  document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+  animationFrameId = requestAnimationFrame(animateWaveBars);
   localStorage.setItem("lastActivity", Date.now());
   localStorage.setItem("isPlaying", isPlaying);
 });
@@ -544,12 +562,14 @@ audio.addEventListener("playing", () => {
 audio.addEventListener("pause", () => {
   isPlaying = false;
   playPauseBtn.textContent = "▶";
-  document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+  cancelAnimationFrame(animationFrameId);
+  waveBars.forEach(bar => bar.style.transform = "scaleY(0.3)");
   localStorage.setItem("isPlaying", isPlaying);
 });
 
 audio.addEventListener("error", () => {
-  document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+  cancelAnimationFrame(animationFrameId);
+  waveBars.forEach(bar => bar.style.transform = "scaleY(0.3)");
   if (!navigator.onLine) {
     updateNetworkStatus("Офлайн");
   }
@@ -564,9 +584,7 @@ window.addEventListener("online", () => {
   console.log("Мережа відновлена");
   updateNetworkStatus("Онлайн");
   if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
-    audio.pause();
-    audio.src = stationItems[currentIndex].dataset.value;
-    tryAutoPlay();
+    changeStation(currentIndex);
   }
 });
 
