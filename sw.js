@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v809";
+﻿const CACHE_NAME = "radio-pwa-play-cache-v810";
 const urlsToCache = [
   "/",
   "index.html",
@@ -10,10 +10,10 @@ const urlsToCache = [
   "icon-512.png"
 ];
 
-// Змінні для Service Worker
-let isInitialLoad = true;
+// Змінні для ServiceWorker
+let isInitialLoader = true;
 let wasOnline = navigator.onLine;
-let isBluetoothConnected = false;
+let isPausedDueToBluetooth = false; // Для відстеження паузи через Bluetooth
 let retryAttempts = { 1: 0, 2: 0, 5: 0 };
 let retryInterval = null;
 
@@ -37,7 +37,7 @@ self.addEventListener("fetch", event => {
         fetch(event.request, { cache: "no-cache" })
           .then(networkResponse => {
             if (!networkResponse || networkResponse.status !== 200) {
-              return caches.match(event.request) || Response.error();
+              return caches.match(event.request) || new Response.error();
             }
             const responseToCache = networkResponse.clone();
             caches.open(CACHE_NAME).then(cache => {
@@ -61,7 +61,7 @@ self.addEventListener("fetch", event => {
                   });
                   return networkResponse;
                 }
-                return cachedResponse || Response.error();
+                return cachedResponse || networkResponse;
               })
               .catch(() => cachedResponse || Response.error());
             return cachedResponse || fetchPromise;
@@ -84,7 +84,7 @@ self.addEventListener("activate", event => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (!cacheWhitelist.includes(cacheName)) {
-            console.log(`Видалення старого кешу: ${cacheName}`);
+            console.log(`Видалення кешу: ${cacheName}`);
             return caches.delete(cacheName);
           }
         })
@@ -94,23 +94,25 @@ self.addEventListener("activate", event => {
       isInitialLoad = true;
       self.clients.matchAll().then(clients => {
         clients.forEach(client => {
-          client.postMessage({ type: "UPDATE", message: "Додаток оновлено до нової версії!" });
+          client.postMessage({ type: "UPDATE", message: "Додаток оновлено" });
         });
       });
     }).then(() => self.clients.claim())
   );
 });
 
-// Періодична перевірка активності
+// Перевірка активності тільки при паузі через Bluetooth
 setInterval(() => {
-  self.clients.matchAll().then(clients => {
-    clients.forEach(client => {
-      client.postMessage({ type: "KEEP_ALIVE" });
+  if (isPausedDueToBluetooth) {
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({ type: "KEEP_ALIVE" });
+      });
     });
-  });
+  }
 }, 30000); // Кожні 30 секунд
 
-// Моніторинг мережі та Bluetooth
+// Моніторинг мережі
 function startNetworkCheck(interval) {
   if (retryInterval) clearInterval(retryInterval);
   retryAttempts[interval]++;
@@ -120,10 +122,12 @@ function startNetworkCheck(interval) {
         if (!wasOnline) {
           wasOnline = true;
           self.clients.matchAll().then(clients => {
-            clients.forEach(client => {
+            clients.forEach(clients => {
               client.postMessage({ type: "NETWORK_STATUS", online: true });
               client.postMessage({ type: "BLUETOOTH_RECONNECT" });
-              client.postMessage({ type: "KEEP_ALIVE" }); // Додано для активності
+              if (isPausedDueToBluetooth) {
+                client.postMessage({ type: "KEEP_ALIVE" });
+              }
             });
             if (!clients.length) {
               self.registration.showNotification("", { tag: "network-reconnect", silent: true });
@@ -150,13 +154,12 @@ function startNetworkCheck(interval) {
 
 self.addEventListener("message", event => {
   if (event.data.type === "BLUETOOTH_STATUS") {
-    isBluetoothConnected = event.data.connected;
-    console.log(`Bluetooth status updated: ${isBluetoothConnected}`);
-    if (isBluetoothConnected) {
+    isPausedDueToBluetooth = event.data.pausedDueToBluetooth; // Оновлюємо стан
+    console.log(`Bluetooth Paused Status: ${isPausedDueToBluetooth}`);
+    if (event.data.connected) {
       self.clients.matchAll().then(clients => {
         clients.forEach(client => {
           client.postMessage({ type: "BLUETOOTH_RECONNECT" });
-          // Активація вкладки
           if (client.focus) {
             client.focus();
           }
@@ -167,9 +170,9 @@ self.addEventListener("message", event => {
       });
     }
   } else if (event.data.type === "REQUEST_RESTART") {
-    console.log(`Отримано запит на повторне підключення: ${event.data.reason}`);
+    console.log(`Отримано запит: ${event.data.reason}`);
     startNetworkCheck(1);
-  } else if (event.data.type === "ACTIVATE_TAB") { // Додано обробку ACTIVATE_TAB
+  } else if (event.data.type === "ACTIVATE_TAB") {
     console.log("Отримано запит на активацію вкладки");
     self.clients.matchAll().then(clients => {
       const client = clients.find(c => c.url.includes("index.html"));
@@ -194,7 +197,7 @@ setInterval(() => {
       }
     })
     .catch(error => {
-      console.error("Помилка перевірки мережі:", error);
+      console.error("Помилка:", error);
       if (wasOnline) {
         wasOnline = false;
         self.clients.matchAll().then(clients => {
