@@ -1,7 +1,7 @@
 console.log("Script.js loaded successfully");
 
-document.addEventListener('DOMContentLoaded', () => {
-  console.log("DOM content loaded");
+function initializeApp() {
+  console.log("Initializing app");
   const audio = document.getElementById("audioPlayer");
   const stationList = document.getElementById("stationList");
   const playPauseBtn = document.getElementById("playPauseBtn");
@@ -10,12 +10,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const currentStationInfo = document.getElementById("currentStationInfo");
   const themeToggle = document.querySelector(".theme-toggle");
 
-  console.log("Checking DOM elements:", { audio, stationList, playPauseBtn, prevBtn, nextBtn, currentStationInfo, themeToggle });
-  if (!audio || !stationList || !playPauseBtn || !prevBtn || !nextBtn || !currentStationInfo || !themeToggle) {
-    console.error("One of the required DOM elements not found");
-    throw new Error("Failed to initialize app due to missing DOM elements");
+  // Детальне логування
+  console.log("Checking DOM elements:", {
+    audio: !!audio,
+    stationList: !!stationList,
+    playPauseBtn: !!playPauseBtn,
+    prevBtn: !!prevBtn,
+    nextBtn: !!nextBtn,
+    currentStationInfo: !!currentStationInfo,
+    themeToggle: !!themeToggle
+  });
+
+  // Перевірка елементів
+  const missingElements = [];
+  if (!audio) missingElements.push("audioPlayer");
+  if (!stationList) missingElements.push("stationList");
+  if (!playPauseBtn) missingElements.push("playPauseBtn");
+  if (!prevBtn) missingElements.push("prevBtn");
+  if (!nextBtn) missingElements.push("nextBtn");
+  if (!currentStationInfo) missingElements.push("currentStationInfo");
+  if (!themeToggle) missingElements.push("theme-toggle");
+
+  if (missingElements.length > 0) {
+    console.error(`Missing DOM elements: ${missingElements.join(", ")}`);
+    // Відображаємо повідомлення користувачу
+    if (stationList) {
+      stationList.innerHTML = `<div class='station-item empty'>Помилка: не знайдено елементи ${missingElements.join(", ")}</div>`;
+    }
+    // Продовжуємо ініціалізацію, якщо можливо
+  } else {
+    console.log("DOM elements verified");
   }
-  console.log("DOM elements verified");
 
   let currentTab = localStorage.getItem("currentTab") || "techno";
   let currentIndex = 0;
@@ -26,10 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
   let isAutoPlaying = false;
   let lastStationUrl = localStorage.getItem("lastStationUrl") || "";
 
-  audio.preload = "auto";
-  audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
+  if (audio) {
+    audio.preload = "auto";
+    audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
+  }
 
   function resetStationInfo() {
+    if (!currentStationInfo) return;
     const stationNameElement = currentStationInfo.querySelector(".station-name");
     const stationGenreElement = currentStationInfo.querySelector(".station-genre");
     const stationCountryElement = currentStationInfo.querySelector(".station-country");
@@ -45,6 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadStations() {
+    if (!stationList) {
+      console.error("stationList not found, cannot load stations");
+      return;
+    }
     console.log("loadStations function called");
     console.time("loadStations");
     stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
@@ -140,7 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTheme(nextTheme);
   }
 
-  themeToggle.addEventListener("click", toggleTheme);
+  if (themeToggle) {
+    themeToggle.addEventListener("click", toggleTheme);
+  }
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then(registration => {
@@ -159,9 +193,11 @@ document.addEventListener('DOMContentLoaded', () => {
     navigator.serviceWorker.addEventListener("message", event => {
       if (event.data.type === "NETWORK_STATUS" && event.data.online && isPlaying && stationItems?.length && currentIndex < stationItems.length) {
         console.log("Received message from Service Worker: network restored");
-        audio.pause();
-        audio.src = stationItems[currentIndex].dataset.value;
-        tryAutoPlay();
+        if (audio) {
+          audio.pause();
+          audio.src = stationItems[currentIndex].dataset.value;
+          tryAutoPlay();
+        }
       }
     });
   }
@@ -171,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log("Device is offline, skipping playback");
       return;
     }
-    if (!isPlaying || !stationItems?.length || currentIndex >= stationItems.length || isAutoPlaying) {
+    if (!isPlaying || !stationItems?.length || currentIndex >= stationItems.length || isAutoPlaying || !audio) {
       document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
       return;
     }
@@ -184,7 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!stationItems[currentIndex].dataset.value || !/^https?:\/\//.test(stationItems[currentIndex].dataset.value)) {
       console.error("Invalid audio source URL:", stationItems[currentIndex].dataset.value);
       resetStationInfo();
-      stationList.innerHTML = "<div class='station-item empty'>Невалідна URL станції</div>";
+      if (stationList) {
+        stationList.innerHTML = "<div class='station-item empty'>Невалідна URL станції</div>";
+      }
       return;
     }
     isAutoPlaying = true;
@@ -200,7 +238,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Playback error:", error);
         isAutoPlaying = false;
         document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
-        stationList.innerHTML = "<div class='station-item empty'>Помилка відтворення: " + error.message + "</div>";
+        if (stationList) {
+          stationList.innerHTML = "<div class='station-item empty'>Помилка відтворення: " + error.message + "</div>";
+        }
       });
   }
 
@@ -291,10 +331,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!lastStationUrl || !/^https?:\/\//.test(lastStationUrl)) {
       console.error("Invalid audio source URL:", lastStationUrl);
       resetStationInfo();
-      stationList.innerHTML = "<div class='station-item empty'>Невалідна URL станції</div>";
+      if (stationList) {
+        stationList.innerHTML = "<div class='station-item empty'>Невалідна URL станції</div>";
+      }
       return;
     }
-    audio.src = lastStationUrl;
+    if (audio) {
+      audio.src = lastStationUrl;
+    }
     updateCurrentStationInfo(item);
     tryAutoPlay();
   }
@@ -318,10 +362,10 @@ document.addEventListener('DOMContentLoaded', () => {
         album: "Radio SO3"
       });
       navigator.mediaSession.setActionHandler("play", () => {
-        if (audio.paused) togglePlayPause();
+        if (audio && audio.paused) togglePlayPause();
       });
       navigator.mediaSession.setActionHandler("pause", () => {
-        if (!audio.paused) togglePlayPause();
+        if (audio && !audio.paused) togglePlayPause();
       });
       navigator.mediaSession.setActionHandler("previoustrack", prevStation);
       navigator.mediaSession.setActionHandler("nexttrack", nextStation);
@@ -414,10 +458,14 @@ document.addEventListener('DOMContentLoaded', () => {
               if (result.device && !isPlaying && lastStationUrl) {
                 console.log('Bluetooth device detected, starting playback');
                 isPlaying = true;
-                playPauseBtn.textContent = "⏸";
-                playPauseBtn.setAttribute("aria-label", "Призупинити відтворення");
-                audio.src = lastStationUrl;
-                tryAutoPlay();
+                if (playPauseBtn) {
+                  playPauseBtn.textContent = "⏸";
+                  playPauseBtn.setAttribute("aria-label", "Призупинити відтворення");
+                }
+                if (audio) {
+                  audio.src = lastStationUrl;
+                  tryAutoPlay();
+                }
               }
             }, { timeout: 5000 });
 
@@ -426,10 +474,12 @@ document.addEventListener('DOMContentLoaded', () => {
               console.log('Bluetooth disabled, pausing playback');
               await new Promise(resolve => setTimeout(resolve, 1000));
               if (!(await BleClient.isEnabled()).value) {
-                audio.pause();
+                if (audio) audio.pause();
                 isPlaying = false;
-                playPauseBtn.textContent = "▶";
-                playPauseBtn.setAttribute("aria-label", "Почати відтворення");
+                if (playPauseBtn) {
+                  playPauseBtn.textContent = "▶";
+                  playPauseBtn.setAttribute("aria-label", "Почати відтворення");
+                }
                 document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
                 localStorage.setItem("isPlaying", isPlaying);
               }
@@ -456,15 +506,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const eventListeners = {
     keydown: e => {
-      if (e.key === "ArrowLeft") prevStation();
-      if (e.key === "ArrowRight") nextStation();
-      if (e.key === " ") {
+      if (e.key === "ArrowLeft" && prevBtn) prevStation();
+      if (e.key === "ArrowRight" && nextBtn) nextStation();
+      if (e.key === " " && playPauseBtn) {
         e.preventDefault();
         togglePlayPause();
       }
     },
     visibilitychange: () => {
-      if (!document.hidden && isPlaying && navigator.onLine) {
+      if (!document.hidden && isPlaying && navigator.onLine && audio) {
         if (!audio.paused) return;
         audio.pause();
         audio.src = stationItems[currentIndex]?.dataset.value || '';
@@ -472,8 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     resume: () => {
-      // Перевірка доступності мережі без navigator.connection
-      if (isPlaying && navigator.onLine) {
+      if (isPlaying && navigator.onLine && audio) {
         if (!audio.paused) return;
         audio.pause();
         audio.src = stationItems[currentIndex]?.dataset.value || '';
@@ -489,9 +538,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll(".tab-btn").forEach(btn => {
       btn.addEventListener("click", () => switchTab(btn.getAttribute("data-tab")));
     });
-    playPauseBtn.addEventListener("click", togglePlayPause);
-    prevBtn.addEventListener("click", prevStation);
-    nextBtn.addEventListener("click", nextStation);
+    if (playPauseBtn) playPauseBtn.addEventListener("click", togglePlayPause);
+    if (prevBtn) prevBtn.addEventListener("click", prevStation);
+    if (nextBtn) nextBtn.addEventListener("click", nextStation);
   }
 
   function removeEventListeners() {
@@ -501,41 +550,47 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll(".tab-btn").forEach(btn => {
       btn.removeEventListener("click", () => switchTab(btn.getAttribute("data-tab")));
     });
-    playPauseBtn.removeEventListener("click", togglePlayPause);
-    prevBtn.removeEventListener("click", prevStation);
-    nextBtn.removeEventListener("click", nextStation);
+    if (playPauseBtn) playPauseBtn.removeEventListener("click", togglePlayPause);
+    if (prevBtn) prevBtn.removeEventListener("click", prevStation);
+    if (nextBtn) nextBtn.removeEventListener("click", nextStation);
   }
 
-  audio.addEventListener("playing", () => {
-    isPlaying = true;
-    playPauseBtn.textContent = "⏸";
-    playPauseBtn.setAttribute("aria-label", "Призупинити відтворення");
-    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
-    localStorage.setItem("isPlaying", isPlaying);
-  });
+  if (audio) {
+    audio.addEventListener("playing", () => {
+      isPlaying = true;
+      if (playPauseBtn) {
+        playPauseBtn.textContent = "⏸";
+        playPauseBtn.setAttribute("aria-label", "Призупинити відтворення");
+      }
+      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+      localStorage.setItem("isPlaying", isPlaying);
+    });
 
-  audio.addEventListener("pause", () => {
-    isPlaying = false;
-    playPauseBtn.textContent = "▶";
-    playPauseBtn.setAttribute("aria-label", "Почати відтворення");
-    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
-    localStorage.setItem("isPlaying", isPlaying);
-    if ("mediaSession" in navigator) {
-      navigator.mediaSession.metadata = null;
-    }
-  });
+    audio.addEventListener("pause", () => {
+      isPlaying = false;
+      if (playPauseBtn) {
+        playPauseBtn.textContent = "▶";
+        playPauseBtn.setAttribute("aria-label", "Почати відтворення");
+      }
+      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+      localStorage.setItem("isPlaying", isPlaying);
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = null;
+      }
+    });
 
-  audio.addEventListener("error", () => {
-    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
-  });
+    audio.addEventListener("error", () => {
+      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+    });
 
-  audio.addEventListener("volumechange", () => {
-    localStorage.setItem("volume", audio.volume);
-  });
+    audio.addEventListener("volumechange", () => {
+      localStorage.setItem("volume", audio.volume);
+    });
+  }
 
   window.addEventListener("online", () => {
     console.log("Network restored");
-    if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
+    if (isPlaying && stationItems?.length && currentIndex < stationItems.length && audio) {
       audio.pause();
       audio.src = stationItems[currentIndex].dataset.value;
       tryAutoPlay();
@@ -558,4 +613,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   applyTheme(currentTheme);
   loadStations();
+}
+
+// Ініціалізація з затримкою, щоб переконатися, що DOM готовий
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initializeApp, 100);
 });

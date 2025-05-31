@@ -49,13 +49,13 @@
   <link rel="icon" href="icon-192.png" type="image/png">
   <!-- Підключення Capacitor для мобільних платформ -->
   <script src="https://cdn.jsdelivr.net/npm/@capacitor/core@latest/dist/capacitor.js"></script>
-  <script type="module" src="script.js"></script>
+  <script defer src="script.js"></script>
 </head>
 <body>
   <div class="container">
     <div class="theme-toggle" aria-label="Змінити тему">🌙</div>
     <h1>🎧 RADIO MUSIC</h1>
-    <div class="current-station-info">
+    <div class="current-station-info" id="currentStationInfo">
       <div class="station-info-content">
         <div class="wave-progress">
           <div class="wave-bar"></div>
