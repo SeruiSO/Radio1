@@ -47,13 +47,11 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" type="image/png">
-  <!-- Підключення Capacitor для мобільних платформ -->
-  <script src="https://cdn.jsdelivr.net/npm/@capacitor/core@latest/dist/capacitor.js"></script>
   <script defer src="script.js"></script>
 </head>
 <body>
   <div class="container">
-    <div class="theme-toggle" aria-label="Змінити тему">🌙</div>
+    <div class="theme-toggle" aria-label="Змінити тему" role="button" tabindex="0">🌙</div>
     <h1>🎧 RADIO MUSIC</h1>
     <div class="current-station-info" id="currentStationInfo">
       <div class="station-info-content">
@@ -73,19 +71,19 @@
         </div>
       </div>
     </div>
-    <div class="tabs">
-      <button class="tab-btn" data-tab="best">BEST</button>
-      <button class="tab-btn" data-tab="techno">TECHNO</button>
-      <button class="tab-btn" data-tab="trance">TRANCE</button>
-      <button class="tab-btn" data-tab="ukraine">UKRAINE</button>
+    <div class="tabs" role="tablist">
+      <button class="tab-btn" data-tab="best" onclick="switchTab('best')" role="tab" aria-selected="false" aria-controls="stationList">BEST</button>
+      <button class="tab-btn" data-tab="techno" onclick="switchTab('techno')" role="tab" aria-selected="true" aria-controls="stationList">TECHNO</button>
+      <button class="tab-btn" data-tab="trance" onclick="switchTab('trance')" role="tab" aria-selected="false" aria-controls="stationList">TRANCE</button>
+      <button class="tab-btn" data-tab="ukraine" onclick="switchTab('ukraine')" role="tab" aria-selected="false" aria-controls="stationList">UKRAINE</button>
     </div>
     <div class="station-list" id="stationList" role="listbox"></div>
     <div class="controls-container">
       <audio id="audioPlayer"></audio>
       <div class="controls">
-        <button class="control-btn" id="prevBtn" aria-label="Попередня станція">⏮</button>
-        <button class="control-btn" id="playPauseBtn" aria-label="Почати відтворення">▶</button>
-        <button class="control-btn" id="nextBtn" aria-label="Наступна станція">⏭</button>
+        <button class="control-btn" id="prevBtn" aria-label="Попередня станція" role="button">⏮</button>
+        <button class="control-btn" id="playPauseBtn" aria-label="Почати відтворення" role="button">▶</button>
+        <button class="control-btn" id="nextBtn" aria-label="Наступна станція" role="button">⏭</button>
       </div>
     </div>
   </div>

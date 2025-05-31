@@ -1,11 +1,10 @@
-/* Updated on May 31, 2025 */
+/* Updated on May 28, 2025 */
 :root {
   --body-bg: #0A0A0A;
   --container-bg: #121212;
   --accent: #00F0FF;
   --text: #F0F0F0;
   --accent-gradient: #003C4B;
-  --accent-rgb: 0, 240, 255; /* Додано для коректної тіні */
 }
 
 body {
@@ -70,10 +69,6 @@ h1 {
   transform: scale(1.1);
 }
 
-.theme-toggle[aria-label="Змінити тему"] {
-  background: var(--container-bg);
-}
-
 .current-station-info {
   background: linear-gradient(45deg, var(--container-bg), var(--accent-gradient));
   padding: 20px;
@@ -132,9 +127,9 @@ h1 {
 .tabs {
   display: flex;
   justify-content: space-between;
-  margin: 5px 0;
+  margin: 5px 0; /* Зменшено відступи */
   position: sticky;
-  bottom: 100px;
+  bottom: 100px; /* Адаптовано для розташування над controls-container */
   z-index: 10;
   background: var(--container-bg);
   padding: 5px;
@@ -169,11 +164,6 @@ h1 {
   color: #0A0A0A;
 }
 
-.tab-btn[aria-selected="true"] {
-  background: var(--accent);
-  color: #0A0A0A;
-}
-
 .station-list {
   max-height: 500px;
   overflow-y: auto;
@@ -186,10 +176,6 @@ h1 {
   scrollbar-color: var(--accent) var(--container-bg);
   flex-grow: 1;
   transition: border-color 0.4s ease;
-}
-
-.station-list[role="listbox"] {
-  background: var(--container-bg);
 }
 
 .station-list::-webkit-scrollbar {
@@ -416,7 +402,7 @@ h1 {
   }
 
   .tabs {
-    bottom: 90px;
+    bottom: 90px; /* Адаптовано для нового розташування */
   }
 }
 

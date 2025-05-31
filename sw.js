@@ -1,4 +1,4 @@
-const CACHE_NAME = "radio-pwa-cache-v904"; // Оновлено версію кешу
+﻿const CACHE_NAME = "radio-pwa-cache-v911"; // Оновлено версію кешу
 const urlsToCache = [
   "/",
   "index.html",
@@ -94,11 +94,9 @@ self.addEventListener("activate", event => {
       console.log("Активація нового Service Worker");
       isInitialLoad = true; // Скидаємо для нової сесії
       self.clients.matchAll().then(clients => {
-        if (clients.length > 0) {
-          clients.forEach(client => {
-            client.postMessage({ type: "UPDATE", message: "Додаток оновлено до нової версії!" });
-          });
-        }
+        clients.forEach(client => {
+          client.postMessage({ type: "UPDATE", message: "Додаток оновлено до нової версії!" });
+        });
       });
     }).then(() => self.clients.claim())
   );
@@ -108,17 +106,14 @@ self.addEventListener("activate", event => {
 let wasOnline = navigator.onLine;
 
 setInterval(() => {
-  // Перевірка мережі через локальний ресурс
-  fetch("stations.json", { method: "HEAD", cache: "no-cache" })
+  fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
     .then(() => {
       if (!wasOnline) {
         wasOnline = true;
         self.clients.matchAll().then(clients => {
-          if (clients.length > 0) {
-            clients.forEach(client => {
-              client.postMessage({ type: "NETWORK_STATUS", online: true });
-            });
-          }
+          clients.forEach(client => {
+            client.postMessage({ type: "NETWORK_STATUS", online: true });
+          });
         });
       }
     })
@@ -127,11 +122,9 @@ setInterval(() => {
       if (wasOnline) {
         wasOnline = false;
         self.clients.matchAll().then(clients => {
-          if (clients.length > 0) {
-            clients.forEach(client => {
-              client.postMessage({ type: "NETWORK_STATUS", online: false });
-            });
-          }
+          clients.forEach(client => {
+            client.postMessage({ type: "NETWORK_STATUS", online: false });
+          });
         });
       }
     });

@@ -10,18 +10,8 @@ function initializeApp() {
   const currentStationInfo = document.getElementById("currentStationInfo");
   const themeToggle = document.querySelector(".theme-toggle");
 
-  // Детальне логування
-  console.log("Checking DOM elements:", {
-    audio: !!audio,
-    stationList: !!stationList,
-    playPauseBtn: !!playPauseBtn,
-    prevBtn: !!prevBtn,
-    nextBtn: !!nextBtn,
-    currentStationInfo: !!currentStationInfo,
-    themeToggle: !!themeToggle
-  });
-
-  // Перевірка елементів
+  // Перевірка DOM-елементів
+  console.log("Checking DOM elements:", { audio, stationList, playPauseBtn, prevBtn, nextBtn, currentStationInfo, themeToggle });
   const missingElements = [];
   if (!audio) missingElements.push("audioPlayer");
   if (!stationList) missingElements.push("stationList");
@@ -30,14 +20,11 @@ function initializeApp() {
   if (!nextBtn) missingElements.push("nextBtn");
   if (!currentStationInfo) missingElements.push("currentStationInfo");
   if (!themeToggle) missingElements.push("theme-toggle");
-
   if (missingElements.length > 0) {
     console.error(`Missing DOM elements: ${missingElements.join(", ")}`);
-    // Відображаємо повідомлення користувачу
     if (stationList) {
       stationList.innerHTML = `<div class='station-item empty'>Помилка: не знайдено елементи ${missingElements.join(", ")}</div>`;
     }
-    // Продовжуємо ініціалізацію, якщо можливо
   } else {
     console.log("DOM elements verified");
   }
@@ -105,7 +92,7 @@ function initializeApp() {
           throw new Error("Invalid or empty stations.json");
         }
         for (const tab in stationLists) {
-          if (!Array.isArray(stationLists[tab]) || !stationLists[tab].every(station => station.value && station.name)) {
+          if (!Array.isArray(stationLists[tab]) || !stationLists[tab].every(station => station.value && station.name && station.genre && station.country && station.emoji)) {
             throw new Error(`Invalid data in stations.json for tab ${tab}`);
           }
         }
@@ -123,7 +110,7 @@ function initializeApp() {
       }
       currentIndex = parseInt(localStorage.getItem(`lastStation_${currentTab}`)) || 0;
       console.log("Current index:", currentIndex);
-      // Фільтрація favoriteStations для видалення неіснуючих станцій
+      // Фільтрація favoriteStations
       favoriteStations = favoriteStations.filter(name => 
         Object.values(stationLists).flat().some(station => station.name === name)
       );
@@ -174,6 +161,12 @@ function initializeApp() {
 
   if (themeToggle) {
     themeToggle.addEventListener("click", toggleTheme);
+    themeToggle.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleTheme();
+      }
+    });
   }
 
   if ("serviceWorker" in navigator) {
@@ -252,9 +245,15 @@ function initializeApp() {
     const maxIndex = tab === "best" ? favoriteStations.length : stationLists[tab]?.length || 0;
     currentIndex = savedIndex < maxIndex ? savedIndex : 0;
     updateStationList();
-    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.classList.remove("active");
+      btn.setAttribute("aria-selected", "false");
+    });
     const activeBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
-    if (activeBtn) activeBtn.classList.add("active");
+    if (activeBtn) {
+      activeBtn.classList.add("active");
+      activeBtn.setAttribute("aria-selected", "true");
+    }
     if (stationItems?.length && currentIndex < stationItems.length) {
       tryAutoPlay();
     }
@@ -320,9 +319,12 @@ function initializeApp() {
   function changeStation(index) {
     if (index < 0 || index >= stationItems.length || stationItems[index].classList.contains("empty")) return;
     const item = stationItems[index];
-    stationItems?.forEach(i => i.classList.remove("selected"));
+    stationItems?.forEach(i => {
+      i.classList.remove("selected");
+      i.setAttribute("aria-selected", "false");
+    });
     item.classList.add("selected");
-    stationItems?.forEach(i => i.setAttribute("aria-selected", i === item));
+    item.setAttribute("aria-selected", "true");
     currentIndex = index;
     lastStationUrl = item.dataset.value;
     localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
@@ -359,7 +361,7 @@ function initializeApp() {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: item.dataset.name || "Unknown Station",
         artist: `${item.dataset.genre || "Unknown"} | ${item.dataset.country || "Unknown"}`,
-        album: "Radio SO3"
+        album: "Radio S O"
       });
       navigator.mediaSession.setActionHandler("play", () => {
         if (audio && audio.paused) togglePlayPause();
@@ -409,31 +411,25 @@ function initializeApp() {
   }
 
   async function startBluetoothMonitoring() {
-    // Запускаємо Bluetooth лише в Capacitor-середовищі
     if (!window.Capacitor?.isNativePlatform()) {
       console.log("Bluetooth monitoring is not supported in browser environment");
       return;
     }
-
     console.log("Starting Bluetooth monitoring");
     try {
       const { BleClient } = await import('@capacitor-community/bluetooth-le');
       const { BackgroundRunner } = await import('@capacitor/background-runner');
       const { Permissions } = await import('@capacitor/core');
 
-      console.log("Imported Capacitor modules");
       const permissionsToRequest = ['bluetooth'];
-
       if (window.Capacitor.getPlatform() === 'android' && parseInt(window.device?.version?.split('.')[0] || '0') >= 12) {
         permissionsToRequest.push('bluetooth_scan', 'bluetooth_connect');
       }
 
       for (const perm of permissionsToRequest) {
         const permissionStatus = await Permissions.query({ name: perm });
-        console.log(`Permission status for ${perm}:`, permissionStatus);
         if (permissionStatus.state !== 'granted') {
           const result = await Permissions.requestPermissions({ permissions: [perm] });
-          console.log(`Permission request result for ${perm}:`, result);
           if (result[perm] !== 'granted') {
             console.log(`${perm} permission denied`);
             return;
@@ -446,6 +442,9 @@ function initializeApp() {
         console.log('Bluetooth initialized');
       } catch (error) {
         console.error('Bluetooth initialization failed:', error);
+        if (stationList) {
+          stationList.innerHTML = "<div class='station-item empty'>Помилка ініціалізації Bluetooth</div>";
+        }
         return;
       }
 
@@ -508,7 +507,7 @@ function initializeApp() {
     keydown: e => {
       if (e.key === "ArrowLeft" && prevBtn) prevStation();
       if (e.key === "ArrowRight" && nextBtn) nextStation();
-      if (e.key === " " && playPauseBtn) {
+      if (e.key === " ") {
         e.preventDefault();
         togglePlayPause();
       }
@@ -535,9 +534,6 @@ function initializeApp() {
     document.addEventListener("keydown", eventListeners.keydown);
     document.addEventListener("visibilitychange", eventListeners.visibilitychange);
     document.addEventListener("resume", eventListeners.resume);
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-      btn.addEventListener("click", () => switchTab(btn.getAttribute("data-tab")));
-    });
     if (playPauseBtn) playPauseBtn.addEventListener("click", togglePlayPause);
     if (prevBtn) prevBtn.addEventListener("click", prevStation);
     if (nextBtn) nextBtn.addEventListener("click", nextStation);
@@ -547,9 +543,6 @@ function initializeApp() {
     document.removeEventListener("keydown", eventListeners.keydown);
     document.removeEventListener("visibilitychange", eventListeners.visibilitychange);
     document.removeEventListener("resume", eventListeners.resume);
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-      btn.removeEventListener("click", () => switchTab(btn.getAttribute("data-tab")));
-    });
     if (playPauseBtn) playPauseBtn.removeEventListener("click", togglePlayPause);
     if (prevBtn) prevBtn.removeEventListener("click", prevStation);
     if (nextBtn) nextBtn.removeEventListener("click", nextStation);
@@ -581,6 +574,9 @@ function initializeApp() {
 
     audio.addEventListener("error", () => {
       document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+      if (stationList) {
+        stationList.innerHTML = "<div class='station-item empty'>Помилка відтворення станції</div>";
+      }
     });
 
     audio.addEventListener("volumechange", () => {
@@ -604,7 +600,6 @@ function initializeApp() {
   document.addEventListener('deviceready', () => {
     console.log("Device ready event fired");
     startBluetoothMonitoring();
-    addEventListeners();
   });
 
   window.addEventListener("beforeunload", () => {
@@ -612,10 +607,11 @@ function initializeApp() {
   });
 
   applyTheme(currentTheme);
+  addEventListeners();
   loadStations();
 }
 
-// Ініціалізація з затримкою, щоб переконатися, що DOM готовий
+// Ініціалізація з затримкою
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(initializeApp, 100);
 });
