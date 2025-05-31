@@ -5,6 +5,7 @@
   --accent: #00F0FF;
   --text: #F0F0F0;
   --accent-gradient: #003C4B;
+  --accent-rgb: 0, 240, 255; /* Додано для коректної тіні */
 }
 
 body {

@@ -1,6 +1,3 @@
-import { BleClient } from '@capacitor-community/bluetooth-le';
-import { BackgroundRunner } from '@capacitor/background-runner';
-
 console.log("Script.js loaded successfully");
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -368,13 +365,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function startBluetoothMonitoring() {
+    // Запускаємо Bluetooth лише в Capacitor-середовищі
+    if (!window.Capacitor?.isNativePlatform()) {
+      console.log("Bluetooth monitoring is not supported in browser environment");
+      return;
+    }
+
     console.log("Starting Bluetooth monitoring");
     try {
+      const { BleClient } = await import('@capacitor-community/bluetooth-le');
+      const { BackgroundRunner } = await import('@capacitor/background-runner');
       const { Permissions } = await import('@capacitor/core');
-      console.log("Imported Permissions module");
+
+      console.log("Imported Capacitor modules");
       const permissionsToRequest = ['bluetooth'];
 
-      if (window.device?.platform === 'android' && parseInt(window.device.version.split('.')[0]) >= 12) {
+      if (window.Capacitor.getPlatform() === 'android' && parseInt(window.device?.version?.split('.')[0] || '0') >= 12) {
         permissionsToRequest.push('bluetooth_scan', 'bluetooth_connect');
       }
 
@@ -399,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      await BackgroundRunner.register({
+      await BackgroundRunner.registerBackgroundTask({
         id: 'bluetoothScanTask',
         callback: async () => {
           try {
@@ -419,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!status.value && isPlaying) {
               console.log('Bluetooth disabled, pausing playback');
               await new Promise(resolve => setTimeout(resolve, 1000));
-              if (!await BleClient.isEnabled().value) {
+              if (!(await BleClient.isEnabled()).value) {
                 audio.pause();
                 isPlaying = false;
                 playPauseBtn.textContent = "▶";
@@ -440,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      await BackgroundRunner.start({ id: 'bluetoothScanTask' })
+      await BackgroundRunner.dispatchEvent({ event: 'bluetoothScanTask' })
         .then(() => console.log('Background Bluetooth scan started'))
         .catch(error => console.error('Failed to start BackgroundRunner:', error));
     } catch (error) {
@@ -461,15 +467,16 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!document.hidden && isPlaying && navigator.onLine) {
         if (!audio.paused) return;
         audio.pause();
-        audio.src = stationItems[currentIndex].dataset.value;
+        audio.src = stationItems[currentIndex]?.dataset.value || '';
         tryAutoPlay();
       }
     },
     resume: () => {
-      if (isPlaying && navigator.connection?.type !== "none") {
+      // Перевірка доступності мережі без navigator.connection
+      if (isPlaying && navigator.onLine) {
         if (!audio.paused) return;
         audio.pause();
-        audio.src = stationItems[currentIndex].dataset.value;
+        audio.src = stationItems[currentIndex]?.dataset.value || '';
         tryAutoPlay();
       }
     }

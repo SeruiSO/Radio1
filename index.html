@@ -46,11 +46,14 @@
   <title>Radio S O</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon-192.png">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <!-- Підключення Capacitor для мобільних платформ -->
+  <script src="https://cdn.jsdelivr.net/npm/@capacitor/core@latest/dist/capacitor.js"></script>
+  <script type="module" src="script.js"></script>
 </head>
 <body>
-  <div class="theme-toggle" aria-label="Змінити тему">🌙</div>
   <div class="container">
+    <div class="theme-toggle" aria-label="Змінити тему">🌙</div>
     <h1>🎧 RADIO MUSIC</h1>
     <div class="current-station-info">
       <div class="station-info-content">
@@ -64,9 +67,9 @@
           <div class="wave-bar"></div>
         </div>
         <div class="station-text">
-          <span class="station-name">Обирайте станцію</span>
-          <span class="station-genre">жанр: -</span>
-          <span class="station-country">країна: -</span>
+          <div class="station-name">Обирайте станцію</div>
+          <div class="station-genre">жанр: -</div>
+          <div class="station-country">країна: -</div>
         </div>
       </div>
     </div>
@@ -86,6 +89,5 @@
       </div>
     </div>
   </div>
-  <script type="module" src="script.js"></script>
 </body>
 </html>
