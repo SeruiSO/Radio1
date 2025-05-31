@@ -9,9 +9,10 @@ function initializeApp() {
   const nextBtn = document.getElementById("nextBtn");
   const currentStationInfo = document.getElementById("currentStationInfo");
   const themeToggle = document.querySelector(".theme-toggle");
+  const tabButtons = document.querySelectorAll(".tab-btn");
 
   // Перевірка DOM-елементів
-  console.log("Checking DOM elements:", { audio, stationList, playPauseBtn, prevBtn, nextBtn, currentStationInfo, themeToggle });
+  console.log("Checking DOM elements:", { audio, stationList, playPauseBtn, prevBtn, nextBtn, currentStationInfo, themeToggle, tabButtons });
   const missingElements = [];
   if (!audio) missingElements.push("audioPlayer");
   if (!stationList) missingElements.push("stationList");
@@ -20,6 +21,7 @@ function initializeApp() {
   if (!nextBtn) missingElements.push("nextBtn");
   if (!currentStationInfo) missingElements.push("currentStationInfo");
   if (!themeToggle) missingElements.push("theme-toggle");
+  if (!tabButtons.length) missingElements.push("tab-btn");
   if (missingElements.length > 0) {
     console.error(`Missing DOM elements: ${missingElements.join(", ")}`);
     if (stationList) {
@@ -537,6 +539,19 @@ function initializeApp() {
     if (playPauseBtn) playPauseBtn.addEventListener("click", togglePlayPause);
     if (prevBtn) prevBtn.addEventListener("click", prevStation);
     if (nextBtn) nextBtn.addEventListener("click", nextStation);
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tab = btn.dataset.tab;
+        if (tab) switchTab(tab);
+      });
+      btn.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          const tab = btn.dataset.tab;
+          if (tab) switchTab(tab);
+        }
+      });
+    });
   }
 
   function removeEventListeners() {
@@ -546,6 +561,10 @@ function initializeApp() {
     if (playPauseBtn) playPauseBtn.removeEventListener("click", togglePlayPause);
     if (prevBtn) prevBtn.removeEventListener("click", prevStation);
     if (nextBtn) nextBtn.removeEventListener("click", nextStation);
+    tabButtons.forEach(btn => {
+      btn.removeEventListener("click", () => {});
+      btn.removeEventListener("keydown", () => {});
+    });
   }
 
   if (audio) {
@@ -611,7 +630,7 @@ function initializeApp() {
   loadStations();
 }
 
-// Ініціалізація з затримкою
+// Інізація з затримкою
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(initializeApp, 100);
 });
