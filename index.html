@@ -37,22 +37,30 @@
         }
         return gk_fileData[filename] || "";
         }
-        </script><!DOCTYPE html>
+        </script><!-- Updated index.html with splash screen, accessibility, security headers, sticky current station, and loading spinner -->
+<!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#00F0FF">
-  <title>🎧 RADIO MUSIC</title>
-  <link rel="icon" type="image/png" href="/icon-192.png">
-  <link rel="manifest" href="manifest.json">
+  <meta name="description" content="Radio S O - Listen to Techno, Trance, and Ukrainian music online">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; media-src https:; connect-src https:; style-src 'self' 'unsafe-inline'; script-src 'self'">
+  <title>Radio S O</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
 </head>
 <body>
-  <button class="theme-toggle">🌙</button>
+  <!-- Splash screen for autoplay initiation -->
+  <div id="splashScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--body-bg); color: var(--text); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;">
+    <h2>Radio S O</h2>
+    <button id="startPlayback" aria-label="Start Playback" style="padding: 10px 20px; font-size: 18px; background: var(--accent); color: #0A0A0A; border: 2px solid var(--text); border-radius: 10px; cursor: pointer;">Start Playback</button>
+  </div>
   <div class="container">
+    <button class="theme-toggle" aria-label="Toggle Theme">🌙</button>
     <h1>🎧 RADIO MUSIC</h1>
-    <div class="current-station-info" id="currentStationInfo">
+    <div class="current-station-info">
       <div class="station-info-content">
         <div class="wave-progress">
           <div class="wave-bar"></div>
@@ -64,28 +72,32 @@
           <div class="wave-bar"></div>
         </div>
         <div class="station-text">
-          <div class="station-name">Обирайте станцію</div>
-          <div class="station-genre">жанр: -</div>
-          <div class="station-country">країна: -</div>
+          <span class="station-name" aria-live="polite">Обирайте станцію</span>
+          <span class="station-genre">жанр: -</span>
+          <span class="station-country">країна: -</span>
         </div>
       </div>
     </div>
-    <div class="station-list" id="stationList"></div>
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('best')">BEST</button>
-      <button class="tab-btn" onclick="switchTab('techno')">TECHNO</button>
-      <button class="tab-btn" onclick="switchTab('trance')">TRANCE</button>
-      <button class="tab-btn" onclick="switchTab('ukraine')">UKRAINE</button>
+      <button class="tab-btn active" onclick="switchTab('best')" aria-label="Best Stations">BEST</button>
+      <button class="tab-btn" onclick="switchTab('techno')" aria-label="Techno Stations">TECHNO</button>
+      <button class="tab-btn" onclick="switchTab('trance')" aria-label="Trance Stations">TRANCE</button>
+      <button class="tab-btn" onclick="switchTab('ukraine')" aria-label="Ukrainian Stations">UKRAINE</button>
     </div>
+    <!-- Sticky current station container -->
+    <div id="stickyStation" style="position: sticky; top: 0; z-index: 10; background: var(--container-bg); padding: 10px; border: 2px solid var(--accent); border-radius: 8px; margin-bottom: 10px; display: none;"></div>
+    <div class="station-list" id="stationList"></div>
     <div class="controls-container">
       <div class="controls">
-        <button class="control-btn" onclick="prevStation()">⏮</button>
-        <button class="control-btn" onclick="togglePlayPause()">▶</button>
-        <button class="control-btn" onclick="nextStation()">⏭</button>
+        <button class="control-btn" onclick="prevStation()" aria-label="Previous Station">⏮</button>
+        <button class="control-btn" onclick="togglePlayPause()" aria-label="Play or Pause">▶</button>
+        <button class="control-btn" onclick="nextStation()" aria-label="Next Station">⏭</button>
       </div>
     </div>
+    <audio id="audioPlayer"></audio>
   </div>
-  <audio id="audioPlayer"></audio>
+  <!-- Toast notification container -->
+  <div id="toast" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #0A0A0A; padding: 10px 20px; border-radius: 8px; z-index: 1000; border: 2px solid transparent;"></div>
   <script src="script.js"></script>
 </body>
 </html>
