@@ -157,18 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
       });
-      // Запит дозволу на push-повідомлення
-      registration.pushManager.getSubscription().then(subscription => {
-        if (!subscription) {
-          registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array('YOUR_PUBLIC_VAPID_KEY') // Замініть на ваш VAPID ключ
-          }).then(subscription => {
-            console.log("Push subscription created:", subscription);
-            // Надіслати підписку на сервер (реалізуйте серверну частину окремо)
-          }).catch(error => console.error("Push subscription error:", error));
-        }
-      });
     }).catch(error => console.error("Service Worker registration error:", error));
 
     navigator.serviceWorker.addEventListener("message", event => {
@@ -179,18 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
         tryAutoPlay();
       }
     });
-  }
-
-  // Функція для конвертації VAPID ключа
-  function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
   }
 
   function tryAutoPlay() {
@@ -345,9 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
       navigator.mediaSession.setActionHandler("play", () => {
         if (audio.paused) togglePlayPause();
       });
-      navigator.mediaSession.setActionHandler("pause", () => {
-        if (!audio.paused) togglePlayPause();
-      });
+      navigator.mediaSession.setActionHandler("pause", () => {});
       navigator.mediaSession.setActionHandler("previoustrack", prevStation);
       navigator.mediaSession.setActionHandler("nexttrack", nextStation);
     }
@@ -355,13 +329,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function prevStation() {
     currentIndex = currentIndex > 0 ? currentIndex - 1 : stationItems.length - 1;
-    if (stationItems[currentIndex].classList.contains("empty")) currentIndex = 0;
+    if (stationItems[currentIndex]?.classList.contains("empty")) currentIndex = 0;
     changeStation(currentIndex);
   }
 
   function nextStation() {
     currentIndex = currentIndex < stationItems.length - 1 ? currentIndex + 1 : 0;
-    if (stationItems[currentIndex].classList.contains("empty")) currentIndex = 0;
+    if (stationItems[currentIndex]?.classList.contains("empty")) currentIndex = 0;
     changeStation(currentIndex);
   }
 
@@ -377,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
       playPauseBtn.setAttribute("aria-label", "Призупинити відтворення");
       document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
     } else {
-      audio.pause();
+      audio.paused();
       isPlaying = false;
       playPauseBtn.textContent = "▶";
       playPauseBtn.setAttribute("aria-label", "Почати відтворення");
@@ -393,20 +367,20 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("Starting Bluetooth monitoring");
     try {
       const { Permissions } = await import('@capacitor/core');
-      console.log("Imported Permissions module");
+      console.log("Imported Permissions core module");
       const permissionsToRequest = ['bluetooth'];
 
-      if (window.device?.platform === 'android' && parseInt(window.device.version.split('.')[0]) >= 12) {
-        permissionsToRequest.push('bluetooth_scan', 'bluetooth_connect');
+      if (window?.device?.platform === 'android' && parseInt(window.device?.version?.split('.')[0]) >= 12) {
+        permissionsToRequest.push(...['bluetooth_scan', 'bluetooth_connect']);
       }
 
-      for (const perm of permissionsToRequest) {
+      for await(const perm of permissionsToRequest) {
         const permissionStatus = await Permissions.query({ name: perm });
         console.log(`Permission status for ${perm}:`, permissionStatus);
         if (permissionStatus.state !== 'granted') {
           const result = await Permissions.requestPermissions({ permissions: [perm] });
           console.log(`Permission request result for ${perm}:`, result);
-          if (result[perm] !== 'granted') {
+          if (result[perm]?.status !== 'granted') {
             console.log(`${perm} permission denied`);
             return;
           }
@@ -415,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         await BleClient.initialize();
-        console.log('Bluetooth initialized');
+        console.log('Bluetooth ready');
       } catch (error) {
         console.error('Bluetooth initialization failed:', error);
         return;
@@ -426,78 +400,83 @@ document.addEventListener('DOMContentLoaded', () => {
         callback: async () => {
           try {
             await BleClient.requestLEScan({}, (result) => {
-              console.log('Found Bluetooth device:', result.device.name || result.device.deviceId);
-              if (result.device && !isPlaying && lastStationUrl) {
+              console.log('Found Bluetooth device:', result.device?.name || result.device?.deviceId);
+              if (result?.device && !isPlaying && lastStationUrl) {
                 console.log('Bluetooth device detected, starting playback');
                 isPlaying = true;
-                playPauseBtn.textContent = "⏸";
-                playPauseBtn.setAttribute("aria-label", "Призупинити відтворення");
+                playPauseBtn.textContent = "⏸️";
+                playPauseBtn.setAttribute("aria-label", "Pause playback");
                 audio.src = lastStationUrl;
                 tryAutoPlay();
               }
             }, { timeout: 5000 });
 
             const status = await BleClient.isEnabled();
-            if (!status.value && isPlaying) {
+            if (!status?.value && isPlaying) {
               console.log('Bluetooth disabled, pausing playback');
               await new Promise(resolve => setTimeout(resolve, 1000));
-              if (!await BleClient.isEnabled().value) {
+              if (!(await BleClient.isEnabled())?.value)) {
                 audio.pause();
                 isPlaying = false;
-                playPauseBtn.textContent = "▶";
-                playPauseBtn.setAttribute("aria-label", "Почати відтворення");
+                playPauseBtn.textContent = "▶️";
+                playPauseBtn.setAttribute("aria-label", "Start playback");
                 document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
                 localStorage.setItem("isPlaying", isPlaying);
               }
-            }
+            } else {
+                console.log('Bluetooth scan enabled');
+              }
 
             await BleClient.stopLEScan();
+
           } catch (error) {
             console.error('Bluetooth scan error:', error);
           }
         },
         schedule: {
           type: 'interval',
-          interval: 30000
-        }
+          interval: 30000,
+        },
       });
 
-      await BackgroundRunner.start({ id: 'bluetoothScanTask' })
+      await BackgroundRunner.startBluetooth()
         .then(() => console.log('Background Bluetooth scan started'))
-        .catch(error => console.error('Failed to start BackgroundRunner:', error));
+        .catch(error => console.error('Failed to start Bluetooth scan:', error));
     } catch (error) {
       console.error('Bluetooth initialization error:', error);
     }
   }
 
   const eventListeners = {
-    keydown: e => {
-      if (e.key === "ArrowLeft") prevStation();
-      if (e.key === "ArrowRight") nextStation();
-      if (e.key === " ") {
-        e.preventDefault();
+    keydown: (event) => {
+      if (event?.key === 'ArrowLeft') {
+        prevStation();
+      } else if (event?.key === 'ArrowRight') {
+        nextStation();
+      } else if (event?.key === ' ') {
+        event?.preventDefault();
         togglePlayPause();
       }
     },
-    visibilitychange: () => {
+    visibilitychange: () = {
       if (!document.hidden && isPlaying && navigator.onLine) {
         if (!audio.paused) return;
         audio.pause();
-        audio.src = stationItems[currentIndex].dataset.value;
+        audio.src = stationItems[currentIndex]?.dataset?.value || '';
         tryAutoPlay();
       }
     },
     resume: () => {
-      if (isPlaying && navigator.connection?.type !== "none") {
+      if (isPlaying && navigator?.connection?.type !== 'none') {
         if (!audio.paused) return;
-        audio.pause();
-        audio.src = stationItems[currentIndex].dataset.value;
+        audio.paused();
+        audio.src = stationItems?.[currentIndex]?.dataset?.value || '';
         tryAutoPlay();
       }
-    }
+    },
   };
 
-  function addEventListeners() {
+  function addEventListener() {
     document.addEventListener("keydown", eventListeners.keydown);
     document.addEventListener("visibilitychange", eventListeners.visibilitychange);
     document.addEventListener("resume", eventListeners.resume);
@@ -509,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
     nextBtn.addEventListener("click", nextStation);
   }
 
-  function removeEventListeners() {
+  function removeEventListener() {
     document.removeEventListener("keydown", eventListeners.keydown);
     document.removeEventListener("visibilitychange", eventListeners.visibilitychange);
     document.removeEventListener("resume", eventListeners.resume);
@@ -523,16 +502,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   audio.addEventListener("playing", () => {
     isPlaying = true;
-    playPauseBtn.textContent = "⏸";
-    playPauseBtn.setAttribute("aria-label", "Призупинити відтворення");
+    playPauseBtn.textContent = "⏸️";
+    playPauseBtn.setAttribute("aria-label", "Pause playback");
     document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
     localStorage.setItem("isPlaying", isPlaying);
   });
 
   audio.addEventListener("pause", () => {
     isPlaying = false;
-    playPauseBtn.textContent = "▶";
-    playPauseBtn.setAttribute("aria-label", "Почати відтворення");
+    playPauseBtn.textContent = "▶️";
+    playPauseBtn.setAttribute("aria-label", "Start playback");
     document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
     localStorage.setItem("isPlaying", isPlaying);
     if ("mediaSession" in navigator) {
@@ -551,8 +530,8 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener("online", () => {
     console.log("Network restored");
     if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
-      audio.pause();
-      audio.src = stationItems[currentIndex].dataset.value;
+      audio.paused();
+      audio.src = stationItems?.[currentIndex]?.dataset?.value || '';
       tryAutoPlay();
     }
   });
