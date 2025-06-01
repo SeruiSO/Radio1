@@ -323,22 +323,13 @@ function updateStationList() {
     currentIndex = 0;
     stationItems = [];
     stationList.innerHTML = `<div class='station-item empty'>${currentTab === "best" ? "Немає улюблених станцій" : "Немає станцій у цій категорії"}</div>`;
-    resetStationInfo();
     return;
-  }
-
-  // Переміщення поточної станції на початок списку
-  if (currentIndex < stations.length) {
-    const currentStation = stations[currentIndex];
-    if (currentStation) {
-      stations = [currentStation, ...stations.slice(0, currentIndex), ...stations.slice(currentIndex + 1)];
-    }
   }
 
   const fragment = document.createDocumentFragment();
   stations.forEach((station, index) => {
     const item = document.createElement("div");
-    item.className = `station-item ${index === 0 ? "selected" : ""}`;
+    item.className = `station-item ${index === currentIndex ? "selected" : ""}`;
     item.dataset.value = station.value;
     item.dataset.name = station.name;
     item.dataset.genre = station.genre;
@@ -364,10 +355,8 @@ function updateStationList() {
     }
   };
 
-  // Оновлення інформації про станцію лише якщо є валідна поточна станція
   if (stationItems.length && currentIndex < stationItems.length) {
-    const item = stationItems[0]; // Поточна станція завжди перша
-    updateCurrentStationInfo(item);
+    changeStation(currentIndex);
   }
 }
 
@@ -390,7 +379,7 @@ function changeStation(index) {
   const item = stationItems[index];
   stationItems?.forEach(i => i.classList.remove("selected"));
   item.classList.add("selected");
-  currentIndex = index; // Оновлюємо currentIndex
+  currentIndex = index;
   audio.src = item.dataset.value;
   updateCurrentStationInfo(item);
   localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
@@ -439,7 +428,6 @@ function prevStation() {
   currentIndex = currentIndex > 0 ? currentIndex - 1 : stationItems.length - 1;
   if (stationItems[currentIndex].classList.contains("empty")) currentIndex = 0;
   changeStation(currentIndex);
-  updateStationList(); // Оновлюємо список, щоб нова станція була зверху
 }
 
 function nextStation() {
@@ -447,7 +435,6 @@ function nextStation() {
   currentIndex = currentIndex < stationItems.length - 1 ? currentIndex + 1 : 0;
   if (stationItems[currentIndex].classList.contains("empty")) currentIndex = 0;
   changeStation(currentIndex);
-  updateStationList(); // Оновлюємо список, щоб нова станція була зверху
 }
 
 function togglePlayPause() {
@@ -473,7 +460,7 @@ function togglePlayPause() {
 // Обробники подій
 const eventListeners = {
   keydown: e => {
-    hasUserInteracted = true;
+    hasUserInteracted = true; // Позначити взаємодію користувача
     if (e.key === "ArrowLeft") prevStation();
     if (e.key === "ArrowRight") nextStation();
     if (e.key === " ") {
@@ -485,7 +472,7 @@ const eventListeners = {
     if (!document.hidden && isPlaying && navigator.onLine) {
       if (!audio.paused) return;
       audio.pause();
-      audio.src = stationItems[currentIndex]?.dataset.value;
+      audio.src = stationItems[currentIndex].dataset.value;
       tryAutoPlayDebounced();
     }
   },
@@ -493,7 +480,7 @@ const eventListeners = {
     if (isPlaying && navigator.connection?.type !== "none") {
       if (!audio.paused) return;
       audio.pause();
-      audio.src = stationItems[currentIndex]?.dataset.value;
+      audio.src = stationItems[currentIndex].dataset.value;
       tryAutoPlayDebounced();
     }
   }
@@ -514,14 +501,12 @@ function removeEventListeners() {
 }
 
 // Додаємо слухачі подій
-audio.addEventListenerPlaying = () => {
+audio.addEventListener("playing", () => {
   isPlaying = true;
   playPauseBtn.textContent = "⏸";
   document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
   localStorage.setItem("isPlaying", isPlaying);
-};
-
-audio.addEventListener("playing", audioEventListenerPlaying);
+});
 
 audio.addEventListener("pause", () => {
   isPlaying = false;
@@ -535,10 +520,10 @@ audio.addEventListener("pause", () => {
 
 audio.addEventListener("error", () => {
   document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
-  console.error("Audio error:", audio.error?.message, "for URL:", audio.src);
+  console.error("Помилка аудіо:", audio.error?.message, "для URL:", audio.src);
   if (isPlaying && errorCount < ERROR_LIMIT) {
     errorCount++;
-    setTimeout(nextStation, 1000); // Задержка перед переключением
+    setTimeout(nextStation, 1000); // Затримка перед перемиканням
   } else if (errorCount >= ERROR_LIMIT) {
     console.error("Досягнуто ліміт помилок відтворення");
   }
@@ -559,7 +544,7 @@ window.addEventListener("online", () => {
 });
 
 window.addEventListener("offline", () => {
-  console.log("Offline");
+  console.log("Втрачено з'єднання з мережею");
 });
 
 // Ініціалізація слухачів
@@ -586,5 +571,3 @@ document.addEventListener("click", () => {
 // Ініціалізація
 applyTheme(currentTheme);
 loadStations();
-</xaiArtifactScript>
-
