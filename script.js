@@ -37,8 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
     audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 
     // Прив’язка обробників подій для кнопок вкладок
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-      const tab = btn.textContent.toLowerCase(); // Отримуємо значення вкладки з тексту кнопки
+    document.querySelectorAll(".tab-btn").forEach((btn, index) => {
+      const tabs = ["best", "techno", "trance", "ukraine", "pop"];
+      const tab = tabs[index]; // Прив’язуємо вкладки за порядком
       btn.addEventListener("click", () => switchTab(tab));
     });
 
@@ -309,6 +310,12 @@ document.addEventListener("DOMContentLoaded", () => {
           console.error("Помилка відтворення:", error);
           isAutoPlaying = false;
           document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+          errorCount++;
+          if (errorCount < ERROR_LIMIT) {
+            setTimeout(nextStation, 1000);
+          } else {
+            console.error("Досягнуто ліміт помилок відтворення");
+          }
         });
     }
 
@@ -322,8 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
       currentIndex = savedIndex < maxIndex ? savedIndex : 0;
       updateStationList();
       document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-      const activeBtn = document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`) || 
-                       document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ukraine", "pop"].indexOf(tab) + 1})`);
+      const activeBtn = document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ukraine", "pop"].indexOf(tab) + 1})`);
       if (activeBtn) activeBtn.classList.add("active");
       if (stationItems?.length && currentIndex < stationItems.length) tryAutoPlayDebounced();
     }

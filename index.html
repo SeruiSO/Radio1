@@ -14,7 +14,7 @@
   <button class="theme-toggle">🌙</button>
   <div class="container">
     <h1>🎧 RADIO MUSIC</h1>
-    <div class="current-station-info">
+    <div class="current-station-info" id="currentStationInfo">
       <div class="station-info-content">
         <div class="wave-progress">
           <div class="wave-bar"></div>
@@ -34,18 +34,18 @@
     </div>
     <div class="station-list" id="stationList"></div>
     <div class="tabs">
-      <button class="tab-btn" onclick="switchTab('best')">BEST</button>
-      <button class="tab-btn" onclick="switchTab('techno')">TECHNO</button>
-      <button class="tab-btn" onclick="switchTab('trance')">TRANCE</button>
-      <button class="tab-btn" onclick="switchTab('ukraine')">UA</button>
-      <button class="tab-btn" onclick="switchTab('pop')">POP</button>
+      <button class="tab-btn">BEST</button>
+      <button class="tab-btn">TECHNO</button>
+      <button class="tab-btn">TRANCE</button>
+      <button class="tab-btn">UA</button>
+      <button class="tab-btn">POP</button>
     </div>
     <div class="controls-container">
       <audio id="audioPlayer"></audio>
       <div class="controls">
-        <button class="control-btn" onclick="prevStation()">⏮</button>
-        <button class="control-btn" onclick="togglePlayPause()">▶</button>
-        <button class="control-btn" onclick="nextStation()">⏭</button>
+        <button class="control-btn">⏮</button>
+        <button class="control-btn">▶</button>
+        <button class="control-btn">⏭</button>
       </div>
     </div>
   </div>
