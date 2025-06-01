@@ -294,7 +294,7 @@ function tryAutoPlay() {
 
 // Перемикання вкладок
 function switchTab(tab) {
-  if (!["techno", "trance", "ukraine", "best"].includes(tab)) tab = "techno";
+  if (!["techno", "trance", "ukraine", "pop", "best"].includes(tab)) tab = "techno";
   currentTab = tab;
   localStorage.setItem("currentTab", tab);
   const savedIndex = parseInt(localStorage.getItem(`lastStation_${tab}`)) || 0;
@@ -326,10 +326,16 @@ function updateStationList() {
     return;
   }
 
+  // Переміщення поточної станції на початок списку
+  const currentStation = stations[currentIndex];
+  if (currentStation) {
+    stations = [currentStation, ...stations.slice(0, currentIndex), ...stations.slice(currentIndex + 1)];
+  }
+
   const fragment = document.createDocumentFragment();
   stations.forEach((station, index) => {
     const item = document.createElement("div");
-    item.className = `station-item ${index === currentIndex ? "selected" : ""}`;
+    item.className = `station-item ${index === 0 ? "selected" : ""}`;
     item.dataset.value = station.value;
     item.dataset.name = station.name;
     item.dataset.genre = station.genre;
@@ -356,7 +362,7 @@ function updateStationList() {
   };
 
   if (stationItems.length && currentIndex < stationItems.length) {
-    changeStation(currentIndex);
+    changeStation(0); // Обираємо першу станцію, яка є поточною
   }
 }
 
@@ -379,11 +385,12 @@ function changeStation(index) {
   const item = stationItems[index];
   stationItems?.forEach(i => i.classList.remove("selected"));
   item.classList.add("selected");
-  currentIndex = index;
+  currentIndex = Array.from(stationItems).indexOf(item); // Оновлюємо currentIndex на основі реального індексу
   audio.src = item.dataset.value;
   updateCurrentStationInfo(item);
   localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
   tryAutoPlayDebounced();
+  updateStationList(); // Оновлюємо список, щоб поточна станція залишилася зверху
 }
 
 // Оновлення інформації про станцію
