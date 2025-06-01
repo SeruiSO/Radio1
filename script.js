@@ -249,12 +249,27 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("Отримано повідомлення від Service Worker: мережа відновлена");
           audio.pause();
           audio.src = stationItems[currentIndex].dataset.value;
-          tryAutoPlay();
+          tryAutoPlayDebounced();
         }
       });
     }
 
-    // Функція для спроби відтворення
+    // Функція для дебонсингу
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // Автовідтворення з дебонсингом
+    const tryAutoPlayDebounced = debounce(tryAutoPlay, 500);
+
     function tryAutoPlay() {
       if (!navigator.onLine) {
         console.log("Пристрій офлайн, пропускаємо відтворення");
@@ -272,7 +287,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!isValidUrl(stationItems[currentIndex].dataset.value)) {
         console.error("Невалідний URL:", stationItems[currentIndex].dataset.value);
         errorCount++;
-        if (errorCount >= ERROR_LIMIT) {
+        if (errorCount < ERROR_LIMIT) {
+          setTimeout(nextStation, 1000);
+        } else {
           console.error("Досягнуто ліміт помилок відтворення");
         }
         return;
@@ -292,11 +309,13 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(error => {
           console.error("Помилка відтворення:", error);
           isAutoPlaying = false;
+          document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
           errorCount++;
-          if (errorCount >= ERROR_LIMIT) {
+          if (errorCount < ERROR_LIMIT) {
+            setTimeout(nextStation, 1000);
+          } else {
             console.error("Досягнуто ліміт помилок відтворення");
           }
-          document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
         });
     }
 
@@ -312,7 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
       const activeBtn = document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ukraine", "pop"].indexOf(tab) + 1})`);
       if (activeBtn) activeBtn.classList.add("active");
-      if (stationItems?.length && currentIndex < stationItems.length) tryAutoPlay();
+      if (stationItems?.length && currentIndex < stationItems.length) tryAutoPlayDebounced();
     }
 
     // Оновлення списку станцій
@@ -391,7 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
       audio.src = item.dataset.value;
       updateCurrentStationInfo(item);
       localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
-      tryAutoPlay();
+      tryAutoPlayDebounced();
     }
 
     // Оновлення інформації про станцію
@@ -453,7 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
       hasUserInteracted = true;
       if (audio.paused) {
         isPlaying = true;
-        tryAutoPlay();
+        tryAutoPlayDebounced();
         playPauseBtn.textContent = "⏸";
         document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
       } else {
@@ -481,7 +500,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (!audio.paused) return;
           audio.pause();
           audio.src = stationItems[currentIndex].dataset.value;
-          tryAutoPlay();
+          tryAutoPlayDebounced();
         }
       },
       resume: () => {
@@ -489,7 +508,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (!audio.paused) return;
           audio.pause();
           audio.src = stationItems[currentIndex].dataset.value;
-          tryAutoPlay();
+          tryAutoPlayDebounced();
         }
       }
     };
@@ -547,7 +566,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
         audio.pause();
         audio.src = stationItems[currentIndex].dataset.value;
-        tryAutoPlay();
+        tryAutoPlayDebounced();
       }
     });
 
