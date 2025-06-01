@@ -1,4 +1,4 @@
-const audio = document.getAge: 8
+const audio = document.getElementById("audioPlayer");
 const stationList = document.getElementById("stationList");
 const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
 const currentStationInfo = document.getElementById("currentStationInfo");
@@ -228,7 +228,7 @@ if ("serviceWorker" in navigator) {
       console.log("Отримано повідомлення від Service Worker: мережа відновлена");
       audio.pause();
       audio.src = stationItems[currentIndex].dataset.value;
-      tryAutoPlay();
+      tryAutoPlayDebounced();
     }
   });
 }
