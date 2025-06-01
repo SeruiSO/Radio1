@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Перевірка наявності всіх необхідних елементів
   if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle) {
     console.error("Один із необхідних DOM-елементів не знайдено");
-    // Замість помилки спробуємо відкласти ініціалізацію
+    // Відкладена ініціалізація
     setTimeout(initializeApp, 100);
     return;
   }
@@ -38,10 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Прив’язка обробників подій для кнопок вкладок
     document.querySelectorAll(".tab-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const tab = btn.getAttribute("onclick")?.match(/'([^']+)'/)?.[1];
-        if (tab) switchTab(tab);
-      });
+      const tab = btn.textContent.toLowerCase(); // Отримуємо значення вкладки з тексту кнопки
+      btn.addEventListener("click", () => switchTab(tab));
     });
 
     // Прив’язка обробників для кнопок керування
@@ -172,7 +170,6 @@ document.addEventListener("DOMContentLoaded", () => {
       "aurora-haze": {
         bodyBg: "#121212",
         containerBg: "#1A1A1A",
-        accentល: "aurora-haze": {
         accent: "#64FFDA",
         text: "#E0F7FA",
         accentGradient: "#1A4B4B"
@@ -325,7 +322,8 @@ document.addEventListener("DOMContentLoaded", () => {
       currentIndex = savedIndex < maxIndex ? savedIndex : 0;
       updateStationList();
       document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-      const activeBtn = document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`);
+      const activeBtn = document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`) || 
+                       document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ukraine", "pop"].indexOf(tab) + 1})`);
       if (activeBtn) activeBtn.classList.add("active");
       if (stationItems?.length && currentIndex < stationItems.length) tryAutoPlayDebounced();
     }
