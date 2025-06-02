@@ -1,266 +1,265 @@
-// VibeWave Radio Script
-import { stations } from './stations.js';
+import React, { useState, useEffect, useRef } from 'https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js';
+import ReactDOM from 'https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js';
 
-const state = {
-  currentTab: localStorage.getItem('currentTab') || 'techno',
-  currentIndex: parseInt(localStorage.getItem('currentIndex')) || 0,
-  isPlaying: localStorage.getItem('isPlaying') === 'true',
-  favoriteStations: JSON.parse(localStorage.getItem('favoriteStations')) || [],
-  hasInteracted: false,
-  audioContext: null,
-  analyser: null
-};
+const App = () => {
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('currentTab') || 'techno');
+  const [stations, setStations] = useState({});
+  const [favorites, setFavorites] = useState(JSON.parse(localStorage.getItem('favorites')) || []);
+  const [currentStation, setCurrentStation] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [streak, setStreak] = useState(parseInt(localStorage.getItem('streak')) || 0);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'coral-vibe');
+  const audioRef = useRef(new Audio());
+  const [showThemeModal, setShowThemeModal] = useState(false);
 
-const elements = {
-  audio: document.getElementById('audioPlayer'),
-  stationList: document.getElementById('stationList'),
-  playPauseBtn: document.querySelector('.play-pause-btn'),
-  visualizer: document.getElementById('visualizer'),
-  nowPlaying: document.querySelector('.now-playing'),
-  themeToggle: document.querySelector('.theme-toggle'),
-  shareBtn: document.querySelector('.share-btn')
-};
-
-function initializeApp() {
-  if (!Object.values(elements).every(el => el)) {
-    console.error('Один із необхідних елементів не знайдено');
-    setTimeout(initializeApp, 100);
-    return;
-  }
-
-  elements.audio.volume = parseFloat(localStorage.getItem('volume')) || 0.8;
-  setupEventListeners();
-  setupAudioContext();
-  applyTheme(localStorage.getItem('theme') || 'dark');
-  loadStations();
-}
-
-function setupEventListeners() {
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-  });
-
-  elements.playPauseBtn.addEventListener('click', togglePlayPause);
-  document.querySelector('.prev-btn').addEventListener('click', prevStation);
-  document.querySelector('.next-btn').addEventListener('click', nextStation);
-  elements.themeToggle.addEventListener('click', toggleTheme);
-  elements.shareBtn.addEventListener('click', shareStation);
-  elements.stationList.addEventListener('click', handleStationClick);
-  document.addEventListener('touchstart', handleSwipe);
-  window.addEventListener('online', tryAutoPlay);
-  window.addEventListener('offline', () => console.log('Офлайн-режим'));
-}
-
-function setupAudioContext() {
-  state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  state.analyser = state.audioContext.createAnalyser();
-  const source = state.audioContext.createMediaElementSource(elements.audio);
-  source.connect(state.analyser);
-  state.analyser.connect(state.audioContext.destination);
-  state.analyser.fftSize = 64;
-  renderVisualizer();
-}
-
-function renderVisualizer() {
-  const bufferLength = state.analyser.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
-  const bars = Array.from({ length: 6 }, () => {
-    const bar = document.createElement('div');
-    bar.className = 'wave-bar';
-    elements.visualizer.appendChild(bar);
-    return bar;
-  });
-
-  function animate() {
-    if (state.isPlaying) {
-      state.analyser.getByteFrequencyData(dataArray);
-      bars.forEach((bar, i) => {
-        const value = dataArray[i * 2] / 255;
-        bar.style.transform = `scaleY(${Math.max(0.3, value)})`;
-      });
-    }
-    requestAnimationFrame(animate);
-  }
-  animate();
-}
-
-function loadStations() {
-  elements.stationList.innerHTML = '<div class="station-item empty">Завантаження...</div>';
-  setTimeout(() => {
-    switchTab(state.currentTab);
-  }, 100);
-}
-
-function switchTab(tab) {
-  if (!['best', 'techno', 'trance', 'ukraine', 'pop'].includes(tab)) tab = 'techno';
-  state.currentTab = tab;
-  localStorage.setItem('currentTab', tab);
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
-  updateStationList();
-}
-
-function updateStationList() {
-  const stationsData = state.currentTab === 'best'
-    ? state.favoriteStations.map(name => stations[state.currentTab]?.find(s => s.name === name) || Object.values(stations).flat().find(s => s.name === name)).filter(Boolean)
-    : stations[state.currentTab] || [];
-
-  if (!stationsData.length) {
-    elements.stationList.innerHTML = `<div class="station-item empty">${state.currentTab === 'best' ? 'Додайте улюблені станції' : 'Немає станцій'}</div>`;
-    return;
-  }
-
-  elements.stationList.innerHTML = '';
-  stationsData.forEach((station, index) => {
-    const item = document.createElement('div');
-    item.className = `station-item ${index === state.currentIndex ? 'selected' : ''}`;
-    item.dataset.value = station.value;
-    item.dataset.name = station.name;
-    item.dataset.genre = station.genre;
-    item.dataset.country = station.country;
-    item.innerHTML = `
-      ${station.emoji} ${station.name}
-      <button class="favorite-btn${state.favoriteStations.includes(station.name) ? ' favorited' : ''}" aria-label="Додати до улюблених">★</button>
-    `;
-    elements.stationList.appendChild(item);
-  });
-
-  state.stationItems = elements.stationList.querySelectorAll('.station-item');
-  if (state.stationItems.length && state.currentIndex < state.stationItems.length) {
-    updateCurrentStationInfo(state.stationItems[state.currentIndex]);
-    tryAutoPlay();
-  }
-}
-
-function handleStationClick(e) {
-  const item = e.target.closest('.station-item');
-  const favoriteBtn = e.target.closest('.favorite-btn');
-  if (item && !item.classList.contains('empty')) {
-    state.currentIndex = Array.from(state.stationItems).indexOf(item);
-    changeStation(state.currentIndex);
-  }
-  if (favoriteBtn) {
-    e.stopPropagation();
-    toggleFavorite(favoriteBtn.parentElement.dataset.name);
-  }
-}
-
-function toggleFavorite(stationName) {
-  if (state.favoriteStations.includes(stationName)) {
-    state.favoriteStations = state.favoriteStations.filter(name => name !== stationName);
-  } else {
-    state.favoriteStations.push(stationName);
-  }
-  localStorage.setItem('favoriteStations', JSON.stringify(state.favoriteStations));
-  if (state.currentTab === 'best') switchTab('best');
-  else updateStationList();
-}
-
-function changeStation(index) {
-  if (index < 0 || index >= state.stationItems.length || state.stationItems[index].classList.contains('empty')) return;
-  state.stationItems.forEach(item => item.classList.remove('selected'));
-  state.stationItems[index].classList.add('selected');
-  state.currentIndex = index;
-  localStorage.setItem('currentIndex', index);
-  updateCurrentStationInfo(state.stationItems[index]);
-  tryAutoPlay();
-}
-
-function updateCurrentStationInfo(item) {
-  elements.nowPlaying.querySelector('.station-name').textContent = item.dataset.name || 'Невідома станція';
-  elements.nowPlaying.querySelector('.station-genre').textContent = `жанр: ${item.dataset.genre || '-'}`;
-  elements.nowPlaying.querySelector('.station-country').textContent = `країна: ${item.dataset.country || '-'}`;
-  if ('mediaSession' in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: item.dataset.name,
-      artist: `${item.dataset.genre} | ${item.dataset.country}`,
-      album: 'VibeWave Radio'
-    });
-  }
-}
-
-function tryAutoPlay() {
-  if (!navigator.onLine || !state.isPlaying || !state.stationItems?.length || state.currentIndex >= state.stationItems.length || !state.hasInteracted) {
-    elements.visualizer.querySelectorAll('.wave-bar').forEach(bar => bar.style.animationPlayState = 'paused');
-    return;
-  }
-
-  elements.audio.src = state.stationItems[state.currentIndex].dataset.value;
-  elements.audio.play().then(() => {
-    state.isPlaying = true;
-    elements.playPauseBtn.textContent = '⏸';
-    elements.visualizer.querySelectorAll('.wave-bar').forEach(bar => bar.style.animationPlayState = 'running');
-  }).catch(err => {
-    console.error('Помилка відтворення:', err);
-    elements.visualizer.querySelectorAll('.wave-bar').forEach(bar => bar.style.animationPlayState = 'paused');
-  });
-}
-
-function togglePlayPause() {
-  state.hasInteracted = true;
-  if (elements.audio.paused) {
-    state.isPlaying = true;
-    tryAutoPlay();
-  } else {
-    elements.audio.pause();
-    state.isPlaying = false;
-    elements.playPauseBtn.textContent = '▶';
-    elements.visualizer.querySelectorAll('.wave-bar').forEach(bar => bar.style.animationPlayState = 'paused');
-  }
-  localStorage.setItem('isPlaying', state.isPlaying);
-}
-
-function prevStation() {
-  state.hasInteracted = true;
-  state.currentIndex = state.currentIndex > 0 ? state.currentIndex - 1 : state.stationItems.length - 1;
-  changeStation(state.currentIndex);
-}
-
-function nextStation() {
-  state.hasInteracted = true;
-  state.currentIndex = state.currentIndex < state.stationItems.length - 1 ? state.currentIndex + 1 : 0;
-  changeStation(state.currentIndex);
-}
-
-function shareStation() {
-  if (!state.stationItems[state.currentIndex]) return;
-  const station = state.stationItems[state.currentIndex].dataset;
-  const shareData = {
-    title: `Слухаю ${station.name} на VibeWave Radio!`,
-    text: `Чекай цей трек: ${station.name} (${station.genre}, ${station.country})`,
-    url: window.location.href
+  const themes = {
+    'coral-vibe': { primary: '#FF6F61', secondary: '#2D2D2D', text: '#F0F0F0', gradient: '#4B1A2E' },
+    'neon-lime': { primary: '#B2FF59', secondary: '#2D2D2D', text: '#E8F5E9', gradient: '#2E4B2F' },
+    'cyber-purple': { primary: '#7C4DFF', secondary: '#1A1A1A', text: '#EDE7F6', gradient: '#2E1A47' }
   };
-  if (navigator.share) {
-    navigator.share(shareData).catch(err => console.error('Помилка шарингу:', err));
-  } else {
-    alert('Поділитися: ' + shareData.text);
-  }
-}
 
-function handleSwipe(e) {
-  let touchStartX = e.touches[0].clientX;
-  document.addEventListener('touchend', (endEvent) => {
-    const touchEndX = endEvent.changedTouches[0].clientX;
-    const diff = touchStartX - touchEndX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) nextStation();
-      else prevStation();
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--primary', themes[theme].primary);
+    root.style.setProperty('--secondary', themes[theme].secondary);
+    root.style.setProperty('--text', themes[theme].text);
+    root.style.setProperty('--gradient', themes[theme].gradient);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const loadStations = async () => {
+      try {
+        const response = await fetch(`stations.json?t=${Date.now()}`, { cache: 'no-cache' });
+        const data = await response.json();
+        setStations(data);
+        const savedStation = JSON.parse(localStorage.getItem('currentStation'));
+        if (savedStation && data[currentTab]?.find(s => s.name === savedStation.name)) {
+          setCurrentStation(savedStation);
+          audioRef.current.src = savedStation.value;
+          if (localStorage.getItem('isPlaying') === 'true') {
+            audioRef.current.play().catch(() => {});
+            setIsPlaying(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading stations:', error);
+      }
+    };
+    loadStations();
+
+    const updateStreak = () => {
+      const lastVisit = localStorage.getItem('lastVisit');
+      const today = new Date().toDateString();
+      if (lastVisit !== today) {
+        setStreak(s => {
+          const newStreak = lastVisit ? s + 1 : 1;
+          localStorage.setItem('streak', newStreak);
+          localStorage.setItem('lastVisit', today);
+          return newStreak;
+        });
+      }
+    };
+    updateStreak();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
     }
-  }, { once: true });
-}
+  }, []);
 
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme);
-}
+  const switchTab = (tab) => {
+    setCurrentTab(tab);
+    localStorage.setItem('currentTab', tab);
+    setSearchQuery('');
+  };
 
-function toggleTheme() {
-  const currentTheme = localStorage.getItem('theme') || 'dark';
-  applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
-}
+  const togglePlayPause = () => {
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else if (currentStation) {
+      audioRef.current.play().catch(() => {});
+      setIsPlaying(true);
+    }
+    localStorage.setItem('isPlaying', !isPlaying);
+  };
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(reg => reg.update());
-}
+  const selectStation = (station) => {
+    setCurrentStation(station);
+    audioRef.current.src = station.value;
+    audioRef.current.play().catch(() => {});
+    setIsPlaying(true);
+    localStorage.setItem('currentStation', JSON.stringify(station));
+    localStorage.setItem('isPlaying', true);
+  };
 
-document.addEventListener('DOMContentLoaded', initializeApp);
-document.addEventListener('click', () => state.hasInteracted = true);
+  const toggleFavorite = (stationName) => {
+    const newFavorites = favorites.includes(stationName)
+      ? favorites.filter(name => name !== stationName)
+      : [...favorites, stationName];
+    setFavorites(newFavorites);
+    localStorage.setItem('favorites', JSON.stringify(newFavorites));
+  };
+
+  const shareStation = (station) => {
+    if (navigator.share) {
+      navigator.share({
+        title: `Слухай ${station.name} на VibeWave Radio!`,
+        text: `Перевір цю круту радіостанцію: ${station.name} (${station.genre}) з ${station.country}!`,
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(`${station.name} (${station.genre}) - ${station.country}`);
+      alert('Посилання скопійовано до буферу обміну!');
+    }
+  };
+
+  const filteredStations = currentTab === 'favorites'
+    ? favorites.map(name => Object.values(stations).flat().find(s => s.name === name)).filter(Boolean)
+    : stations[currentTab]?.filter(s =>
+        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.genre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.country.toLowerCase().includes(searchQuery.toLowerCase())
+      ) || [];
+
+  return (
+    <div className="min-h-screen bg-secondary flex flex-col">
+      <header className="p-4 flex justify-between items-center bg-gradient-to-r from-primary to-gradient">
+        <h1 className="text-2xl font-bold text-text">VibeWave Radio</h1>
+        <button onClick={() => setShowThemeModal(true)} className="p-2 rounded-full bg-primary text-secondary">
+          🎨
+        </button>
+      </header>
+
+      {showThemeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-secondary p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-bold mb-4 text-text">Обери тему</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {Object.keys(themes).map(t => (
+                <button
+                  key={t}
+                  onClick={() => { setTheme(t); setShowThemeModal(false); }}
+                  className={`p-4 rounded-lg ${theme === t ? 'bg-primary text-secondary' : 'bg-gray-800 text-text'}`}
+                >
+                  {t.replace('-', ' ')}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setShowThemeModal(false)} className="mt-4 p-2 bg-primary text-secondary rounded-lg w-full">
+              Закрити
+            </button>
+          </div>
+        </div>
+      )}
+
+      {currentStation && (
+        <div className="p-4 bg-gradient-to-r from-primary to-gradient rounded-lg m-4 shadow-lg">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-text">{currentStation.name}</h2>
+              <p className="text-text">Жанр: {currentStation.genre}</p>
+              <p className="text-text">Країна: {currentStation.country}</p>
+            </div>
+            <button
+              onClick={() => toggleFavorite(currentStation.name)}
+              className={`text-2xl ${favorites.includes(currentStation.name) ? 'text-yellow-400' : 'text-text'}`}
+            >
+              ★
+            </button>
+            <button onClick={() => shareStation(currentStation)} className="text-2xl text-text">
+              📤
+            </button>
+          </div>
+          <div className="flex justify-center gap-4 mt-4">
+            <button onClick={togglePlayPause} className="p-4 bg-primary text-secondary rounded-full text-2xl">
+              {isPlaying ? '⏸' : '▶'}
+            </button>
+          </div>
+          <div className="flex gap-2 mt-4 justify-center">
+            {[...Array(7)].map((_, i) => (
+              <div
+                key={i}
+                className="w-2 bg-primary rounded-full"
+                style={{
+                  animation: isPlaying ? `wave 1.2s infinite ease-in-out ${i * 0.1}s` : 'none',
+                  height: '40px'
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="p-4 flex-1">
+        <input
+          type="text"
+          placeholder="Пошук станцій..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full p-3 rounded-lg bg-gray-800 text-text mb-4 focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+          {filteredStations.length ? (
+            filteredStations.map(station => (
+              <div
+                key={station.value}
+                onClick={() => selectStation(station)}
+                className="p-4 bg-gray-800 rounded-lg shadow-lg hover:bg-primary hover:text-secondary transition-all cursor-pointer flex justify-between items-center"
+              >
+                <div>
+                  <h3 className="text-lg font-semibold">{station.emoji} {station.name}</h3>
+                  <p className="text-sm">{station.genre} | {station.country}</p>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavorite(station.name);
+                  }}
+                  className={`text-xl ${favorites.includes(station.name) ? 'text-yellow-400' : 'text-text'}`}
+                >
+                  ★
+                </button>
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-text opacity-70">Немає станцій</div>
+          )}
+        </div>
+      </div>
+
+      <nav className="fixed bottom-0 w-full bg-secondary p-4 flex justify-around border-t border-primary">
+        {['techno', 'trance', 'ukraine', 'favorites'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => switchTab(tab)}
+            className={`p-2 rounded-lg ${currentTab === tab ? 'bg-primary text-secondary' : 'text-text'}`}
+          >
+            {tab === 'favorites' ? '⭐ Улюблені' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
+        <button onClick={() => switchTab('profile')} className={`p-2 rounded-lg ${currentTab === 'profile' ? 'bg-primary text-secondary' : 'text-text'}`}>
+          Профіль
+        </button>
+      </nav>
+
+      {currentTab === 'profile' && (
+        <div className="p-4 flex-1">
+          <h2 className="text-2xl font-bold text-text mb-4">Твій профіль</h2>
+          <p className="text-text">Стрік: {streak} днів 🔥</p>
+          <p className="text-text mt-2">Слухай щодня, щоб збільшити стрік!</p>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes wave {
+          0%, 100% { transform: scaleY(0.3); }
+          50% { transform: scaleY(1); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+ReactDOM.render(<App />, document.getElementById('root'));
