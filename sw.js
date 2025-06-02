@@ -1,10 +1,10 @@
-﻿const CACHE_NAME = 'vibewave-radio-v1';
+﻿const CACHE_NAME = 'vibewave-radio-v2';
 const urlsToCache = [
   '/',
   'index.html',
   'styles.css',
   'script.js',
-  'stations.js',
+  'stations.js', // Переконайтеся, що stations.js включено
   'manifest.json',
   'icon-192.png',
   'icon-512.png'
