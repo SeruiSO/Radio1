@@ -31,15 +31,19 @@ const themes = {
 };
 
 function applyTheme(theme) {
+  // Перевіряємо, чи є тема валідною, інакше використовуємо тему за замовчуванням
+  const validTheme = themes[theme] ? theme : 'coral-vibe';
+  if (theme !== validTheme) {
+    localStorage.setItem('theme', validTheme);
+    currentTheme = validTheme;
+  }
   const root = document.documentElement;
-  root.style.setProperty('--primary', themes[theme].primary);
-  root.style.setProperty('--secondary', themes[theme].secondary);
-  root.style.setProperty('--text', themes[theme].text);
-  root.style.setProperty('--gradient', themes[theme].gradient);
-  localStorage.setItem('theme', theme);
-  currentTheme = theme;
+  root.style.setProperty('--primary', themes[validTheme].primary);
+  root.style.setProperty('--secondary', themes[validTheme].secondary);
+  root.style.setProperty('--text', themes[validTheme].text);
+  root.style.setProperty('--gradient', themes[validTheme].gradient);
   document.querySelectorAll('.theme-grid button').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.theme === theme);
+    btn.classList.toggle('active', btn.dataset.theme === validTheme);
   });
 }
 
@@ -228,6 +232,7 @@ window.addEventListener('online', () => {
   }
 });
 
+// Ініціалізація
 applyTheme(currentTheme);
 loadStations();
 updateStreak();
