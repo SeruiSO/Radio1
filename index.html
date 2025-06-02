@@ -3,51 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#00F0FF">
-  <title>Radio Music</title>
+  <meta name="description" content="VibeWave Radio - сучасне радіо для молоді з техно, трансом та поп-музикою">
+  <meta name="theme-color" content="#6E44FF">
+  <title>VibeWave Radio</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="icon-192.png">
-  <script src="script.js" defer></script>
 </head>
 <body>
-  <button class="theme-toggle">🌙</button>
-  <div class="container">
-    <h1>🎧 RADIO MUSIC</h1>
-    <div class="current-station-info" id="currentStationInfo">
-      <div class="station-info-content">
-        <div class="wave-progress">
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
+  <div class="app-container">
+    <header class="header">
+      <h1>VibeWave Radio</h1>
+      <button class="theme-toggle" aria-label="Змінити тему">🌙</button>
+    </header>
+    <main class="main-content">
+      <section class="now-playing" aria-live="polite">
+        <div class="visualizer" id="visualizer"></div>
+        <div class="station-info">
+          <h2 class="station-name">Обирайте станцію</h2>
+          <p class="station-genre">жанр: -</p>
+          <p class="station-country">країна: -</p>
+          <button class="share-btn" aria-label="Поділитися станцією">📤</button>
         </div>
-        <div class="station-text">
-          <div class="station-name">Обирайте станцію</div>
-          <div class="station-genre">жанр: -</div>
-          <div class="station-country">країна: -</div>
-        </div>
-      </div>
-    </div>
-    <div class="station-list" id="stationList"></div>
-    <div class="tabs">
-      <button class="tab-btn">BEST</button>
-      <button class="tab-btn">TECHNO</button>
-      <button class="tab-btn">TRANCE</button>
-      <button class="tab-btn">UA</button>
-      <button class="tab-btn">POP</button>
-    </div>
-    <div class="controls-container">
-      <audio id="audioPlayer"></audio>
+      </section>
+      <section class="tabs">
+        <button class="tab-btn active" data-tab="best">Улюблені</button>
+        <button class="tab-btn" data-tab="techno">Техно</button>
+        <button class="tab-btn" data-tab="trance">Транс</button>
+        <button class="tab-btn" data-tab="ukraine">UA</button>
+        <button class="tab-btn" data-tab="pop">Поп</button>
+      </section>
+      <section class="station-list" id="stationList">
+        <div class="station-item empty">Завантаження...</div>
+      </section>
+    </main>
+    <footer class="controls-container">
       <div class="controls">
-        <button class="control-btn">⏮</button>
-        <button class="control-btn">▶</button>
-        <button class="control-btn">⏭</button>
+        <button class="control-btn prev-btn" aria-label="Попередня станція">⏮</button>
+        <button class="control-btn play-pause-btn" aria-label="Відтворити або призупинити">▶</button>
+        <button class="control-btn next-btn" aria-label="Наступна станція">⏭</button>
       </div>
-    </div>
+    </footer>
   </div>
+  <audio id="audioPlayer" preload="auto"></audio>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
