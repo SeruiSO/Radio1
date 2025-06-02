@@ -2,10 +2,12 @@ const CACHE_NAME = 'vibewave-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/styles.css',
+  '/script.js',
   '/stations.json',
   '/manifest.json',
-  '/icon-192.webp',
-  '/icon-512.webp'
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
@@ -57,6 +59,6 @@ self.addEventListener('push', event => {
   const data = event.data.json();
   self.registration.showNotification(data.title, {
     body: data.body,
-    icon: '/icon-192.webp'
+    icon: '/icon-192.png'
   });
 });

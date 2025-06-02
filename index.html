@@ -45,27 +45,65 @@
   <meta name="theme-color" content="#FF6F61">
   <title>VibeWave Radio</title>
   <link rel="manifest" href="/manifest.json">
-  <link rel="icon" type="image/png" href="/icon-192.webp">
-  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'primary': '#FF6F61',
-            'secondary': '#2D2D2D',
-            'text': '#F0F0F0',
-            'gradient': '#4B1A2E'
-          }
-        }
-      }
-    }
-  </script>
+  <link rel="icon" type="image/png" href="/icon-192.png">
+  <link rel="stylesheet" href="/styles.css">
 </head>
-<body class="bg-gray-900 text-white font-sans">
-  <div id="root"></div>
-  <script type="module" src="/script.js"></script>
+<body>
+  <header>
+    <h1>VibeWave Radio</h1>
+    <button id="theme-toggle">🎨</button>
+  </header>
+  <div id="theme-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Обери тему</h2>
+      <div class="theme-grid">
+        <button data-theme="coral-vibe">Coral Vibe</button>
+        <button data-theme="neon-lime">Neon Lime</button>
+        <button data-theme="cyber-purple">Cyber Purple</button>
+      </div>
+      <button id="close-modal">Закрити</button>
+    </div>
+  </div>
+  <div id="current-station" class="current-station hidden">
+    <div class="station-info">
+      <div>
+        <h2 id="station-name">Обирайте станцію</h2>
+        <p id="station-genre">Жанр: -</p>
+        <p id="station-country">Країна: -</p>
+      </div>
+      <button id="favorite-btn">★</button>
+      <button id="share-btn">📤</button>
+    </div>
+    <div class="controls">
+      <button id="play-pause-btn">▶</button>
+    </div>
+    <div class="wave-progress">
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+    </div>
+  </div>
+  <div class="station-list">
+    <input type="text" id="search-input" placeholder="Пошук станцій...">
+    <div id="station-list"></div>
+  </div>
+  <nav>
+    <button class="nav-btn active" data-tab="techno">Techno</button>
+    <button class="nav-btn" data-tab="trance">Trance</button>
+    <button class="nav-btn" data-tab="ukraine">Ukraine</button>
+    <button class="nav-btn" data-tab="favorites">⭐ Улюблені</button>
+    <button class="nav-btn" data-tab="profile">Профіль</button>
+  </nav>
+  <div id="profile" class="profile hidden">
+    <h2>Твій профіль</h2>
+    <p id="streak">Стрік: 0 днів 🔥</p>
+    <p>Слухай щодня, щоб збільшити стрік!</p>
+  </div>
+  <audio id="audio-player" preload="auto"></audio>
+  <script src="/script.js"></script>
 </body>
 </html>
