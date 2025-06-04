@@ -42,68 +42,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#FF6F61">
-  <title>VibeWave Radio</title>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="icon" type="image/png" href="/icon-192.png">
-  <link rel="stylesheet" href="/styles.css">
+  <title>Radio S O</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00F0FF">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="icon-192.png" type="image/png">
 </head>
 <body>
-  <header>
-    <h1>VibeWave Radio</h1>
-    <button id="theme-toggle">🎨</button>
-  </header>
-  <div id="theme-modal" class="modal hidden">
-    <div class="modal-content">
-      <h2>Обери тему</h2>
-      <div class="theme-grid">
-        <button data-theme="coral-vibe">Coral Vibe</button>
-        <button data-theme="neon-lime">Neon Lime</button>
-        <button data-theme="cyber-purple">Cyber Purple</button>
+  <button class="theme-toggle">🌙</button>
+  <div class="container">
+    <h1>🎧 RADIO MUSIC</h1>
+    <div class="current-station-info" id="currentStationInfo">
+      <div class="station-info-content">
+        <div class="station-text">
+          <div class="station-name">Обирайте станцію</div>
+          <div class="station-genre">жанр: -</div>
+          <div class="station-country">країна: -</div>
+        </div>
       </div>
-      <button id="close-modal">Закрити</button>
     </div>
-  </div>
-  <div id="current-station" class="current-station hidden">
-    <div class="station-info">
-      <div>
-        <h2 id="station-name">Обирайте станцію</h2>
-        <p id="station-genre">Жанр: -</p>
-        <p id="station-country">Країна: -</p>
+    <div class="tabs">
+      <button class="tab-btn">BEST</button>
+      <button class="tab-btn active">TECHNO</button>
+      <button class="tab-btn">TRANCE</button>
+      <button class="tab-btn">UA</button>
+      <button class="tab-btn">POP</button>
+    </div>
+    <div class="station-list" id="stationList"></div>
+    <div class="controls-container">
+      <button class="sleep-timer-btn">⏰</button>
+      <div class="controls">
+        <button class="control-btn">⏮</button>
+        <button class="control-btn">▶</button>
+        <button class="control-btn">⏭</button>
       </div>
-      <button id="favorite-btn">★</button>
-      <button id="share-btn">📤</button>
+      <button class="volume-btn">🔊</button>
+      <div class="wave-progress">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+      </div>
+      <div class="volume-slider" id="volumeSlider" style="display: none;">
+        <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="0.9" orient="vertical">
+      </div>
     </div>
-    <div class="controls">
-      <button id="play-pause-btn">▶</button>
-    </div>
-    <div class="wave-progress">
-      <div class="wave-bar"></div>
-      <div class="wave-bar"></div>
-      <div class="wave-bar"></div>
-      <div class="wave-bar"></div>
-      <div class="wave-bar"></div>
-      <div class="wave-bar"></div>
-      <div class="wave-bar"></div>
+    <div class="sleep-timer-modal" id="sleepTimerModal" style="display: none;">
+      <div class="modal-content">
+        <h2>Таймер сну</h2>
+        <button class="timer-option" data-minutes="15">15 хвилин</button>
+        <button class="timer-option" data-minutes="30">30 хвилин</button>
+        <button class="timer-option" data-minutes="60">60 хвилин</button>
+        <button class="timer-option cancel">Скасувати</button>
+      </div>
     </div>
   </div>
-  <div class="station-list">
-    <input type="text" id="search-input" placeholder="Пошук станцій...">
-    <div id="station-list"></div>
-  </div>
-  <nav>
-    <button class="nav-btn active" data-tab="techno">Techno</button>
-    <button class="nav-btn" data-tab="trance">Trance</button>
-    <button class="nav-btn" data-tab="ukraine">Ukraine</button>
-    <button class="nav-btn" data-tab="favorites">⭐ Улюблені</button>
-    <button class="nav-btn" data-tab="profile">Профіль</button>
-  </nav>
-  <div id="profile" class="profile hidden">
-    <h2>Твій профіль</h2>
-    <p id="streak">Стрік: 0 днів 🔥</p>
-    <p>Слухай щодня, щоб збільшити стрік!</p>
-  </div>
-  <audio id="audio-player" preload="auto"></audio>
-  <script src="/script.js"></script>
+  <audio id="audioPlayer" preload="none"></audio>
+  <script src="script.js"></script>
 </body>
 </html>
