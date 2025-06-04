@@ -273,7 +273,7 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: 10px;
   z-index: 10;
   transition: background 0.4s ease, border-color 0.4s ease;
 }
@@ -281,7 +281,7 @@ h2 {
 .controls {
   display: flex;
   justify-content: center;
-  gap: 50px;
+  gap: 20px;
 }
 
 .sleep-timer-btn, .volume-btn {
@@ -421,7 +421,7 @@ h2 {
 .volume-slider {
   position: absolute;
   bottom: 120px;
-  right: var(--container);
+  right: 20px;
   background: var(--container-bg);
   padding: 10px;
   border-radius: 10px;
@@ -429,28 +429,28 @@ h2 {
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   transition: opacity 0.3s ease;
 }
 
 .volume-slider input[type="range"] {
-  -webkit-appearance: rotate(270deg);
+  transform: rotate(270deg);
   width: 100px;
   height: 20px;
-  background: linear-gradient(to right, var(--accent) 0% var(--volume-bar));
+  background: linear-gradient(to right, var(--accent) 0%, var(--container-bg) 100%);
   border-radius: 5px;
   outline: none;
-  cursor: background 0;
+  cursor: pointer;
 }
 
-.volume-slider input[type="range]::-webkit-slider-thumb {
-  -webkit-appearance: width;
-  20px;
+.volume-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
   height: 20px;
   background: var(--accent);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease;
 }
 
@@ -458,7 +458,7 @@ h2 {
   transform: scale(1.2);
 }
 
-.volume-slider input[type="range]::-moz-range-track {
+.volume-slider input[type="range"]::-moz-range-track {
   background: var(--container-bg);
   border-radius: 5px;
 }
@@ -469,7 +469,7 @@ h2 {
   background: var(--accent);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 @media (max-width: 720px) {
@@ -484,17 +484,26 @@ h2 {
   }
 
   .control-btn {
-    width: 70px;
-    height: 70px;
-    font-size: 28px;
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
     border-width: 2px;
-    border-radius: 10px;
+    border-radius: 8px;
   }
 
   .sleep-timer-btn, .volume-btn {
-    width: 45px;
-    height: 45px;
-    font-size: 18px;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .controls {
+    gap: 10px;
+  }
+
+  .controls-container {
+    gap: 8px;
+    padding: 10px;
   }
 
   .station-list {
