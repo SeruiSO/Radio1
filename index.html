@@ -38,62 +38,39 @@
         return gk_fileData[filename] || "";
         }
         </script><!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#00F0FF">
   <title>Radio S O</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="icon" href="icon-192.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="/icon-192.png">
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'neon-cyan': '#00F0FF',
+            'dark-bg': '#0A0A0A',
+            'container-bg': '#1A1A1A',
+            'accent-gradient': '#003C4B',
+          },
+        },
+      },
+    }
+  </script>
 </head>
-<body>
-  <div class="container">
-    <button class="theme-toggle" aria-label="Перемкнути тему"><span class="theme-icon">🌙</span></button>
-    <h1>🎧 RADIO MUSIC</h1>
-    <div class="search-container">
-      <input type="text" id="searchInput" placeholder="Пошук за назвою, жанром, країною..." aria-label="Пошук станцій">
-    </div>
-    <div class="current-station-info" id="currentStationInfo">
-      <div class="station-info-content">
-        <div class="station-text">
-          <div class="station-name">Обирайте станцію</div>
-          <div class="station-genre">жанр: -</div>
-          <div class="station-country">країна: -</div>
-        </div>
-      </div>
-    </div>
-    <div class="tabs">
-      <button class="tab-btn" aria-label="Улюблені станції">BEST</button>
-      <button class="tab-btn" aria-label="Техно станції">TECHNO</button>
-      <button class="tab-btn" aria-label="Транс станції">TRANCE</button>
-      <button class="tab-btn" aria-label="Українські станції">UA</button>
-      <button class="tab-btn" aria-label="Поп станції">POP</button>
-    </div>
-    <div class="station-list" id="stationList"></div>
-    <div class="controls-container">
-      <button class="extra-btn" id="sleepTimerBtn" aria-label="Таймер сну">⏰</button>
-      <div class="controls">
-        <button class="control-btn" aria-label="Попередня станція">⏮</button>
-        <button class="control-btn" aria-label="Відтворити або призупинити">▶</button>
-        <button class="control-btn" aria-label="Наступна станція">⏭</button>
-      </div>
-      <div class="wave-progress">
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-      </div>
-      <input type="range" id="volumeSlider" min="0" max="1" step="0.01" aria-label="Регулятор гучності">
-      <button class="extra-btn" id="qualityToggle" aria-label="Перемкнути якість потоку">Якість: Висока</button>
-    </div>
-    <audio id="audioPlayer" preload="auto"></audio>
-  </div>
-  <script src="script.js"></script>
+<body class="bg-dark-bg text-white font-sans">
+  <div id="root"></div>
+  <script src="/script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  </script>
 </body>
 </html>
