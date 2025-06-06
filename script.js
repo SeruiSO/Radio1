@@ -64,8 +64,20 @@ document.addEventListener("DOMContentLoaded", () => {
     "light": { bodyBg: "#F5F7FA", containerBg: "#FFFFFF", accent: "#40C4FF", text: "#212121", accentGradient: "#B3E5FC" }
   };
   let currentTheme = localStorage.getItem("selectedTheme") || "neon";
+  // Ensure currentTheme is valid
+  if (!themes[currentTheme]) {
+    currentTheme = "neon";
+    localStorage.setItem("selectedTheme", currentTheme);
+  }
 
   function applyTheme(theme) {
+    // Fallback to "neon" if theme is invalid
+    if (!themes[theme]) {
+      console.warn(`Тема "${theme}" не знайдена. Використовується тема за замовчуванням: "neon".`);
+      theme = "neon";
+      currentTheme = theme;
+      localStorage.setItem("selectedTheme", theme);
+    }
     const root = document.documentElement;
     Object.entries(themes[theme]).forEach(([key, value]) => root.style.setProperty(`--${key}`, value));
     localStorage.setItem("selectedTheme", theme);
