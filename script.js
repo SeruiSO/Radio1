@@ -1,245 +1,237 @@
-import React, { useState, useEffect, useRef } from 'https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js';
-import ReactDOM from 'https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js';
+// Оголошення змінних на початку
+let currentTab = localStorage.getItem("currentTab") || "techno";
+let hasUserInteracted = false;
+let currentIndex = 0;
+let favoriteStations = JSON.parse(localStorage.getItem("favoriteStations")) || [];
+let isPlaying = localStorage.getItem("isPlaying") === "true" || false;
+let stationLists = {};
+let stationItems;
+let abortController = new AbortController();
+let errorCount = 0;
+const ERROR_LIMIT = 5;
 
-const themes = {
-  'neon-pulse': { bg: '#0A0A0A', container: '#1A1A1A', accent: '#00F0FF', text: '#F0F0F0', gradient: '#003C4B' },
-  'lime-surge': { bg: '#0A0A0A', container: '#1A1A1A', accent: '#B2FF59', text: '#E8F5E9', gradient: '#2E4B2F' },
-  'flamingo-flash': { bg: '#0A0A0A', container: '#1A1A1A', accent: '#FF4081', text: '#FCE4EC', gradient: '#4B1A2E' },
-};
+document.addEventListener("DOMContentLoaded", () => {
+  const audio = document.getElementById("audioPlayer");
+  const stationList = document.getElementById("stationList");
+  const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
+  const currentStationInfo = document.querySelector(".current-station-info");
+  const themeToggle = document.querySelector(".theme-toggle");
+  const sleepTimerBtn = document.querySelector(".sleep-timer-btn");
+  const stationSearch = document.getElementById("stationSearch");
 
-const App = () => {
-  const [currentTab, setCurrentTab] = useState(localStorage.getItem('currentTab') || 'techno');
-  const [stations, setStations] = useState({});
-  const [currentStation, setCurrentStation] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(parseFloat(localStorage.getItem('volume')) || 0.9);
-  const [favorites, setFavorites] = useState(JSON.parse(localStorage.getItem('favoriteStations')) || []);
-  const [search, setSearch] = useState('');
-  const [theme, setTheme] = useState(localStorage.getItem('selectedTheme') || 'neon-pulse');
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const audioRef = useRef(new Audio());
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !sleepTimerBtn || !stationSearch) {
+    console.error("Один із DOM-елементів не знайдено");
+    setTimeout(initializeApp, 100);
+    return;
+  }
 
-  useEffect(() => {
-    fetch('/stations.json')
-      .then(res => res.json())
-      .then(data => setStations(data))
-      .catch(() => setStations({}));
-    window.addEventListener('online', () => setIsOnline(true));
-    window.addEventListener('offline', () => setIsOnline(false));
-    return () => {
-      window.removeEventListener('online', () => setIsOnline(true));
-      window.removeEventListener('offline', () => setIsOnline(false));
-    };
-  }, []);
+  audio.preload = "auto";
+  audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 
-  useEffect(() => {
-    audioRef.current.volume = volume;
-    localStorage.setItem('volume', volume);
-  }, [volume]);
+  document.querySelectorAll(".tab-btn").forEach((btn, index) => {
+    const tabs = ["best", "techno", "trance", "ua", "pop"];
+    btn.addEventListener("click", () => switchTab(tabs[index]));
+  });
 
-  useEffect(() => {
-    localStorage.setItem('favoriteStations', JSON.stringify(favorites));
-    if (currentTab === 'best') {
-      setCurrentTab('best');
+  document.querySelector(".controls .control-btn:nth-child(1)").addEventListener("click", prevStation);
+  document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", togglePlayPause);
+  document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", nextStation);
+  themeToggle.addEventListener("click", toggleTheme);
+  sleepTimerBtn.addEventListener("click", toggleSleepTimer);
+  stationSearch.addEventListener("input", filterStations);
+
+  async function loadStations() {
+    stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
+    try {
+      abortController.abort();
+      abortController = new AbortController();
+      const response = await fetch("stations.json", { cache: "no-cache", signal: abortController.signal });
+      if (response.ok) {
+        stationLists = await response.json();
+        favoriteStations = favoriteStations.filter(name => Object.values(stationLists).flat().some(s => s.name === name));
+        localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
+        switchTab(currentTab);
+      } else throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      if (error.name !== 'AbortError') stationList.innerHTML = "<div class='station-item empty'>Помилка завантаження</div>";
     }
-  }, [favorites]);
+  }
 
-  useEffect(() => {
-    localStorage.setItem('selectedTheme', theme);
-    document.documentElement.style.setProperty('--body-bg', themes[theme].bg);
-    document.documentElement.style.setProperty('--container-bg', themes[theme].container);
-    document.documentElement.style.setProperty('--accent', themes[theme].accent);
-    document.documentElement.style.setProperty('--text', themes[theme].text);
-    document.documentElement.style.setProperty('--accent-gradient', themes[theme].gradient);
-  }, [theme]);
-
-  const switchTab = (tab) => {
-    setCurrentTab(tab);
-    localStorage.setItem('currentTab', tab);
-    setCurrentStation(null);
-    audioRef.current.pause();
-    setIsPlaying(false);
+  const themes = {
+    "neon": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#00F0FF", text: "#F0F0F0", accentGradient: "#003C4B" },
+    "dark-green": { bodyBg: "#0A1A0A", containerBg: "#1A2A1A", accent: "#00FF00", text: "#E0F0E0", accentGradient: "#003C00" },
+    "pink": { bodyBg: "#1A0A1A", containerBg: "#2A1A2A", accent: "#FF00FF", text: "#F0E0F0", accentGradient: "#4B004B" },
+    "light": { bodyBg: "#F5F7FA", containerBg: "#FFFFFF", accent: "#40C4FF", text: "#212121", accentGradient: "#B3E5FC" }
   };
+  let currentTheme = localStorage.getItem("selectedTheme") || "neon";
 
-  const playStation = (station) => {
-    audioRef.current.src = station.value;
-    audioRef.current.play().then(() => {
-      setIsPlaying(true);
-      setCurrentStation(station);
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: station.name,
-          artist: `${station.genre} | ${station.country}`,
-          album: 'Radio S O',
-        });
+  function applyTheme(theme) {
+    const root = document.documentElement;
+    Object.entries(themes[theme]).forEach(([key, value]) => root.style.setProperty(`--${key}`, value));
+    localStorage.setItem("selectedTheme", theme);
+    document.documentElement.setAttribute("data-theme", theme);
+    document.querySelector('meta[name="theme-color"]').setAttribute("content", themes[theme].accent);
+  }
+
+  function toggleTheme() {
+    const themesOrder = Object.keys(themes);
+    const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
+    applyTheme(nextTheme);
+  }
+
+  let sleepTimer = null;
+  function toggleSleepTimer() {
+    if (sleepTimer) {
+      clearTimeout(sleepTimer);
+      sleepTimer = null;
+      sleepTimerBtn.textContent = "⏰";
+      alert("Таймер сну вимкнено");
+    } else {
+      const minutes = prompt("Введіть хвилини для таймера сну:", 30);
+      const time = parseInt(minutes) * 60 * 1000;
+      if (time > 0) {
+        sleepTimer = setTimeout(() => {
+          audio.pause();
+          isPlaying = false;
+          playPauseBtn.textContent = "▶";
+          document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+          localStorage.setItem("isPlaying", isPlaying);
+          sleepTimer = null;
+          alert("Таймер сну завершився");
+        }, time);
+        sleepTimerBtn.textContent = `⏰ ${minutes}min`;
+        alert(`Таймер сну встановлено на ${minutes} хвилин`);
       }
-    }).catch(err => console.error('Playback error:', err));
-  };
-
-  const togglePlayPause = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else if (currentStation) {
-      audioRef.current.play().then(() => setIsPlaying(true));
     }
-  };
-
-  const toggleFavorite = (name) => {
-    setFavorites(favs => 
-      favs.includes(name) ? favs.filter(f => f !== name) : [name, ...favs]
-    );
-  };
-
-  const filteredStations = () => {
-    const stationList = currentTab === 'best'
-      ? favorites.map(name => Object.values(stations).flat().find(s => s.name === name)).filter(Boolean)
-      : stations[currentTab] || [];
-    return stationList.filter(s => 
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.genre.toLowerCase().includes(search.toLowerCase()) ||
-      s.country.toLowerCase().includes(search.toLowerCase())
-    );
-  };
-
-  if (!isOnline) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen text-center">
-        <h1 className="text-4xl font-bold mb-4">Offline</h1>
-        <p>Please check your internet connection and try again.</p>
-      </div>
-    );
   }
 
-  return (
-    <div className="flex min-h-screen">
-      <aside className="w-64 bg-container-bg p-4 border-r border-accent">
-        <h1 className="text-3xl font-bold text-accent mb-6">Radio S O</h1>
-        <nav>
-          {['best', 'techno', 'trance', 'ukraine', 'pop'].map(tab => (
-            <button
-              key={tab}
-              className={`block w-full text-left py-2 px-4 mb-2 rounded-lg ${currentTab === tab ? 'bg-accent text-dark-bg' : 'hover:bg-accent hover:text-dark-bg'}`}
-              onClick={() => switchTab(tab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </nav>
-        <select
-          className="mt-4 w-full p-2 bg-container-bg border border-accent rounded-lg"
-          value={theme}
-          onChange={(e) => setTheme(e.target.value)}
-        >
-          {Object.keys(themes).map(t => (
-            <option key={t} value={t}>{t.replace('-', ' ').toUpperCase()}</option>
-          ))}
-        </select>
-      </aside>
-      <main className="flex-1 p-6">
-        <div className="max-w-4xl mx-auto">
-          <input
-            type="text"
-            placeholder="Search stations..."
-            className="w-full p-3 mb-6 bg-container-bg border border-accent rounded-lg text-white"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <div className="bg-container-bg p-4 rounded-lg border border-accent mb-6">
-            <div className="flex items-center gap-4">
-              <div className="flex gap-2">
-                {[...Array(5)].map((_, i) => (
-                  <div
-                    key={i}
-                    className={`w-2 bg-accent rounded-full ${isPlaying ? 'animate-wave' : ''}`}
-                    style={{ animationDelay: `${i * 0.2}s` }}
-                  />
-                ))}
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold">{currentStation?.name || 'Select a station'}</h2>
-                <p className="text-sm">Genre: {currentStation?.genre || '-'}</p>
-                <p className="text-sm">Country: {currentStation?.country || '-'}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 mt-4">
-              <button
-                className="p-3 bg-accent text-dark-bg rounded-lg"
-                onClick={() => {
-                  const list = filteredStations();
-                  const idx = list.findIndex(s => s.name === currentStation?.name);
-                  playStation(list[idx > 0 ? idx - 1 : list.length - 1]);
-                }}
-              >
-                ⏮
-              </button>
-              <button
-                className="p-3 bg-accent text-dark-bg rounded-lg"
-                onClick={togglePlayPause}
-              >
-                {isPlaying ? '⏸' : '▶'}
-              </button>
-              <button
-                className="p-3 bg-accent text-dark-bg rounded-lg"
-                onClick={() => {
-                  const list = filteredStations();
-                  const idx = list.findIndex(s => s.name === currentStation?.name);
-                  playStation(list[idx < list.length - 1 ? idx + 1 : 0]);
-                }}
-              >
-                ⏭
-              </button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={volume}
-                onChange={(e) => setVolume(parseFloat(e.target.value))}
-                className="w-32"
-              />
-            </div>
-          </div>
-          <div className="grid gap-4">
-            {filteredStations().map(station => (
-              <div
-                key={station.name}
-                className={`p-4 bg-container-bg border border-accent rounded-lg flex justify-between items-center cursor-pointer ${currentStation?.name === station.name ? 'bg-accent text-dark-bg' : ''}`}
-                onClick={() => playStation(station)}
-              >
-                <span>{station.emoji} {station.name}</span>
-                <button
-                  className={`text-xl ${favorites.includes(station.name) ? 'text-yellow-400' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(station.name);
-                  }}
-                >
-                  ★
-                </button>
-              </div>
-            ))}
-            {filteredStations().length === 0 && (
-              <div className="text-center text-gray-400">No stations found</div>
-            )}
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-};
-
-const styles = `
-  .animate-wave {
-    animation: wave 1.2s infinite ease-in-out;
+  function filterStations() {
+    const query = stationSearch.value.toLowerCase();
+    const stations = currentTab === "best" ? favoriteStations.map(name => Object.values(stationLists).flat().find(s => s.name === name)).filter(s => s) : stationLists[currentTab] || [];
+    const filtered = stations.filter(station => station.name.toLowerCase().includes(query) || station.genre.toLowerCase().includes(query) || station.country.toLowerCase().includes(query));
+    updateStationList(filtered);
   }
-  @keyframes wave {
-    0%, 100% { transform: scaleY(0.3); }
-    50% { transform: scaleY(1); }
-  }
-`;
-const styleSheet = document.createElement('style');
-styleSheet.textContent = styles;
-document.head.appendChild(styleSheet);
 
-ReactDOM.render(<App />, document.getElementById('root'));
+  function updateStationList(stations = []) {
+    if (!stations.length) {
+      currentIndex = 0;
+      stationItems = [];
+      stationList.innerHTML = `<div class='station-item empty'>${currentTab === "best" ? "Немає улюблених" : "Немає станцій"}</div>`;
+      return;
+    }
+    const fragment = document.createDocumentFragment();
+    stations.forEach((station, index) => {
+      const item = document.createElement("div");
+      item.className = `station-item ${index === currentIndex ? "selected" : ""}`;
+      item.dataset.value = station.value;
+      item.dataset.name = station.name;
+      item.dataset.genre = station.genre;
+      item.dataset.country = station.country;
+      item.innerHTML = `${station.emoji} ${station.name}<button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button>`;
+      fragment.appendChild(item);
+    });
+    stationList.innerHTML = "";
+    stationList.appendChild(fragment);
+    stationItems = stationList.querySelectorAll(".station-item");
+    stationList.onclick = e => {
+      const item = e.target.closest(".station-item");
+      const favoriteBtn = e.target.closest(".favorite-btn");
+      if (item && !item.classList.contains("empty")) {
+        currentIndex = Array.from(stationItems).indexOf(item);
+        changeStation(currentIndex);
+      }
+      if (favoriteBtn) toggleFavorite(favoriteBtn.parentElement.dataset.name);
+    };
+    if (stationItems.length) changeStation(currentIndex);
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    localStorage.setItem("currentTab", tab);
+    currentIndex = 0;
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+    document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ua", "pop"].indexOf(tab) + 1})`).classList.add("active");
+    stationSearch.value = "";
+    filterStations();
+  }
+
+  function toggleFavorite(stationName) {
+    if (favoriteStations.includes(stationName)) favoriteStations = favoriteStations.filter(name => name !== stationName);
+    else favoriteStations.unshift(stationName);
+    localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
+    if (currentTab === "best") switchTab("best");
+    else filterStations();
+  }
+
+  function changeStation(index) {
+    if (index < 0 || index >= stationItems.length || stationItems[index].classList.contains("empty")) return;
+    stationItems.forEach(i => i.classList.remove("selected"));
+    stationItems[index].classList.add("selected");
+    currentIndex = index;
+    updateCurrentStationInfo(stationItems[index]);
+    tryAutoPlay();
+  }
+
+  function updateCurrentStationInfo(item) {
+    currentStationInfo.querySelector(".station-name").textContent = item.dataset.name || "Unknown";
+    currentStationInfo.querySelector(".station-genre").textContent = `жанр: ${item.dataset.genre || "Unknown"}`;
+    currentStationInfo.querySelector(".station-country").textContent = `країна: ${item.dataset.country || "Unknown"}`;
+  }
+
+  function tryAutoPlay() {
+    if (!navigator.onLine || !stationItems?.length || currentIndex >= stationItems.length || !hasUserInteracted) return;
+    audio.pause();
+    audio.src = stationItems[currentIndex].dataset.value;
+    const playPromise = audio.play();
+    playPromise.then(() => {
+      errorCount = 0;
+      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+    }).catch(error => {
+      console.error("Помилка відтворення:", error);
+      errorCount++;
+      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+    });
+  }
+
+  function prevStation() { currentIndex = currentIndex > 0 ? currentIndex - 1 : stationItems.length - 1; changeStation(currentIndex); }
+  function nextStation() { currentIndex = currentIndex < stationItems.length - 1 ? currentIndex + 1 : 0; changeStation(currentIndex); }
+  function togglePlayPause() {
+    hasUserInteracted = true;
+    if (audio.paused) {
+      isPlaying = true;
+      tryAutoPlay();
+      playPauseBtn.textContent = "⏸";
+    } else {
+      audio.pause();
+      isPlaying = false;
+      playPauseBtn.textContent = "▶";
+    }
+    localStorage.setItem("isPlaying", isPlaying);
+  }
+
+  audio.addEventListener("playing", () => {
+    isPlaying = true;
+    playPauseBtn.textContent = "⏸";
+    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+    localStorage.setItem("isPlaying", isPlaying);
+  });
+  audio.addEventListener("pause", () => {
+    isPlaying = false;
+    playPauseBtn.textContent = "▶";
+    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+    localStorage.setItem("isPlaying", isPlaying);
+  });
+  audio.addEventListener("error", () => {
+    document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+    if (isPlaying && errorCount < ERROR_LIMIT) setTimeout(nextStation, 1000);
+  });
+  audio.addEventListener("volumechange", () => localStorage.setItem("volume", audio.volume));
+
+  window.addEventListener("online", () => { if (isPlaying) tryAutoPlay(); });
+  window.addEventListener("offline", () => console.log("Офлайн"));
+
+  document.addEventListener("click", () => hasUserInteracted = true);
+
+  applyTheme(currentTheme);
+  loadStations();
+});
