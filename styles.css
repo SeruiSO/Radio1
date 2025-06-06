@@ -1,10 +1,10 @@
 /* Updated on June 06, 2025 */
 :root {
-  --body-bg: #0A0A0A;
-  --container-bg: rgba(18, 18, 18, 0.9);
+  --body-bg: #0C1A2A;
+  --container-bg: rgba(20, 30, 50, 0.9);
   --accent: #00D1FF;
   --accent-rgb: 0, 209, 255;
-  --text: #F0F0F0;
+  --text: #F0F0FA;
   --accent-gradient: linear-gradient(45deg, #003B5C, #00D1FF);
 }
 
@@ -38,6 +38,7 @@ body {
   justify-content: flex-start;
   transition: background 0.4s ease, border-color 0.4s ease;
   backdrop-filter: blur(10px);
+  z-index: 1; /* Додано для уникнення перекриття */
 }
 
 h1 {
@@ -51,26 +52,30 @@ h1 {
 
 .theme-toggle {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: var(--container-bg);
-  border: 2px solid var(--accent);
+  top: 15px; /* Збільшено відступ для кращої видимості */
+  left: 15px;
+  background: var(--accent-gradient); /* Яскравіший фон */
+  border: 2px solid var(--text); /* Контрастна межа */
   border-radius: 50%;
-  padding: 8px;
+  padding: 10px;
   cursor: pointer;
-  height: 40px;
-  width: 40px;
+  height: 48px; /* Збільшено розмір */
+  width: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.4s ease;
-  box-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.3);
+  box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.5); /* Покращене підсвічування */
+  z-index: 100; /* Високий z-index для видимості */
+  color: var(--text); /* Колір іконки */
+  font-size: 24px; /* Розмір іконки */
 }
 
 .theme-toggle:hover {
   background: var(--accent);
   color: #0A0A0A;
-  transform: scale(1.1) translateZ(5px);
+  transform: scale(1.15) translateZ(5px);
+  box-shadow: 0 6px 16px rgba(var(--accent-rgb), 0.7);
 }
 
 .current-station-info {
@@ -86,7 +91,7 @@ h1 {
   align-items: center;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 10; /* Зменшено, щоб не перекривати theme-toggle */
   box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.4);
   transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
   backdrop-filter: blur(8px);
@@ -94,7 +99,7 @@ h1 {
 
 .current-station-info:hover {
   transform: translateY(-3px) translateZ(5px);
-  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.6);
+  box: 0 6px 20px rgba(var(--accent-rgb), 0.6);
 }
 
 .station-info-content {
@@ -185,7 +190,7 @@ h1 {
   scrollbar-width: thin;
   scrollbar-color: var(--accent) var(--container-bg);
   flex-grow: 1;
-  transition: border-color0.4s ease;
+  transition: border-color 0.4s ease;
   backdrop-filter: blur(8px);
 }
 
@@ -375,11 +380,13 @@ h1 {
   }
 
   .theme-toggle {
-    top: 5px;
-    left: 5px;
-    padding: 4px;
-    height: 35px;
-    width: 35px;
+    top: 10px; /* Зменшено відступ для адаптивності */
+    left: 10px;
+    padding: 6px;
+    height: 40px; /* Трохи більший розмір для мобільних */
+    width: 40px;
+    font-size: 20px; /* Менший розмір іконки */
+    box-shadow: 0 3px 10px rgba(var(--accent-rgb), 0.5); /* Покращене підсвічування */
   }
 
   .current-station-info {
