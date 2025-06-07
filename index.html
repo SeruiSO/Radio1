@@ -38,48 +38,60 @@
         return gk_fileData[filename] || "";
         }
         </script><!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#FF5722">
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#00F0FF">
   <title>Radio S O</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <audio id="audioPlayer"></audio>
 </head>
 <body>
   <div class="container">
-    <div class="nav-header">
-      <button class="nav-back">←</button>
-      <span class="nav-title">PLAYING NOW</span>
-      <button class="nav-menu">⋮</button>
+    <div class="header">
+      <div class="theme-toggle">🌙</div>
+      <h1>🎧 RADIO S O</h1>
+      <div class="search-container">
+        <input type="text" id="stationSearch" placeholder="Search stations...">
+      </div>
     </div>
-    <div class="current-station">
-      <div class="station-artwork"></div>
-      <div class="station-info">
-        <div class="station-name">Обирайте станцію</div>
-        <div class="station-details">
-          <span class="station-genre">жанр: -</span> | <span class="station-country">країна: -</span>
+    <div class="current-station-info">
+      <div class="station-info-content">
+        <div class="equalizer">
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+          <div class="eq-bar"></div>
+        </div>
+        <div class="station-text">
+          <div class="station-name">Обирайте станцію</div>
+          <div class="station-genre">жанр: -</div>
+          <div class="station-country">країна: -</div>
         </div>
       </div>
-      <div class="progress-bar">
-        <span class="progress-time">0:00</span>
-        <div class="progress"></div>
-        <span class="total-time">0:00</span>
-      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn">BEST</button>
+      <button class="tab-btn">TECHNO</button>
+      <button class="tab-btn">TRANCE</button>
+      <button class="tab-btn">UA</button>
+      <button class="tab-btn">POP</button>
+    </div>
+    <div class="station-list" id="stationList"></div>
+    <div class="controls-container">
       <div class="controls">
-        <button class="control-btn prev">⏮</button>
-        <button class="control-btn play-pause">▶</button>
-        <button class="control-btn next">⏭</button>
+        <button class="control-btn">⏮</button>
+        <button class="control-btn">▶</button>
+        <button class="control-btn">⏭</button>
+      </div>
+      <div class="volume-control">
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.9">
       </div>
     </div>
-    <div class="station-list">
-      <div class="list-header">СТАНЦІЇ</div>
-      <div id="stationList"></div>
-    </div>
-    <button class="shuffle-btn">SHUFFLE</button>
   </div>
-  <audio id="audioPlayer"></audio>
   <script src="script.js"></script>
 </body>
 </html>
