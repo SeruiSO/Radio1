@@ -1,14 +1,10 @@
-/* Updated on June 07, 2025 */
+/* Updated on May 28, 2025 */
 :root {
-  --body-bg: #0F1419; /* Dark background similar to the app interface */
-  --container-bg: #1A252F; /* Slightly lighter container background */
-  --accent: #00D1FF; /* Glowing cyan accent color */
-  --text: #E0E6ED; /* Light text for contrast */
-  --accent-gradient: #003D4D; /* Gradient for depth */
-  --button-bg: #2A3B4D; /* Base button background */
-  --button-hover: #00D1FF; /* Button hover color */
-  --button-active: #0090B0; /* Button active color */
-  --shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Subtle shadow for raised effect */
+  --body-bg: #0A0A0A;
+  --container-bg: #121212;
+  --accent: #00F0FF;
+  --text: #F0F0F0;
+  --accent-gradient: #003C4B;
 }
 
 body {
@@ -39,8 +35,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  box-shadow: var(--shadow);
-  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.3s ease;
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 
 h1 {
@@ -48,7 +43,6 @@ h1 {
   margin: 5px 0;
   text-align: center;
   color: var(--accent);
-  text-shadow: 0 0 10px rgba(0, 209, 255, 0.5);
   transition: color 0.4s ease;
 }
 
@@ -56,7 +50,7 @@ h1 {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: var(--button-bg);
+  background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 50%;
   padding: 8px;
@@ -66,14 +60,18 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow);
   transition: all 0.3s ease;
 }
 
 .theme-toggle:hover {
-  background: var(--button-hover);
-  color: var(--body-bg);
+  background: var(--accent);
+  color: #0A0A0A;
   transform: scale(1.1);
+}
+
+.theme-toggle:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .current-station-info {
@@ -90,13 +88,13 @@ h1 {
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: var(--shadow);
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
+  transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .current-station-info:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 209, 255, 0.5);
+  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.5);
 }
 
 .station-info-content {
@@ -117,7 +115,6 @@ h1 {
   font-weight: 700;
   display: inline-flex;
   align-items: center;
-  text-shadow: 0 0 5px rgba(0, 209, 255, 0.3);
 }
 
 .current-station-info .station-genre {
@@ -143,37 +140,38 @@ h1 {
   padding: 5px;
   border-radius: 10px;
   border: 1px solid var(--accent);
-  box-shadow: var(--shadow);
-  transition: all 0.3s ease;
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 
 .tab-btn {
   flex: 1;
   padding: 12px;
-  background: var(--button-bg);
+  background: var(--container-bg);
   border: 2px solid var(--accent);
-  border-radius: 10px;
+  border-radius: 5px;
   color: var(--text);
   cursor: pointer;
   margin: 0 2px;
   text-align: center;
   font-size: 14px;
-  box-shadow: var(--shadow);
   transition: all 0.3s ease;
 }
 
 .tab-btn:hover {
-  background: var(--button-hover);
-  color: var(--body-bg);
+  background: var(--accent);
+  color: #0A0A0A;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 209, 255, 0.5);
 }
 
-.tab-btn.active {
+.tab-btn:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.tab-btn[aria-selected="true"] {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--body-bg);
-  box-shadow: 0 6px 20px rgba(0, 209, 255, 0.7);
+  color: #0A0A0A;
 }
 
 .station-list {
@@ -187,7 +185,6 @@ h1 {
   scrollbar-width: thin;
   scrollbar-color: var(--accent) var(--container-bg);
   flex-grow: 1;
-  box-shadow: var(--shadow);
   transition: border-color 0.4s ease;
 }
 
@@ -207,25 +204,28 @@ h1 {
 .station-item {
   padding: 12px;
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 500;
   border: 1px solid var(--text);
   margin: 5px 0;
   color: var(--text);
-  background: var(--button-bg);
+  background: var(--container-bg);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: var(--shadow);
   transition: all 0.3s ease;
 }
 
 .station-item:hover, .station-item.selected {
-  background: var(--button-hover) !important;
+  background: var(--accent) !important;
   border: 2px solid var(--accent) !important;
-  color: var(--body-bg);
+  color: #0A0A0A;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 209, 255, 0.5);
+}
+
+.station-item:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .station-item .favorite-btn {
@@ -255,7 +255,6 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: none;
 }
 
 .station-item.empty::before {
@@ -281,8 +280,7 @@ h1 {
   justify-content: center;
   gap: 20px;
   z-index: 10;
-  box-shadow: var(--shadow);
-  transition: all 0.3s ease;
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 
 .controls {
@@ -305,7 +303,6 @@ h1 {
   animation: waveAnimation 1.2s infinite ease-in-out;
   animation-play-state: paused;
   transition: background 0.4s ease;
-  box-shadow: 0 0 10px rgba(0, 209, 255, 0.5);
 }
 
 .wave-bar:nth-child(2) { animation-delay: 0.2s; }
@@ -324,12 +321,11 @@ h1 {
   width: 80px;
   height: 80px;
   font-size: 32px;
-  background: var(--button-bg);
+  background: var(--container-bg);
   color: var(--text);
   border: 4px solid var(--accent);
-  border-radius: 10px;
+  border-radius: 15px;
   cursor: pointer;
-  box-shadow: var(--shadow);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -337,15 +333,18 @@ h1 {
 }
 
 .control-btn:hover {
-  background: var(--button-hover);
-  color: var(--body-bg);
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 209, 255, 0.7);
+  background: var(--accent);
+  color: #0A0A0A;
+  transform: scale(1.15);
 }
 
 .control-btn:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow);
+  transform: scale(0.95);
+}
+
+.control-btn:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 @media (max-width: 720px) {
@@ -364,7 +363,7 @@ h1 {
     height: 70px;
     font-size: 24px;
     border-width: 2px;
-    border-radius: 8px;
+    border-radius: 10px;
   }
 
   .station-list {

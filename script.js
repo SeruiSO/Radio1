@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Перевірка наявності всіх необхідних елементів
   if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle) {
     console.error("Один із необхідних DOM-елементів не знайдено");
+    // Відкладена ініціалізація
     setTimeout(initializeApp, 100);
     return;
   }
@@ -32,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function initializeApp() {
     // Налаштування аудіо
     audio.preload = "auto";
+    audio.playsinline = true; // Для стабільного відтворення в фоні
     audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 
     // Прив’язка обробників подій для кнопок вкладок
@@ -117,43 +119,78 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Теми
     const themes = {
-      "neon-cyber": {
-        bodyBg: "#0F1419",
-        containerBg: "#1A252F",
-        accent: "#00D1FF",
-        text: "#E0E6ED",
-        accentGradient: "#003D4D"
+      "neon-pulse": {
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
+        accent: "#00F0FF",
+        text: "#F0F0F0",
+        accentGradient: "#003C4B"
       },
-      "crimson-pulse": {
-        bodyBg: "#0F1419",
-        containerBg: "#1A252F",
-        accent: "#FF4D88",
-        text: "#E0E6ED",
-        accentGradient: "#4D1A2E"
-      },
-      "lime-neon": {
-        bodyBg: "#0F1419",
-        containerBg: "#1A252F",
+      "lime-surge": {
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
         accent: "#B2FF59",
-        text: "#E0E6ED",
+        text: "#E8F5E9",
         accentGradient: "#2E4B2F"
       },
-      "violet-glow": {
-        bodyBg: "#0F1419",
-        containerBg: "#1A252F",
+      "flamingo-flash": {
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
+        accent: "#FF4081",
+        text: "#FCE4EC",
+        accentGradient: "#4B1A2E"
+      },
+      "violet-vortex": {
+        bodyBg: "#121212",
+        containerBg: "#1A1A1A",
         accent: "#7C4DFF",
-        text: "#E0E6ED",
+        text: "#EDE7F6",
         accentGradient: "#2E1A47"
       },
-      "amber-rush": {
-        bodyBg: "#0F1419",
-        containerBg: "#1A252F",
-        accent: "#FFC107",
-        text: "#E0E6ED",
-        accentGradient: "#4D3D00"
+      "aqua-glow": {
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
+        accent: "#26C6DA",
+        text: "#B2EBF2",
+        accentGradient: "#1A3C4B"
+      },
+      "cosmic-indigo": {
+        bodyBg: "#121212",
+        containerBg: "#1A1A1A",
+        accent: "#3F51B5",
+        text: "#BBDEFB",
+        accentGradient: "#1A2A5A"
+      },
+      "mystic-jade": {
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
+        accent: "#26A69A",
+        text: "#B2DFDB",
+        accentGradient: "#1A3C4B"
+      },
+      "aurora-haze": {
+        bodyBg: "#121212",
+        containerBg: "#1A1A1A",
+        accent: "#64FFDA",
+        text: "#E0F7FA",
+        accentGradient: "#1A4B4B"
+      },
+      "starlit-amethyst": {
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
+        accent: "#B388FF",
+        text: "#E1BEE7",
+        accentGradient: "#2E1A47"
+      },
+      "lunar-frost": {
+        bodyBg: "#F5F7FA",
+        containerBg: "#FFFFFF",
+        accent: "#40C4FF",
+        text: "#212121",
+        accentGradient: "#B3E5FC"
       }
     };
-    let currentTheme = localStorage.getItem("selectedTheme") || "neon-cyber";
+    let currentTheme = localStorage.getItem("selectedTheme") || "neon-pulse";
 
     function applyTheme(theme) {
       const root = document.documentElement;
@@ -173,11 +210,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function toggleTheme() {
       const themesOrder = [
-        "neon-cyber",
-        "crimson-pulse",
-        "lime-neon",
-        "violet-glow",
-        "amber-rush"
+        "neon-pulse",
+        "lime-surge",
+        "flamingo-flash",
+        "violet-vortex",
+        "aqua-glow",
+        "cosmic-indigo",
+        "mystic-jade",
+        "aurora-haze",
+        "starlit-amethyst",
+        "lunar-frost"
       ];
       const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
       applyTheme(nextTheme);
@@ -213,6 +255,28 @@ document.addEventListener("DOMContentLoaded", () => {
           tryAutoPlay();
         }
       });
+    }
+
+    // Функція для отримання метаданих потоку
+    async function fetchStreamMetadata(url) {
+      try {
+        const response = await fetch(`${url}/status-json.xsl`, { cache: "no-cache" });
+        const data = await response.json();
+        const track = data.icestats?.source?.title || stationItems[currentIndex].dataset.name;
+        if ("mediaSession" in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: track,
+            artist: stationItems[currentIndex].dataset.genre || "Unknown",
+            album: stationItems[currentIndex].dataset.country || "Unknown",
+            artwork: [
+              { src: "icon-192.png", sizes: "192x192", type: "image/png" },
+              { src: "icon-512.png", sizes: "512x512", type: "image/png" }
+            ]
+          });
+        }
+      } catch (error) {
+        console.error("Помилка отримання метаданих:", error);
+      }
     }
 
     // Функція для спроби відтворення
@@ -251,6 +315,8 @@ document.addEventListener("DOMContentLoaded", () => {
           errorCount = 0;
           console.log("Відтворення розпочато успішно");
           document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+          // Оновлення метаданих
+          fetchStreamMetadata(stationItems[currentIndex].dataset.value);
         })
         .catch(error => {
           console.error("Помилка відтворення:", error);
@@ -273,9 +339,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const maxIndex = tab === "best" ? favoriteStations.length : stationLists[tab]?.length || 0;
       currentIndex = savedIndex < maxIndex ? savedIndex : 0;
       updateStationList();
-      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.setAttribute("aria-selected", "false"));
       const activeBtn = document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ukraine", "pop"].indexOf(tab) + 1})`);
-      if (activeBtn) activeBtn.classList.add("active");
+      if (activeBtn) activeBtn.setAttribute("aria-selected", "true");
       if (stationItems?.length && currentIndex < stationItems.length) tryAutoPlay();
     }
 
@@ -306,7 +372,10 @@ document.addEventListener("DOMContentLoaded", () => {
         item.dataset.name = station.name;
         item.dataset.genre = station.genre;
         item.dataset.country = station.country;
-        item.innerHTML = `${station.emoji} ${station.name}<button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button>`;
+        item.setAttribute("role", "option");
+        item.setAttribute("tabindex", "0");
+        item.setAttribute("aria-selected", index === currentIndex ? "true" : "false");
+        item.innerHTML = `${station.emoji} ${station.name}<button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}" aria-label="Додати до улюблених">★</button>`;
         fragment.appendChild(item);
       });
       stationList.innerHTML = "";
@@ -326,6 +395,16 @@ document.addEventListener("DOMContentLoaded", () => {
           toggleFavorite(favoriteBtn.parentElement.dataset.name);
         }
       };
+
+      // Додаємо клавіатурну навігацію
+      stationItems.forEach(item => {
+        item.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            item.click();
+          }
+        });
+      });
 
       if (stationItems.length && currentIndex < stationItems.length) {
         changeStation(currentIndex);
@@ -349,7 +428,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function changeStation(index) {
       if (index < 0 || index >= stationItems.length || stationItems[index].classList.contains("empty")) return;
       const item = stationItems[index];
-      stationItems?.forEach(i => i.classList.remove("selected"));
+      stationItems?.forEach(i => i.setAttribute("aria-selected", "false"));
+      item.setAttribute("aria-selected", "true");
       item.classList.add("selected");
       currentIndex = index;
       updateCurrentStationInfo(item);
@@ -387,8 +467,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: item.dataset.name || "Unknown Station",
-          artist: `${item.dataset.genre || "Unknown"} | ${item.dataset.country || "Unknown"}`,
-          album: "Radio Music"
+          artist: item.dataset.genre || "Unknown",
+          album: item.dataset.country || "Unknown",
+          artwork: [
+            { src: "icon-192.png", sizes: "192x192", type: "image/png" },
+            { src: "icon-512.png", sizes: "512x512", type: "image/png" }
+          ]
         });
       }
     }
@@ -479,6 +563,12 @@ document.addEventListener("DOMContentLoaded", () => {
       playPauseBtn.textContent = "⏸";
       document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
       localStorage.setItem("isPlaying", isPlaying);
+      // Періодичне оновлення метаданих
+      setInterval(() => {
+        if (isPlaying && stationItems[currentIndex]) {
+          fetchStreamMetadata(stationItems[currentIndex].dataset.value);
+        }
+      }, 15000);
     });
 
     audio.addEventListener("pause", () => {
@@ -535,6 +625,22 @@ document.addEventListener("DOMContentLoaded", () => {
       navigator.mediaSession.setActionHandler("pause", togglePlayPause);
       navigator.mediaSession.setActionHandler("previoustrack", prevStation);
       navigator.mediaSession.setActionHandler("nexttrack", nextStation);
+      navigator.mediaSession.setActionHandler("seekbackward", () => {
+        // Обмежено для потокового аудіо, але підтримує Bluetooth
+        console.log("Seek backward");
+      });
+      navigator.mediaSession.setActionHandler("seekforward", () => {
+        // Обмежено для потокового аудіо, але підтримує Bluetooth
+        console.log("Seek forward");
+      });
+      navigator.mediaSession.setActionHandler("stop", () => {
+        audio.pause();
+        togglePlayPause();
+      });
+      navigator.mediaSession.setActionHandler("seekto", details => {
+        // Обмежено для потокового аудіо, але підтримує Bluetooth
+        console.log("Seek to:", details.seekTime);
+      });
     }
 
     // Відстеження взаємодії користувача
