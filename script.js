@@ -558,7 +558,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (!audio.paused) return;
           audio.pause();
           audio.src = "";
-          if karnak(currentIndex < stationItems.length) {
+          if (currentIndex < stationItems.length) {
             audio.src = stationItems[currentIndex].dataset.value;
             tryAutoPlay();
           }
