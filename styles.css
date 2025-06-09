@@ -1,4 +1,4 @@
-/* Updated on June 9, 2025 */
+/* Ваші існуючі стилі... */
 :root {
   --body-bg: #0A0A0A;
   --container-bg: #121212;
@@ -84,7 +84,7 @@ h1 {
   top: 0;
   z-index: 10;
   box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
-  transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.4s ease;
 }
 
 .current-station-info:hover {
@@ -97,6 +97,15 @@ h1 {
   align-items: center;
   gap: 15px;
   width: 100%;
+}
+
+.station-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent);
+  transition: all 0.3s ease;
 }
 
 .station-text {
@@ -112,68 +121,14 @@ h1 {
   align-items: center;
 }
 
-.current-station-info .station-genre {
+.current-station-info .station-details {
   font-size: 18px;
   font-weight: 400;
   margin-top: 5px;
 }
 
-.current-station-info .station-country {
-  font-size: 18px;
-  font-weight: 400;
-  margin-top: 2px;
-}
-
-.search-container {
-  display: flex;
-  gap: 10px;
-  margin: 10px 0;
-  position: sticky;
-  top: 120px;
-  z-index: 9;
-  background: var(--container-bg);
-  padding: 5px;
-  border-radius: 10px;
-  border: 1px solid var(--accent);
-  transition: border-color 0.4s ease;
-}
-
-#searchInput {
-  flex: 1;
-  padding: 10px;
-  border: 2px solid var(--accent);
-  border-radius: 5px;
-  background: var(--container-bg);
-  color: var(--text);
-  font-size: 16px;
-  transition: all 0.3s ease;
-}
-
-#searchInput:focus {
-  outline: none;
-  border-color: var(--accent);
-  background: #1A1A1A;
-}
-
-#searchBtn, #clearSearchBtn {
-  padding: 10px;
-  background: var(--container-bg);
-  border: 2px solid var(--accent);
-  border-radius: 5px;
-  color: var(--text);
-  cursor: pointer;
-  font-size: 16px;
-  transition: all 0.3s ease;
-}
-
-#searchBtn:hover, #clearSearchBtn:hover {
-  background: var(--accent);
-  color: #0A0A0A;
-  transform: translateY(-2px);
-}
-
-#clearSearchBtn {
-  display: none;
+.current-station-info .station-details span {
+  margin-right: 10px;
 }
 
 .tabs {
@@ -181,13 +136,13 @@ h1 {
   justify-content: space-between;
   margin: 5px 0;
   position: sticky;
-  top: 170px;
+  bottom: 100px;
   z-index: 10;
   background: var(--container-bg);
   padding: 5px;
   border-radius: 10px;
   border: 1px solid var(--accent);
-  transition: background 0.4s ease, border-color 0.4s ease;
+  transition: all 0.4s ease;
 }
 
 .tab-btn {
@@ -217,7 +172,7 @@ h1 {
 }
 
 .station-list {
-  max-height: 400px;
+  max-height: 500px;
   overflow-y: auto;
   background: var(--container-bg);
   border: 2px solid var(--accent);
@@ -317,7 +272,7 @@ h1 {
   justify-content: center;
   gap: 20px;
   z-index: 10;
-  transition: background 0.4s ease, border-color 0.4s ease;
+  transition: all 0.4s ease;
 }
 
 .controls {
@@ -379,95 +334,41 @@ h1 {
   transform: scale(0.95);
 }
 
+.search-bar {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 2px solid var(--accent);
+  border-radius: 5px;
+  background: var(--container-bg);
+  color: var(--text);
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--container-bg);
+  transform: scale(1.02);
+}
+
 @media (max-width: 720px) {
-  h1 {
-    font-size: 2em;
-  }
-
-  .container {
-    padding: 10px;
-    margin: 0 5px;
-    min-height: 90vh;
-  }
-
-  .control-btn {
-    width: 70px;
-    height: 70px;
-    font-size: 24px;
-    border-width: 2px;
-    border-radius: 10px;
-  }
-
-  .station-list {
-    max-height: 300px;
-    margin: 8px 0;
-    padding: 8px;
-  }
-
-  .station-item {
-    padding: 10px;
-    margin: 4px 0;
-  }
-
-  .theme-toggle {
-    top: 5px;
-    left: 5px;
-    padding: 4px;
-    height: 35px;
-    width: 35px;
-  }
-
-  .current-station-info {
-    padding: 12px;
-    height: auto;
-  }
-
-  .current-station-info .station-name {
-    font-size: 24px;
-  }
-
-  .current-station-info .station-genre {
-    font-size: 16px;
-  }
-
-  .current-station-info .station-country {
-    font-size: 16px;
-  }
-
-  .station-info-content {
-    gap: 10px;
-  }
-
-  .wave-progress {
-    width: 70px;
-    height: 50px;
-  }
-
-  .wave-bar {
-    width: 8px;
-  }
-
-  .tab-btn {
-    padding: 10px;
-    font-size: 12px;
-    border-width: 1px;
-  }
-
-  .search-container {
-    top: 100px;
-  }
-
-  .tabs {
-    top: 150px;
-  }
+  h1 { font-size: 2em; }
+  .container { padding: 10px; margin: 0 5px; min-height: 90vh; }
+  .control-btn { width: 70px; height: 70px; font-size: 24px; border-width: 2px; border-radius: 10px; }
+  .station-list { max-height: 400px; margin: 8px 0; padding: 8px; }
+  .station-item { padding: 10px; margin: 4px 0; }
+  .theme-toggle { top: 5px; left: 5px; padding: 4px; height: 35px; width: 35px; }
+  .current-station-info { padding: 12px; height: auto; }
+  .current-station-info .station-name { font-size: 24px; }
+  .current-station-info .station-details { font-size: 16px; }
+  .station-icon { width: 50px; height: 50px; }
+  .search-bar { font-size: 14px; padding: 8px; }
+  .tabs { bottom: 90px; }
 }
 
 @media (max-height: 1600px) {
-  .container {
-    min-height: 85vh;
-  }
-
-  .station-list {
-    max-height: 350px;
-  }
+  .container { min-height: 85vh; }
+  .station-list { max-height: 450px; }
 }

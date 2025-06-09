@@ -1,4 +1,4 @@
-const CACHE_NAME = "radio-pwa-cache-v971";
+const CACHE_NAME = "radio-pwa-cache-v973";
 const urlsToCache = [
   "/",
   "index.html",
@@ -15,12 +15,7 @@ let isInitialLoad = true;
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log("Кешування файлів:", urlsToCache);
-        return cache.addAll(urlsToCache).catch(error => {
-          console.error("Помилка кешування:", error);
-        });
-      })
+      .then(cache => cache.addAll(urlsToCache))
       .then(() => self.skipWaiting())
   );
 });
@@ -30,16 +25,12 @@ self.addEventListener("fetch", event => {
     if (isInitialLoad) {
       event.respondWith(
         fetch(event.request, { cache: "no-cache" })
-          .then(networkResponse => {
-            if (!networkResponse || networkResponse.status !== 200) {
-              return caches.match(event.request) || Response.error();
-            }
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, responseToCache);
-            });
+          .then(response => {
+            if (!response.ok) return caches.match(event.request) || Response.error();
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
             isInitialLoad = false;
-            return networkResponse;
+            return response;
           })
           .catch(() => caches.match(event.request) || Response.error())
       );
@@ -47,19 +38,13 @@ self.addEventListener("fetch", event => {
       event.respondWith(
         caches.match(event.request)
           .then(cachedResponse => {
-            const fetchPromise = fetch(event.request, { cache: "no-cache" })
-              .then(networkResponse => {
-                if (networkResponse && networkResponse.status === 200) {
-                  const responseToCache = networkResponse.clone();
-                  caches.open(CACHE_NAME).then(cache => {
-                    cache.put(event.request, responseToCache);
-                  });
-                  return networkResponse;
-                }
-                return cachedResponse || Response.error();
-              })
-              .catch(() => cachedResponse || Response.error());
-            return cachedResponse || fetchPromise;
+            return cachedResponse || fetch(event.request).then(networkResponse => {
+              if (networkResponse.ok) {
+                const responseToCache = networkResponse.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
+              }
+              return networkResponse;
+            });
           })
       );
     }
@@ -75,49 +60,11 @@ self.addEventListener("fetch", event => {
 self.addEventListener("activate", event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (!cacheWhitelist.includes(cacheName)) {
-            console.log(`Видалення старого кешу: ${cacheName}`);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      console.log("Активація нового Service Worker");
+    caches.keys().then(cacheNames => Promise.all(
+      cacheNames.map(cacheName => !cacheWhitelist.includes(cacheName) && caches.delete(cacheName))
+    )).then(() => {
       isInitialLoad = true;
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-          client.postMessage({ type: "UPDATE", message: "Додаток оновлено до нової версії!" });
-        });
-      });
-    }).then(() => self.clients.claim())
+      self.clients.claim();
+    })
   );
 });
-
-let wasOnline = navigator.onLine;
-
-setInterval(() => {
-  fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
-    .then(() => {
-      if (!wasOnline) {
-        wasOnline = true;
-        self.clients.matchAll().then(clients => {
-          clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: true });
-          });
-        });
-      }
-    })
-    .catch(() => {
-      if (wasOnline) {
-        wasOnline = false;
-        self.clients.matchAll().then(clients => {
-          clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: false });
-          });
-        });
-      }
-    });
-}, 1000);
