@@ -50,9 +50,12 @@
   <link rel="icon" href="icon-192.png" type="image/png">
 </head>
 <body>
+  <!-- Кнопка перемикання теми -->
   <button class="theme-toggle">🌙</button>
   <div class="container">
+    <!-- Заголовок -->
     <h1>🎧 RADIO S O</h1>
+    <!-- Інформація про поточну станцію -->
     <div class="current-station-info" id="currentStationInfo">
       <div class="station-info-content">
         <div class="station-text">
@@ -62,11 +65,13 @@
         </div>
       </div>
     </div>
+    <!-- Контейнер пошуку -->
     <div class="search-container" id="searchContainer">
       <input type="text" id="searchInput" placeholder="Пошук станцій..." maxlength="50">
       <button id="searchBtn">🔍</button>
       <button id="clearSearchBtn">✖</button>
     </div>
+    <!-- Вкладки -->
     <div class="tabs">
       <button class="tab-btn active">B</button>
       <button class="tab-btn">T</button>
@@ -75,7 +80,9 @@
       <button class="tab-btn">P</button>
       <button class="tab-btn">S</button>
     </div>
+    <!-- Список станцій -->
     <div class="station-list" id="stationList"></div>
+    <!-- Контейнер керування -->
     <div class="controls-container">
       <div class="controls">
         <div class="wave-progress">
@@ -93,6 +100,7 @@
       </div>
     </div>
   </div>
+  <!-- Аудіоплеєр -->
   <audio id="audioPlayer" preload="auto"></audio>
   <script src="script.js"></script>
 </body>
