@@ -1,4 +1,4 @@
-const CACHE_NAME = "radio-pwa-cache-v57";
+const CACHE_NAME = "radio-pwa-cache-v967";
 const urlsToCache = [
   "/",
   "index.html",
@@ -26,8 +26,7 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("fetch", event => {
-  const url = new URL(event.request.url);
-  if (url.pathname.includes("stations.json")) {
+  if (event.request.url.includes("stations.json")) {
     if (isInitialLoad) {
       event.respondWith(
         fetch(event.request, { cache: "no-cache" })
@@ -64,25 +63,6 @@ self.addEventListener("fetch", event => {
           })
       );
     }
-  } else if (url.href.includes("radio-browser.info")) {
-    event.respondWith(
-      caches.match(event.request)
-        .then(cachedResponse => {
-          const fetchPromise = fetch(event.request, { cache: "no-cache" })
-            .then(networkResponse => {
-              if (networkResponse && networkResponse.status === 200) {
-                const responseToCache = networkResponse.clone();
-                caches.open(CACHE_NAME).then(cache => {
-                  cache.put(event.request, responseToCache);
-                });
-                return networkResponse;
-              }
-              return cachedResponse || Response.error();
-            })
-            .catch(() => cachedResponse || Response.error());
-          return cachedResponse || fetchPromise;
-        })
-    );
   } else {
     event.respondWith(
       caches.match(event.request)
@@ -130,8 +110,7 @@ setInterval(() => {
         });
       }
     })
-    .catch(error => {
-      console.error("Помилка перевірки мережі:", error);
+    .catch(() => {
       if (wasOnline) {
         wasOnline = false;
         self.clients.matchAll().then(clients => {
