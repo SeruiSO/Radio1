@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentStationInfo = document.getElementById("currentStationInfo");
   const searchInput = document.getElementById("searchInput");
   const stationIcon = document.getElementById("stationIcon");
+  const themeToggle = document.querySelector(".theme-toggle");
 
   let currentTab = localStorage.getItem("currentTab") || "techno";
   let currentIndex = 0;
@@ -15,9 +16,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Отримання випадкового сервера Radio Browser
   async function getRandomServer() {
-    const response = await fetch("https://all.api.radio-browser.info/servers");
-    const servers = await response.json();
-    return servers[Math.floor(Math.random() * servers.length)];
+    try {
+      const response = await fetch("https://de1.api.radio-browser.info/json/servers");
+      const servers = await response.json();
+      return servers[Math.floor(Math.random() * servers.length)];
+    } catch (error) {
+      console.error("Помилка отримання серверів:", error);
+      return { name: "de1.api.radio-browser.info" };
+    }
   }
 
   // Завантаження станцій з Radio Browser
@@ -35,13 +41,14 @@ document.addEventListener("DOMContentLoaded", () => {
           trance: stations.filter(s => s.tags.includes("trance")),
           ua: stations.filter(s => s.countrycode === "UA"),
           pop: stations.filter(s => s.tags.includes("pop")),
-          search: []
+          search: stations
         };
         filterAndUpdateStations();
       } else {
         throw new Error("Помилка завантаження станцій");
       }
     } catch (error) {
+      console.error("Помилка:", error);
       stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції</div>";
     }
   }
@@ -192,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Керування
+  // Керування відтворенням
   function togglePlayPause() {
     if (audio.paused) {
       isPlaying = true;
@@ -208,8 +215,18 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("isPlaying", isPlaying);
   }
 
+  // Перемикання станцій
   function prevStation() { changeStation(currentIndex > 0 ? currentIndex - 1 : stationItems.length - 1); }
   function nextStation() { changeStation(currentIndex < stationItems.length - 1 ? currentIndex + 1 : 0); }
+
+  // Темна/світла тема
+  themeToggle.addEventListener("click", () => {
+    const isDark = document.body.style.getPropertyValue("--body-bg") === "#0A0A0A";
+    document.body.style.setProperty("--body-bg", isDark ? "#F0F0F0" : "#0A0A0A");
+    document.body.style.setProperty("--container-bg", isDark ? "#E0E0E0" : "#121212");
+    document.body.style.setProperty("--text", isDark ? "#0A0A0A" : "#F0F0F0");
+    themeToggle.textContent = isDark ? "☀" : "🌙";
+  });
 
   // Обробники подій
   searchInput.addEventListener("input", () => {
@@ -228,15 +245,17 @@ document.addEventListener("DOMContentLoaded", () => {
   switchTab(currentTab);
 
   // Оновлення метаданих
-  audio.addEventListener("timeupdate", () => {
+  audio.addEventListener("timeupdate", async () => {
     if ("mediaSession" in navigator && stationItems[currentIndex]) {
-      fetch(`https://${(await getRandomServer()).name}/json/url/${stationItems[currentIndex].dataset.uuid}`)
-        .then(res => res.json())
-        .then(data => {
-          navigator.mediaSession.metadata.title = data.name;
-          navigator.mediaSession.metadata.artist = data.artist || "-";
-        })
-        .catch(() => {});
+      try {
+        const server = await getRandomServer();
+        const response = await fetch(`https://${server.name}/json/url/${stationItems[currentIndex].dataset.uuid}`);
+        const data = await response.json();
+        navigator.mediaSession.metadata.title = data.name;
+        navigator.mediaSession.metadata.artist = data.artist || "-";
+      } catch (error) {
+        console.error("Помилка оновлення метаданих:", error);
+      }
     }
   });
 });

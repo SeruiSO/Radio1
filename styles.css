@@ -4,6 +4,7 @@
   --accent: #00F0FF;
   --text: #F0F0F0;
   --accent-gradient: #003C4B;
+  --accent-rgb: 0, 240, 255;
 }
 
 body {
@@ -331,6 +332,35 @@ h1 {
   outline: none;
   border-color: var(--accent);
   transform: scale(1.02);
+}
+
+.tab-selector {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--container-bg);
+  padding: 15px;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  z-index: 100;
+  display: flex;
+  gap: 10px;
+}
+
+.tab-select-btn {
+  padding: 8px 15px;
+  background: var(--container-bg);
+  border: 2px solid var(--accent);
+  border-radius: 5px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-select-btn:hover {
+  background: var(--accent);
+  color: #0A0A0A;
 }
 
 @media (max-width: 480px) {
