@@ -14,6 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const audio = document.getElementById("audioPlayer");
   const stationList = document.getElementById("stationList");
   const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
+  const prevBtn = document.querySelector(".controls .control-btn:nth-child(1)");
+  const nextBtn = document.querySelector(".controls .control-btn:nth-child(3)");
   const currentStationInfo = document.getElementById("currentStationInfo");
   const themeToggle = document.querySelector(".theme-toggle");
   const searchInput = document.getElementById("searchInput");
@@ -21,11 +23,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const clearSearchBtn = document.getElementById("clearSearchBtn");
   const tabButtons = document.querySelectorAll(".tab-btn");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !searchInput || !searchBtn || !clearSearchBtn || !tabButtons.length) {
+  if (!audio || !stationList || !playPauseBtn || !prevBtn || !nextBtn || !currentStationInfo || !themeToggle || !searchInput || !searchBtn || !clearSearchBtn || !tabButtons.length) {
     console.error("Один або кілька необхідних DOM-елементів не знайдено:", {
       audio: !!audio,
       stationList: !!stationList,
       playPauseBtn: !!playPauseBtn,
+      prevBtn: !!prevBtn,
+      nextBtn: !!nextBtn,
       currentStationInfo: !!currentStationInfo,
       themeToggle: !!themeToggle,
       searchInput: !!searchInput,
@@ -56,9 +60,9 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.addEventListener("click", () => switchTab(tab));
     });
 
-    document.querySelector(".controls .control-btn:nth-child(1)").addEventListener("click", prevStation);
-    document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", togglePlayPause);
-    document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", nextStation);
+    prevBtn.addEventListener("click", prevStation);
+    playPauseBtn.addEventListener("click", togglePlayPause);
+    nextBtn.addEventListener("click", nextStation);
 
     searchBtn.addEventListener("click", () => {
       const query = searchInput.value.trim();
@@ -465,7 +469,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("volume", audio.volume);
     });
 
-    window.addEncoderListener("online", () => {
+    window.addEventListener("online", () => {
       if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
         audio.pause();
         audio.src = "";
