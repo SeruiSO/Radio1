@@ -1,9 +1,10 @@
 {
-  "name": "Radio S O",
-  "short_name": "Radio S O",
+  "name": "RADIO MUSIC",
+  "short_name": "Radio",
+  "description": "Прогресивний веб-додаток для прослуховування радіостанцій",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1a1a",
+  "background_color": "#0A0A0A",
   "theme_color": "#00F0FF",
   "icons": [
     {

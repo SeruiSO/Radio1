@@ -1,4 +1,3 @@
-/* Ваші існуючі стилі... */
 :root {
   --body-bg: #0A0A0A;
   --container-bg: #121212;
@@ -30,7 +29,7 @@ body {
   padding: 15px;
   border-radius: 15px;
   border: 1px solid var(--accent);
-  margin: 0 10px;
+  margin: 0 5px;
   min-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -39,7 +38,7 @@ body {
 }
 
 h1 {
-  font-size: 2.5em;
+  font-size: 2em;
   margin: 5px 0;
   text-align: center;
   color: var(--accent);
@@ -71,8 +70,8 @@ h1 {
 
 .current-station-info {
   background: linear-gradient(45deg, var(--container-bg), var(--accent-gradient));
-  padding: 20px;
-  border-radius: 12px;
+  padding: 15px;
+  border-radius: 10px;
   margin: 10px 0;
   color: var(--text);
   border: 2px solid var(--accent);
@@ -83,25 +82,25 @@ h1 {
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
+  box-shadow: 0 4px 10px rgba(var(--accent-rgb), 0.3);
   transition: all 0.4s ease;
 }
 
 .current-station-info:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(var(--accent-rgb), 0.5);
 }
 
 .station-info-content {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
   width: 100%;
 }
 
 .station-icon {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--accent);
@@ -115,20 +114,18 @@ h1 {
 }
 
 .current-station-info .station-name {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
-  display: inline-flex;
-  align-items: center;
 }
 
 .current-station-info .station-details {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 400;
   margin-top: 5px;
 }
 
 .current-station-info .station-details span {
-  margin-right: 10px;
+  margin-right: 5px;
 }
 
 .tabs {
@@ -136,7 +133,7 @@ h1 {
   justify-content: space-between;
   margin: 5px 0;
   position: sticky;
-  bottom: 100px;
+  bottom: 90px;
   z-index: 10;
   background: var(--container-bg);
   padding: 5px;
@@ -147,14 +144,13 @@ h1 {
 
 .tab-btn {
   flex: 1;
-  padding: 12px;
+  padding: 10px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 5px;
   color: var(--text);
   cursor: pointer;
   margin: 0 2px;
-  text-align: center;
   font-size: 14px;
   transition: all 0.3s ease;
 }
@@ -172,7 +168,7 @@ h1 {
 }
 
 .station-list {
-  max-height: 500px;
+  max-height: 400px;
   overflow-y: auto;
   background: var(--container-bg);
   border: 2px solid var(--accent);
@@ -186,7 +182,7 @@ h1 {
 }
 
 .station-list::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .station-list::-webkit-scrollbar-track {
@@ -195,11 +191,11 @@ h1 {
 
 .station-list::-webkit-scrollbar-thumb {
   background: var(--accent);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 .station-item {
-  padding: 12px;
+  padding: 10px;
   cursor: pointer;
   border-radius: 8px;
   font-weight: 500;
@@ -214,8 +210,8 @@ h1 {
 }
 
 .station-item:hover, .station-item.selected {
-  background: var(--accent) !important;
-  border: 2px solid var(--accent) !important;
+  background: var(--accent);
+  border: 2px solid var(--accent);
   color: #0A0A0A;
   transform: translateY(-2px);
 }
@@ -224,7 +220,7 @@ h1 {
   background: none;
   border: none;
   color: var(--text);
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
   transition: color 0.3s ease;
 }
@@ -242,23 +238,15 @@ h1 {
   font-style: italic;
   color: var(--text);
   opacity: 0.7;
-  padding: 20px;
+  padding: 15px;
   border: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
-.station-item.empty::before {
-  content: "⏳";
-  font-size: 24px;
+.station-item .station-item-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
   margin-right: 10px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 
 .controls-container {
@@ -266,11 +254,11 @@ h1 {
   bottom: 0;
   background: var(--container-bg);
   border-top: 2px solid var(--accent);
-  padding: 15px;
+  padding: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 15px;
   z-index: 10;
   transition: all 0.4s ease;
 }
@@ -278,18 +266,18 @@ h1 {
 .controls {
   display: flex;
   justify-content: center;
-  gap: 50px;
+  gap: 40px;
 }
 
 .wave-progress {
   display: flex;
-  gap: 4px;
-  height: 60px;
-  width: 84px;
+  gap: 3px;
+  height: 50px;
+  width: 70px;
 }
 
 .wave-bar {
-  width: 10px;
+  width: 8px;
   background: var(--accent);
   border-radius: 5px;
   animation: waveAnimation 1.2s infinite ease-in-out;
@@ -310,65 +298,52 @@ h1 {
 }
 
 .control-btn {
-  width: 80px;
-  height: 80px;
-  font-size: 32px;
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
   background: var(--container-bg);
   color: var(--text);
-  border: 4px solid var(--accent);
-  border-radius: 15px;
+  border: 3px solid var(--accent);
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .control-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
-  transform: scale(1.15);
-}
-
-.control-btn:active {
-  transform: scale(0.95);
+  transform: scale(1.1);
 }
 
 .search-bar {
   width: 100%;
-  padding: 10px;
+  padding: 8px;
   margin: 10px 0;
   border: 2px solid var(--accent);
   border-radius: 5px;
   background: var(--container-bg);
   color: var(--text);
-  font-size: 16px;
+  font-size: 14px;
   transition: all 0.3s ease;
 }
 
 .search-bar:focus {
   outline: none;
   border-color: var(--accent);
-  background: var(--container-bg);
   transform: scale(1.02);
 }
 
-@media (max-width: 720px) {
-  h1 { font-size: 2em; }
-  .container { padding: 10px; margin: 0 5px; min-height: 90vh; }
-  .control-btn { width: 70px; height: 70px; font-size: 24px; border-width: 2px; border-radius: 10px; }
-  .station-list { max-height: 400px; margin: 8px 0; padding: 8px; }
-  .station-item { padding: 10px; margin: 4px 0; }
-  .theme-toggle { top: 5px; left: 5px; padding: 4px; height: 35px; width: 35px; }
-  .current-station-info { padding: 12px; height: auto; }
-  .current-station-info .station-name { font-size: 24px; }
-  .current-station-info .station-details { font-size: 16px; }
-  .station-icon { width: 50px; height: 50px; }
-  .search-bar { font-size: 14px; padding: 8px; }
-  .tabs { bottom: 90px; }
-}
-
-@media (max-height: 1600px) {
-  .container { min-height: 85vh; }
-  .station-list { max-height: 450px; }
+@media (max-width: 480px) {
+  h1 { font-size: 1.5em; }
+  .container { padding: 8px; margin: 0; }
+  .control-btn { width: 50px; height: 50px; font-size: 20px; border-width: 2px; }
+  .station-list { max-height: 300px; margin: 5px 0; padding: 5px; }
+  .station-item { padding: 8px; margin: 3px 0; }
+  .theme-toggle { top: 5px; left: 5px; padding: 4px; height: 30px; width: 30px; }
+  .current-station-info { padding: 10px; }
+  .current-station-info .station-name { font-size: 18px; }
+  .current-station-info .station-details { font-size: 12px; }
+  .station-icon { width: 40px; height: 40px; }
+  .search-bar { font-size: 12px; padding: 6px; }
+  .tabs { bottom: 80px; }
 }
