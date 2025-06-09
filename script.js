@@ -19,9 +19,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("searchInput");
   const searchBtn = document.getElementById("searchBtn");
   const clearSearchBtn = document.getElementById("clearSearchBtn");
+  const tabButtons = document.querySelectorAll(".tab-btn");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !searchInput || !searchBtn || !clearSearchBtn) {
-    console.error("Один із необхідних DOM-елементів не знайдено");
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !searchInput || !searchBtn || !clearSearchBtn || !tabButtons.length) {
+    console.error("Один або кілька необхідних DOM-елементів не знайдено:", {
+      audio: !!audio,
+      stationList: !!stationList,
+      playPauseBtn: !!playPauseBtn,
+      currentStationInfo: !!currentStationInfo,
+      themeToggle: !!themeToggle,
+      searchInput: !!searchInput,
+      searchBtn: !!searchBtn,
+      clearSearchBtn: !!clearSearchBtn,
+      tabButtons: tabButtons.length
+    });
     setTimeout(initializeApp, 100);
     return;
   }
@@ -32,8 +43,15 @@ document.addEventListener("DOMContentLoaded", () => {
     audio.preload = "auto";
     audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 
-    document.querySelectorAll(".tab-btn").forEach((btn, index) => {
-      const tabs = ["best", "techno", "trance", "ukraine", "pop", "search"];
+    // Перевірка кількості вкладок
+    const tabs = ["best", "techno", "trance", "ukraine", "pop", "search"];
+    if (tabButtons.length !== tabs.length) {
+      console.error(`Невідповідність кількості вкладок: очікується ${tabs.length}, знайдено ${tabButtons.length}`);
+      stationList.innerHTML = "<div class='station-item empty'>Помилка ініціалізації вкладок</div>";
+      return;
+    }
+
+    tabButtons.forEach((btn, index) => {
       const tab = tabs[index];
       btn.addEventListener("click", () => switchTab(tab));
     });
@@ -151,16 +169,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const themes = {
-      "neon-pulse": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#00F0FF", text: "#F0F0F0", accentGradient: "#003C4B" },
-      "lime-surge": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#B2FF59", text: "#E8F5E9", accentGradient: "#2E4B2F" },
-      "flamingo-flash": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#FF4081", text: "#FCE4EC", accentGradient: "#4B1A2E" },
-      "violet-vortex": { bodyBg: "#121212", containerBg: "#1A1A1A", accent: "#7C4DFF", text: "#EDE7F6", accentGradient: "#2E1A47" },
-      "aqua-glow": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#26C6DA", text: "#B2EBF2", accentGradient: "#1A3C4B" },
-      "cosmic-indigo": { bodyBg: "#121212", containerBg: "#1A1A1A", accent: "#3F51B5", text: "#BBDEFB", accentGradient: "#1A2A5A" },
-      "mystic-jade": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#26A69A", text: "#B2DFDB", accentGradient: "#1A3C4B" },
-      "aurora-haze": { bodyBg: "#121212", containerBg: "#1A1A1A", accent: "#64FFDA", text: "#E0F7FA", accentGradient: "#1A4B4B" },
-      "starlit-amethyst": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#B388FF", text: "#E1BEE7", accentGradient: "#2E1A47" },
-      "lunar-frost": { bodyBg: "#F5F7FA", containerBg: "#FFFFFF", accent: "#40C4FF", text: "#212121", accentGradient: "#B3E5FC" }
+      "neon-pulse": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#00F0FF", textColor: "#F0F0F0", accentGradient: "#003C4B" },
+      "lime-surge": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#B2FF59", textColor: "#E8F5E9", accentGradient: "#2E4B2F" },
+      "flamingo-flash": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#FF4081", textColor: "#FCE4EC", accentGradient: "#4B1A2E" },
+      "violet-vortex": { bodyBg: "#121212", containerBg: "#1A1A1A", accent: "#7C4DFF", textColor: "#EDE7F6", accentGradient: "#2E1A47" },
+      "aqua-glow": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#26C6DA", textColor: "#B2EBF2", accentGradient: "#1A3C4B" },
+      "cosmic-indigo": { bodyBg: "#121212", containerBg: "#1A1A1A", accent: "#3F51B5", textColor: "#BBDEFB", accentGradient: "#1A2A5A" },
+      "mystic-jade": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#26A69A", textColor: "#B2DFDB", accentGradient: "#1A3C4B" },
+      "aurora-haze": { bodyBg: "#121212", containerBg: "#1A1A1A", accent: "#64FFDA", textColor: "#E0F7FA", accentGradient: "#1A4B4B" },
+      "starlit-amethyst": { bodyBg: "#0A0A0A", containerBg: "#121212", accent: "#B388FF", textColor: "#E1BEE7", accentGradient: "#2E1A47" },
+      "lunar-frost": { bodyBg: "#F5F7FA", containerBg: "#FFFFFF", accent: "#40C4FF", textColor: "#212121", accentGradient: "#B3E5FC" }
     };
     let currentTheme = localStorage.getItem("selectedTheme") || "neon-pulse";
 
@@ -169,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
       root.style.setProperty("--body-bg", themes[theme].bodyBg);
       root.style.setProperty("--container-bg", themes[theme].containerBg);
       root.style.setProperty("--accent", themes[theme].accent);
-      root.style.setProperty("--text", themes[theme].text);
+      root.style.setProperty("--text", themes[theme].textColor);
       root.style.setProperty("--accent-gradient", themes[theme].accentGradient);
       localStorage.setItem("selectedTheme", theme);
       currentTheme = theme;
@@ -250,8 +268,8 @@ document.addEventListener("DOMContentLoaded", () => {
       currentIndex = Math.min(savedIndex, maxIndex - 1);
       if (currentIndex < 0) currentIndex = 0;
       updateStationList();
-      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-      const activeBtn = document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ukraine", "pop", "search"].indexOf(tab) + 1}`);
+      tabButtons.forEach(btn => btn.classList.remove("active"));
+      const activeBtn = tabButtons[tabs.indexOf(tab)];
       if (activeBtn) activeBtn.classList.add("active");
       if (stationItems?.length && currentIndex < stationItems.length) tryAutoPlay();
     }
@@ -433,7 +451,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     audio.addEventListener("error", () => {
-      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+      document.querySelectorAll(".wave-bar").forEach(bar => {
+        bar.style.animationPlayState = "paused";
+      });
       console.error("Помилка аудіо:", audio.error?.message, "для URL:", audio.src);
       if (isPlaying && errorCount < ERROR_LIMIT) {
         errorCount++;
@@ -445,7 +465,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("volume", audio.volume);
     });
 
-    window.addEventListener("online", () => {
+    window.addEncoderListener("online", () => {
       if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
         audio.pause();
         audio.src = "";
