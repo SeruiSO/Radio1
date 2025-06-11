@@ -1,4 +1,3 @@
-// Оголошення змінних на початку для уникнення Temporal Dead Zone
 let currentTab = localStorage.getItem("currentTab") || "techno";
 let hasUserInteracted = false;
 let currentIndex = 0;
@@ -10,49 +9,39 @@ let abortController = new AbortController();
 let errorCount = 0;
 const ERROR_LIMIT = 5;
 
-// Очікування завантаження DOM
 document.addEventListener("DOMContentLoaded", () => {
-  // Отримання DOM-елементів
   const audio = document.getElementById("audioPlayer");
   const stationList = document.getElementById("stationList");
   const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
   const currentStationInfo = document.getElementById("currentStationInfo");
   const themeToggle = document.querySelector(".theme-toggle");
 
-  // Перевірка наявності всіх необхідних елементів
   if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle) {
     console.error("Один із необхідних DOM-елементів не знайдено");
-    // Відкладена ініціалізація
     setTimeout(initializeApp, 100);
     return;
   }
 
-  // Ініціалізація програми
   initializeApp();
 
   function initializeApp() {
-    // Налаштування аудіо
     audio.preload = "auto";
     audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 
-    // Прив’язка обробників подій для кнопок вкладок
     document.querySelectorAll(".tab-btn").forEach((btn, index) => {
       const tabs = ["best", "techno", "trance", "ukraine", "pop"];
-      const tab = tabs[index]; // Прив’язуємо вкладки за порядком
+      const tab = tabs[index];
       btn.addEventListener("click", () => switchTab(tab));
     });
 
-    // Прив’язка обробників для кнопок керування
     document.querySelector(".controls .control-btn:nth-child(1)").addEventListener("click", prevStation);
     document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", togglePlayPause);
     document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", nextStation);
 
-    // Функція для перевірки валідності URL
     function isValidUrl(url) {
       return /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(url);
     }
 
-    // Функція для скидання інформації про станцію
     function resetStationInfo() {
       const stationNameElement = currentStationInfo.querySelector(".station-name");
       const stationGenreElement = currentStationInfo.querySelector(".station-genre");
@@ -65,7 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
       else console.error("Елемент .station-country не знайдено в currentStationInfo");
     }
 
-    // Завантаження станцій
     async function loadStations() {
       console.time("loadStations");
       stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
@@ -116,80 +104,81 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Теми
     const themes = {
-      "neon-pulse": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#121212",
-        accent: "#00F0FF",
-        text: "#F0F0F0",
-        accentGradient: "#003C4B"
+      // Feminine Themes
+      "sakura-bloom": {
+        bodyBg: "#FFF0F5",
+        containerBg: "#FFE4E1",
+        accent: "#FF69B4",
+        text: "#4B2E39",
+        accentGradient: "#FFB6C1"
       },
-      "lime-surge": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#121212",
-        accent: "#B2FF59",
-        text: "#E8F5E9",
-        accentGradient: "#2E4B2F"
+      "lavender-mist": {
+        bodyBg: "#F3E5F5",
+        containerBg: "#E1BEE7",
+        accent: "#AB47BC",
+        text: "#3F2A44",
+        accentGradient: "#CE93D8"
       },
-      "flamingo-flash": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#121212",
-        accent: "#FF4081",
-        text: "#FCE4EC",
-        accentGradient: "#4B1A2E"
+      "coral-sunset": {
+        bodyBg: "#FFF3E0",
+        containerBg: "#FFCCBC",
+        accent: "#FF7043",
+        text: "#4A2F27",
+        accentGradient: "#FFAB91"
       },
-      "violet-vortex": {
-        bodyBg: "#121212",
-        containerBg: "#1A1A1A",
-        accent: "#7C4DFF",
-        text: "#EDE7F6",
-        accentGradient: "#2E1A47"
-      },
-      "aqua-glow": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#121212",
-        accent: "#26C6DA",
-        text: "#B2EBF2",
-        accentGradient: "#1A3C4B"
-      },
-      "cosmic-indigo": {
-        bodyBg: "#121212",
-        containerBg: "#1A1A1A",
-        accent: "#3F51B5",
-        text: "#BBDEFB",
-        accentGradient: "#1A2A5A"
-      },
-      "mystic-jade": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#121212",
+      "mint-breeze": {
+        bodyBg: "#E0F2E9",
+        containerBg: "#B2DFDB",
         accent: "#26A69A",
-        text: "#B2DFDB",
-        accentGradient: "#1A3C4B"
+        text: "#2E3D3A",
+        accentGradient: "#80CBC4"
       },
-      "aurora-haze": {
-        bodyBg: "#121212",
-        containerBg: "#1A1A1A",
-        accent: "#64FFDA",
-        text: "#E0F7FA",
-        accentGradient: "#1A4B4B"
+      "rose-quartz": {
+        bodyBg: "#FCE4EC",
+        containerBg: "#F8BBD0",
+        accent: "#EC407A",
+        text: "#4C2F38",
+        accentGradient: "#F48FB1"
       },
-      "starlit-amethyst": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#121212",
-        accent: "#B388FF",
-        text: "#E1BEE7",
-        accentGradient: "#2E1A47"
+      // Masculine Themes
+      "obsidian-gloss": {
+        bodyBg: "#1C2526",
+        containerBg: "#2E2E2E",
+        accent: "#00CED1",
+        text: "#E0E0E0",
+        accentGradient: "#4682B4"
       },
-      "lunar-frost": {
-        bodyBg: "#F5F7FA",
-        containerBg: "#FFFFFF",
-        accent: "#40C4FF",
-        text: "#212121",
-        accentGradient: "#B3E5FC"
+      "steel-blue": {
+        bodyBg: "#263238",
+        containerBg: "#37474F",
+        accent: "#0288D1",
+        text: "#CFD8DC",
+        accentGradient: "#4FC3F7"
+      },
+      "forest-dusk": {
+        bodyBg: "#1B2A1F",
+        containerBg: "#2E3D30",
+        accent: "#4CAF50",
+        text: "#C8E6C9",
+        accentGradient: "#81C784"
+      },
+      "crimson-forge": {
+        bodyBg: "#2C1A1D",
+        containerBg: "#3E2723",
+        accent: "#D32F2F",
+        text: "#EF9A9A",
+        accentGradient: "#EF5350"
+      },
+      "slate-storm": {
+        bodyBg: "#2A2F3A",
+        containerBg: "#3F4C5A",
+        accent: "#78909C",
+        text: "#ECEFF1",
+        accentGradient: "#B0BEC5"
       }
     };
-    let currentTheme = localStorage.getItem("selectedTheme") || "neon-pulse";
+    let currentTheme = localStorage.getItem("selectedTheme") || "sakura-bloom";
 
     function applyTheme(theme) {
       const root = document.documentElement;
@@ -209,25 +198,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function toggleTheme() {
       const themesOrder = [
-        "neon-pulse",
-        "lime-surge",
-        "flamingo-flash",
-        "violet-vortex",
-        "aqua-glow",
-        "cosmic-indigo",
-        "mystic-jade",
-        "aurora-haze",
-        "starlit-amethyst",
-        "lunar-frost"
+        "sakura-bloom",
+        "lavender-mist",
+        "coral-sunset",
+        "mint-breeze",
+        "rose-quartz",
+        "obsidian-gloss",
+        "steel-blue",
+        "forest-dusk",
+        "crimson-forge",
+        "slate-storm"
       ];
       const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
       applyTheme(nextTheme);
     }
 
-    // Додаємо обробник події для кнопки зміни теми
     themeToggle.addEventListener("click", toggleTheme);
 
-    // Налаштування Service Worker
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("sw.js").then(registration => {
         registration.update();
@@ -256,7 +243,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Функція для спроби відтворення
     function tryAutoPlay() {
       if (!navigator.onLine) {
         console.log("Пристрій офлайн, пропускаємо відтворення");
@@ -280,7 +266,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
         return;
       }
-      // Скасувати попереднє відтворення
       audio.pause();
       audio.src = "";
       audio.src = stationItems[currentIndex].dataset.value;
@@ -305,7 +290,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Перемикання вкладок
     function switchTab(tab) {
       if (!["techno", "trance", "ukraine", "pop", "best"].includes(tab)) tab = "techno";
       currentTab = tab;
@@ -320,7 +304,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (stationItems?.length && currentIndex < stationItems.length) tryAutoPlay();
     }
 
-    // Оновлення списку станцій
     function updateStationList() {
       if (!stationList) {
         console.error("stationList не знайдено");
@@ -373,7 +356,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Перемикання улюблених станцій
     function toggleFavorite(stationName) {
       hasUserInteracted = true;
       if (favoriteStations.includes(stationName)) {
@@ -386,7 +368,6 @@ document.addEventListener("DOMContentLoaded", () => {
       else updateStationList();
     }
 
-    // Зміна станції
     function changeStation(index) {
       if (index < 0 || index >= stationItems.length || stationItems[index].classList.contains("empty")) return;
       const item = stationItems[index];
@@ -398,7 +379,6 @@ document.addEventListener("DOMContentLoaded", () => {
       tryAutoPlay();
     }
 
-    // Оновлення інформації про станцію
     function updateCurrentStationInfo(item) {
       if (!currentStationInfo) {
         console.error("currentStationInfo не знайдено");
@@ -434,7 +414,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Керування відтворенням
     function prevStation() {
       hasUserInteracted = true;
       currentIndex = currentIndex > 0 ? currentIndex - 1 : stationItems.length - 1;
@@ -469,7 +448,6 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("isPlaying", isPlaying);
     }
 
-    // Обробники подій
     const eventListeners = {
       keydown: e => {
         hasUserInteracted = true;
@@ -500,21 +478,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
-    // Додаємо слухачі
     function addEventListeners() {
       document.addEventListener("keydown", eventListeners.keydown);
       document.addEventListener("visibilitychange", eventListeners.visibilitychange);
       document.addEventListener("resume", eventListeners.resume);
     }
 
-    // Очищення слухачів
     function removeEventListeners() {
       document.removeEventListener("keydown", eventListeners.keydown);
       document.removeEventListener("visibilitychange", eventListeners.visibilitychange);
       document.removeEventListener("resume", eventListeners.resume);
     }
 
-    // Додаємо слухачі подій
     audio.addEventListener("playing", () => {
       isPlaying = true;
       playPauseBtn.textContent = "⏸";
@@ -547,7 +522,6 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("volume", audio.volume);
     });
 
-    // Моніторинг мережі
     window.addEventListener("online", () => {
       console.log("Мережа відновлена");
       if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
@@ -562,15 +536,12 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("Втрачено з'єднання з мережею");
     });
 
-    // Ініціалізація слухачів
     addEventListeners();
 
-    // Очищення слухачів перед оновленням сторінки
     window.addEventListener("beforeunload", () => {
       removeEventListeners();
     });
 
-    // Media Session API
     if ("mediaSession" in navigator) {
       navigator.mediaSession.setActionHandler("play", togglePlayPause);
       navigator.mediaSession.setActionHandler("pause", togglePlayPause);
@@ -578,12 +549,10 @@ document.addEventListener("DOMContentLoaded", () => {
       navigator.mediaSession.setActionHandler("nexttrack", nextStation);
     }
 
-    // Відстеження взаємодії користувача
     document.addEventListener("click", () => {
       hasUserInteracted = true;
     });
 
-    // Ініціалізація
     applyTheme(currentTheme);
     loadStations();
   }
