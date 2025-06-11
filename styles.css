@@ -1,386 +1,417 @@
-/* Updated on June 11, 2025 */
+/* Updated on May 28, 2025 */
 :root {
-  --bg-space: #0A0B22;
-  --bg-nebula: #1E1F4A;
-  --accent-magic: #7B00FF;
-  --accent-star: #FFD700;
-  --text-glow: #E6E6FF;
-  --text-dim: #B0B0FF;
-  --card-bg: rgba(30, 31, 74, 0.9);
-  --glow-effect: 0 0 12px rgba(123, 0, 255, 0.6);
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  --body-bg: #0A0A0A;
+  --container-bg: #121212;
+  --accent: #00F0FF;
+  --text: #F0F0F0;
+  --accent-gradient: #003C4B;
 }
 
 body {
-  font-family: 'Exo 2', sans-serif;
-  background: radial-gradient(circle at center, var(--bg-nebula), var(--bg-space));
-  color: var(--text-glow);
+  font-family: 'Roboto', sans-serif;
+  background: var(--body-bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   overflow-x: hidden;
-  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="20" cy="20" r="1" fill="%23FFD700" opacity="0.3"/%3E%3Ccircle cx="80" cy="80" r="1.5" fill="%23FFD700" opacity="0.4"/%3E%3Ccircle cx="50" cy="30" r="0.8" fill="%23FFD700" opacity="0.2"/%3E%3C/svg%3E');
-  background-size: 100px;
-  animation: twinkle 10s infinite;
-}
-
-@keyframes twinkle {
-  0%, 100% { background-position: 0 0; }
-  50% { background-position: 10px 10px; }
+  padding-top: 10px;
+  box-sizing: border-box;
+  transition: background 0.4s ease, color 0.4s ease;
 }
 
 .container {
+  max-width: 100%;
   width: 100%;
-  max-width: 360px;
-  height: calc(100vh - 20px);
-  background: var(--card-bg);
-  backdrop-filter: blur(8px);
-  border-radius: 20px;
+  background: var(--container-bg);
   padding: 15px;
+  border-radius: 15px;
+  border: 1px solid var(--accent);
+  margin: 0 10px;
+  min-height: 90vh;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  border: 1px solid var(--accent-magic);
-  box-shadow: var(--glow-effect);
+  justify-content: flex-start;
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 
 h1 {
-  font-size: 1.8em;
+  font-size: 2.5em;
+  margin: 5px 0;
   text-align: center;
-  color: var(--accent-star);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  text-shadow: 0 0 8px var(--accent-star);
-  margin: 10px 0;
+  color: var(--accent);
+  transition: color 0.4s ease;
 }
 
 .theme-toggle {
   position: absolute;
   top: 10px;
-  right: 10px;
-  background: var(--card-bg);
-  border: 2px solid var(--accent-magic);
+  left: 10px;
+  background: var(--container-bg);
+  border: 2px solid var(--accent);
   border-radius: 50%;
-  width: 40px;
+  padding: 8px;
+  cursor: pointer;
   height: 40px;
+  width: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent-star);
-  font-size: 20px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .theme-toggle:hover {
-  transform: rotate(360deg);
-  box-shadow: var(--glow-effect);
+  background: var(--accent);
+  color: #0A0A0A;
+  transform: scale(1.1);
 }
 
 .current-station-info {
-  background: linear-gradient(135deg, var(--bg-space), var(--bg-nebula));
+  background: linear-gradient(45deg, var(--container-bg), var(--accent-gradient));
+  padding: 20px;
   border-radius: 12px;
-  padding: 12px;
+  margin: 10px 0;
+  color: var(--text);
+  border: 2px solid var(--accent);
+  text-align: left;
+  height: auto;
   display: flex;
   align-items: center;
-  gap: 10px;
-  border: 1px solid var(--accent-magic);
-  box-shadow: var(--glow-effect);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
+  transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.current-station-info:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.5);
 }
 
 .station-info-content {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 15px;
   width: 100%;
 }
 
 .station-text {
+  display: flex;
+  flex-direction: column;
   flex: 1;
 }
 
-.station-name {
-  font-size: 1.2em;
-  font-weight: 600;
-  color: var(--accent-star);
-}
-
-.station-genre, .station-country {
-  font-size: 0.9em;
-  color: var(--text-dim);
-}
-
-.controls-container {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  padding: 10px;
-  background: var(--card-bg);
-  border-radius: 12px;
-  border: 1px solid var(--accent-magic);
-}
-
-.controls {
-  display: flex;
-  gap: 15px;
-}
-
-.control-btn {
-  width: 50px;
-  height: 50px;
-  background: var(--bg-nebula);
-  border: 2px solid var(--accent-star);
-  border-radius: 50%;
-  color: var(--text-glow);
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
+.current-station-info .station-name {
+  font-size: 28px;
+  font-weight: 700;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
 }
 
-.control-btn:hover {
-  background: var(--accent-magic);
-  color: var(--bg-space);
-  transform: scale(1.1);
+.current-station-info .station-genre {
+  font-size: 18px;
+  font-weight: 400;
+  margin-top: 5px;
 }
 
-.wave-progress {
-  display: flex;
-  gap: 4px;
-  width: 60px;
-  height: 40px;
-}
-
-.wave-bar {
-  width: 6px;
-  background: var(--accent-star);
-  border-radius: 3px;
-  animation: waveAnimation 0.9s infinite ease-in-out;
-  animation-play-state: paused;
-}
-
-.wave-bar:nth-child(2) { animation-delay: 0.1s; }
-.wave-bar:nth-child(3) { animation-delay: 0.2s; }
-.wave-bar:nth-child(4) { animation-delay: 0.3s; }
-.wave-bar:nth-child(5) { animation-delay: 0.4s; }
-
-@keyframes waveAnimation {
-  0%, 100% { transform: scaleY(0.4); }
-  50% { transform: scaleY(1.2); }
+.current-station-info .station-country {
+  font-size: 18px;
+  font-weight: 400;
+  margin-top: 2px;
 }
 
 .tabs {
   display: flex;
-  justify-content: space-around;
-  gap: 5px;
-  padding: 8px;
-  background: var(--card-bg);
-  border-radius: 12px;
-  border: 1px solid var(--accent-magic);
+  justify-content: space-between;
+  margin: 5px 0; /* Зменшено відступи */
+  position: sticky;
+  bottom: 100px; /* Адаптовано для розташування над controls-container */
+  z-index: 10;
+  background: var(--container-bg);
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid var(--accent);
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 
 .tab-btn {
   flex: 1;
-  padding: 8px;
-  background: var(--bg-nebula);
-  border: 1px solid var(--accent-star);
-  border-radius: 8px;
-  color: var(--text-glow);
+  padding: 12px;
+  background: var(--container-bg);
+  border: 2px solid var(--accent);
+  border-radius: 5px;
+  color: var(--text);
   cursor: pointer;
-  font-size: 0.8em;
+  margin: 0 2px;
   text-align: center;
+  font-size: 14px;
   transition: all 0.3s ease;
 }
 
 .tab-btn:hover {
-  background: var(--accent-magic);
-  color: var(--bg-space);
+  background: var(--accent);
+  color: #0A0A0A;
+  transform: translateY(-2px);
 }
 
 .tab-btn.active {
-  background: var(--accent-star);
-  color: var(--bg-space);
-  box-shadow: var(--glow-effect);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0A0A0A;
 }
 
 .station-list {
-  flex: 1;
+  max-height: 500px;
   overflow-y: auto;
+  background: var(--container-bg);
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  margin: 10px 0 5px;
   padding: 10px;
-  background: var(--card-bg);
-  border-radius: 12px;
-  border: 1px solid var(--accent-magic);
   scrollbar-width: thin;
-  scrollbar-color: var(--accent-star) var(--bg-nebula);
+  scrollbar-color: var(--accent) var(--container-bg);
+  flex-grow: 1;
+  transition: border-color 0.4s ease;
 }
 
 .station-list::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .station-list::-webkit-scrollbar-track {
-  background: var(--bg-nebula);
+  background: var(--container-bg);
 }
 
 .station-list::-webkit-scrollbar-thumb {
-  background: var(--accent-star);
-  border-radius: 3px;
+  background: var(--accent);
+  border-radius: 4px;
 }
 
 .station-item {
-  padding: 10px;
-  margin: 5px 0;
-  background: var(--bg-nebula);
+  padding: 12px;
+  cursor: pointer;
   border-radius: 8px;
-  border: 1px solid var(--accent-magic);
+  font-weight: 500;
+  border: 1px solid var(--text);
+  margin: 5px 0;
+  color: var(--text);
+  background: var(--container-bg);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .station-item:hover, .station-item.selected {
-  background: var(--accent-magic);
-  color: var(--bg-space);
-  transform: translateX(5px);
+  background: var(--accent) !important;
+  border: 2px solid var(--accent) !important;
+  color: #0A0A0A;
+  transform: translateY(-2px);
 }
 
 .station-item .favorite-btn {
   background: none;
   border: none;
-  color: var(--text-glow);
-  font-size: 1.2em;
+  color: var(--text);
+  font-size: 20px;
   cursor: pointer;
+  transition: color 0.3s ease;
 }
 
 .station-item .favorite-btn.favorited {
-  color: var(--accent-star);
+  color: #FFD700;
 }
 
 .station-item .favorite-btn:hover {
-  color: var(--accent-star);
+  color: #FFD700;
 }
 
 .station-item.empty {
   text-align: center;
-  color: var(--text-dim);
   font-style: italic;
-  padding: 15px;
+  color: var(--text);
+  opacity: 0.7;
+  padding: 20px;
   border: none;
-  background: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .station-item.empty::before {
-  content: "✨";
-  font-size: 1.3em;
-  margin-right: 8px;
-  animation: pulseStar 1.5s infinite;
+  content: "⏳";
+  font-size: 24px;
+  margin-right: 10px;
+  animation: spin 1s linear infinite;
 }
 
-@keyframes pulseStar {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-@media (max-width: 360px) {
+.controls-container {
+  position: sticky;
+  bottom: 0;
+  background: var(--container-bg);
+  border-top: 2px solid var(--accent);
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 10;
+  transition: background 0.4s ease, border-color 0.4s ease;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+}
+
+.wave-progress {
+  display: flex;
+  gap: 4px;
+  height: 60px;
+  width: 84px;
+}
+
+.wave-bar {
+  width: 10px;
+  background: var(--accent);
+  border-radius: 5px;
+  animation: waveAnimation 1.2s infinite ease-in-out;
+  animation-play-state: paused;
+  transition: background 0.4s ease;
+}
+
+.wave-bar:nth-child(2) { animation-delay: 0.2s; }
+.wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.wave-bar:nth-child(4) { animation-delay: 0.4s; }
+.wave-bar:nth-child(5) { animation-delay: 0.5s; }
+.wave-bar:nth-child(6) { animation-delay: 0.6s; }
+.wave-bar:nth-child(7) { animation-delay: 0.7s; }
+
+@keyframes waveAnimation {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+.control-btn {
+  width: 80px;
+  height: 80px;
+  font-size: 32px;
+  background: var(--container-bg);
+  color: var(--text);
+  border: 4px solid var(--accent);
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-btn:hover {
+  background: var(--accent);
+  color: #0A0A0A;
+  transform: scale(1.15);
+}
+
+.control-btn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 720px) {
+  h1 {
+    font-size: 2em;
+  }
+
   .container {
     padding: 10px;
-  }
-
-  h1 {
-    font-size: 1.5em;
-  }
-
-  .station-name {
-    font-size: 1em;
-  }
-
-  .station-genre, .station-country {
-    font-size: 0.8em;
+    margin: 0 5px;
+    min-height: 90vh;
   }
 
   .control-btn {
-    width: 45px;
-    height: 45px;
-    font-size: 18px;
+    width: 70px;
+    height: 70px;
+    font-size: 24px;
+    border-width: 2px;
+    border-radius: 10px;
+  }
+
+  .station-list {
+    max-height: 400px;
+    margin: 8px 0;
+    padding: 8px;
+  }
+
+  .station-item {
+    padding: 10px;
+    margin: 4px 0;
+  }
+
+  .theme-toggle {
+    top: 5px;
+    left: 5px;
+    padding: 4px;
+    height: 35px;
+    width: 35px;
+  }
+
+  .current-station-info {
+    padding: 12px;
+    height: auto;
+  }
+
+  .current-station-info .station-name {
+    font-size: 24px;
+  }
+
+  .current-station-info .station-genre {
+    font-size: 16px;
+  }
+
+  .current-station-info .station-country {
+    font-size: 16px;
+  }
+
+  .station-info-content {
+    gap: 10px;
   }
 
   .wave-progress {
-    width: 50px;
-    height: 35px;
+    width: 70px;
+    height: 50px;
   }
 
   .wave-bar {
-    width: 5px;
+    width: 8px;
   }
 
   .tab-btn {
-    font-size: 0.7em;
-    padding: 6px;
+    padding: 10px;
+    font-size: 12px;
+    border-width: 1px;
+  }
+
+  .tabs {
+    bottom: 90px; /* Адаптовано для нового розташування */
   }
 }
-</xai12Artifact>
 
-<xaiArtifact artifact_id="a7e0c546-ceef-4b71-a71b-d53fa19569a6" artifact_version_id="91b400a1-b06a-4612-8e56-de96a1c8b1bc" title="index.html" contentType="text/html">
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#7B00FF">
-  <title>StellarWave Radio</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="icon" href="icon-192.png" type="image/png">
-</head>
-<body>
-  <div class="theme-toggle">🌟</div>
-  <div class="container">
-    <h1>STELLARWAVE RADIO</h1>
-    <audio id="audioPlayer"></audio>
-    <div class="current-station-info" id="currentStationInfo">
-      <div class="station-info-content">
-        <div class="wave-progress">
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-        </div>
-        <div class="station-text">
-          <div class="station-name">Виберіть станцію</div>
-          <div class="station-genre">жанр: -</div>
-          <div class="station-country">країна: -</div>
-        </div>
-      </div>
-    </div>
-    <div class="tabs">
-      <button class="tab-btn active">ЗОРЯНІ</button>
-      <button class="tab-btn">ТЕХНО</button>
-      <button class="tab-btn">ТРАНС</button>
-      <button class="tab-btn">UA</button>
-      <button class="tab-btn">ПОП</button>
-    </div>
-    <div class="station-list" id="stationList"></div>
-    <div class="controls-container">
-      <div class="controls">
-        <button class="control-btn">⏮</button>
-        <button class="control-btn">▶</button>
-        <button class="control-btn">⏭</button>
-      </div>
-    </div>
-  </div>
-  <script src="script.js"></script>
-  <script src="sw.js"></script>
-</body>
-</html>
+@media (max-height: 1600px) {
+  .container {
+    min-height: 85vh;
+  }
+
+  .station-list {
+    max-height: 450px;
+  }
+}

@@ -1,10 +1,10 @@
 {
-  "name": "StellarWave Radio",
-  "short_name": "StellarWave",
+  "name": "Radio S O",
+  "short_name": "Radio S O",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0A0B22",
-  "theme_color": "#7B00FF",
+  "background_color": "#1a1a1a",
+  "theme_color": "#00F0FF",
   "icons": [
     {
       "src": "icon-192.png",
