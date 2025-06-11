@@ -194,9 +194,19 @@ document.addEventListener("DOMContentLoaded", () => {
         accentGradient: "#00C853"
       }
     };
-    let currentTheme = localStorage.getItem("selectedTheme") || "ruby-spark";
+    let currentTheme = localStorage.getItem("selectedTheme");
+    // Ensure currentTheme is valid; fallback to 'ruby-spark' if invalid
+    if (!themes[currentTheme]) {
+      currentTheme = "ruby-spark";
+      localStorage.setItem("selectedTheme", currentTheme);
+    }
 
     function applyTheme(theme) {
+      // Check if theme exists in themes object
+      if (!themes[theme]) {
+        console.error(`Тема ${theme} не знайдена, використовується ruby-spark`);
+        theme = "ruby-spark";
+      }
       const root = document.documentElement;
       root.style.setProperty("--body-bg", themes[theme].bodyBg);
       root.style.setProperty("--container-bg", themes[theme].containerBg);
@@ -345,7 +355,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const fragment = document.createDocumentFragment();
-      8
       stations.forEach((station, index) => {
         const item = document.createElement("div");
         item.className = `station-item ${index === currentIndex ? "selected" : ""}`;
@@ -448,6 +457,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Керування відтворенням
     function prevStation() {
       hasUserInteracted = true;
+      if (!stationItems?.length) {
+        console.log("Пропуск prevStation: stationItems порожній або не ініціалізований");
+        return;
+      }
       currentIndex = currentIndex > 0 ? currentIndex - 1 : stationItems.length - 1;
       if (stationItems[currentIndex].classList.contains("empty")) currentIndex = 0;
       changeStation(currentIndex);
@@ -455,6 +468,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function nextStation() {
       hasUserInteracted = true;
+      if (!stationItems?.length) {
+        console.log("Пропуск nextStation: stationItems порожній або не ініціалізований");
+        return;
+      }
       currentIndex = currentIndex < stationItems.length - 1 ? currentIndex + 1 : 0;
       if (stationItems[currentIndex].classList.contains("empty")) currentIndex = 0;
       changeStation(currentIndex);
