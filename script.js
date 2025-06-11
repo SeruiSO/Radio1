@@ -1,4 +1,3 @@
-// Оголошення змінних на початку для уникнення Temporal Dead Zone
 let currentTab = localStorage.getItem("currentTab") || "techno";
 let hasUserInteracted = false;
 let currentIndex = 0;
@@ -10,62 +9,48 @@ let abortController = new AbortController();
 let errorCount = 0;
 const ERROR_LIMIT = 5;
 
-// Очікування завантаження DOM
 document.addEventListener("DOMContentLoaded", () => {
-  // Отримання DOM-елементів
   const audio = document.getElementById("audioPlayer");
   const stationList = document.getElementById("stationList");
   const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
   const currentStationInfo = document.getElementById("currentStationInfo");
   const themeToggle = document.querySelector(".theme-toggle");
 
-  // Перевірка наявності всіх необхідних елементів
   if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle) {
     console.error("Один із необхідних DOM-елементів не знайдено");
-    // Відкладена ініціалізація
     setTimeout(initializeApp, 100);
     return;
   }
 
-  // Ініціалізація програми
   initializeApp();
 
   function initializeApp() {
-    // Налаштування аудіо
     audio.preload = "auto";
     audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 
-    // Прив’язка обробників подій для кнопок вкладок
     document.querySelectorAll(".tab-btn").forEach((btn, index) => {
       const tabs = ["best", "techno", "trance", "ukraine", "pop"];
-      const tab = tabs[index]; // Прив’язуємо вкладки за порядком
+      const tab = tabs[index];
       btn.addEventListener("click", () => switchTab(tab));
     });
 
-    // Прив’язка обробників для кнопок керування
     document.querySelector(".controls .control-btn:nth-child(1)").addEventListener("click", prevStation);
     document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", togglePlayPause);
     document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", nextStation);
 
-    // Функція для перевірки валідності URL
     function isValidUrl(url) {
       return /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(url);
     }
 
-    // Функція для скидання інформації про станцію
     function resetStationInfo() {
       const stationNameElement = currentStationInfo.querySelector(".station-name");
       const stationGenreElement = currentStationInfo.querySelector(".station-genre");
       const stationCountryElement = currentStationInfo.querySelector(".station-country");
-      if (stationNameElement) stationNameElement.textContent = "Обирайте станцію";
-      else console.error("Елемент .station-name не знайдено в currentStationInfo");
+      if (stationNameElement) stationNameElement.textContent = "Виберіть станцію";
       if (stationGenreElement) stationGenreElement.textContent = "жанр: -";
-      else console.error("Елемент .station-genre не знайдено в currentStationInfo");
       if (stationCountryElement) stationCountryElement.textContent = "країна: -";
-      else console.error("Елемент .station-country не знайдено в currentStationInfo");
     }
 
-    // Завантаження станцій
     async function loadStations() {
       console.time("loadStations");
       stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
@@ -79,19 +64,16 @@ document.addEventListener("DOMContentLoaded", () => {
           },
           signal: abortController.signal
         });
-        console.log(`Статус відповіді: ${response.status}`);
         if (response.status === 304) {
           const cachedData = await caches.match("stations.json");
           if (cachedData) {
             stationLists = await cachedData.json();
-            console.log("Використовується кешована версія stations.json");
           } else {
             throw new Error("Кеш не знайдено");
           }
         } else if (response.ok) {
           stationLists = await response.json();
           localStorage.setItem("stationsLastModified", response.headers.get("Last-Modified") || "");
-          console.log("Новий stations.json успішно завантажено");
         } else {
           throw new Error(`HTTP ${response.status}`);
         }
@@ -116,78 +98,59 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Теми
     const themes = {
-      "ocean-breeze": {
-        bodyBg: "#1C2526",
-        containerBg: "#2A2F33",
-        accent: "#00D4FF",
-        text: "#E0E6ED",
-        accentGradient: "#1A3C4B"
+      "cyber-neon": {
+        bgPrimary: "#0D0D1A",
+        bgSecondary: "#1A1A2E",
+        accentNeon: "#FF00E6",
+        accentGlow: "#00FFCC",
+        textPrimary: "#E6E6FA",
+        textSecondary: "#A3BFFA"
       },
-      "emerald-dusk": {
-        bodyBg: "#1A2421",
-        containerBg: "#2E3B39",
-        accent: "#2ECC71",
-        text: "#D4EFDF",
-        accentGradient: "#1A4B2E"
+      "quantum-flare": {
+        bgPrimary: "#1A0D1A",
+        bgSecondary: "#2E1A2E",
+        accentNeon: "#FF6B6B",
+        accentGlow: "#FFD93D",
+        textPrimary: "#F5E6FA",
+        textSecondary: "#FABFA3"
       },
-      "crimson-glow": {
-        bodyBg: "#2C1E22",
-        containerBg: "#3B2A2F",
-        accent: "#E91E63",
-        text: "#F8D7DA",
-        accentGradient: "#4B1A2E"
-      },
-      "amethyst-night": {
-        bodyBg: "#1F1B2C",
-        containerBg: "#2E2A3B",
-        accent: "#9C27B0",
-        text: "#E1BEE7",
-        accentGradient: "#2E1A47"
-      },
-      "turquoise-haze": {
-        bodyBg: "#1A2C2F",
-        containerBg: "#2A3B3E",
-        accent: "#26C6DA",
-        text: "#B2EBF2",
-        accentGradient: "#1A3C4B"
+      "cosmo-pulse": {
+        bgPrimary: "#0D1A1A",
+        bgSecondary: "#1A2E2E",
+        accentNeon: "#4BFFD7",
+        accentGlow: "#FF4B4B",
+        textPrimary: "#E6FAFA",
+        textSecondary: "#A3FAFA"
       }
     };
-    let currentTheme = localStorage.getItem("selectedTheme") || "ocean-breeze";
+    let currentTheme = localStorage.getItem("selectedTheme") || "cyber-neon";
 
     function applyTheme(theme) {
       const root = document.documentElement;
-      root.style.setProperty("--body-bg", themes[theme].bodyBg);
-      root.style.setProperty("--container-bg", themes[theme].containerBg);
-      root.style.setProperty("--accent", themes[theme].accent);
-      root.style.setProperty("--text", themes[theme].text);
-      root.style.setProperty("--accent-gradient", themes[theme].accentGradient);
+      root.style.setProperty("--bg-primary", themes[theme].bgPrimary);
+      root.style.setProperty("--bg-secondary", themes[theme].bgSecondary);
+      root.style.setProperty("--accent-neon", themes[theme].accentNeon);
+      root.style.setProperty("--accent-glow", themes[theme].accentGlow);
+      root.style.setProperty("--text-primary", themes[theme].textPrimary);
+      root.style.setProperty("--text-secondary", themes[theme].textSecondary);
       localStorage.setItem("selectedTheme", theme);
       currentTheme = theme;
       document.documentElement.setAttribute("data-theme", theme);
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
       if (themeColorMeta) {
-        themeColorMeta.setAttribute("content", themes[theme].accent);
+        themeColorMeta.setAttribute("content", themes[theme].accentNeon);
       }
     }
 
     function toggleTheme() {
-      const themesOrder = [
-        "ocean-breeze",
-        "emerald-dusk",
-        "crimson-glow",
-        "amethyst-night",
-        "turquoise-haze"
-      ];
+      const themesOrder = ["cyber-neon", "quantum-flare", "cosmo-pulse"];
       const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
       applyTheme(nextTheme);
     }
 
-    // Додаємо обробник події для кнопки зміни теми
     themeToggle.addEventListener("click", toggleTheme);
 
-    // Налаштування Service Worker
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("sw.js").then(registration => {
         registration.update();
@@ -207,7 +170,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       navigator.serviceWorker.addEventListener("message", event => {
         if (event.data.type === "NETWORK_STATUS" && event.data.online && isPlaying && stationItems?.length && currentIndex < stationItems.length) {
-          console.log("Отримано повідомлення від Service Worker: мережа відновлена");
           audio.pause();
           audio.src = "";
           audio.src = stationItems[currentIndex].dataset.value;
@@ -216,56 +178,37 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Функція для спроби відтворення
     function tryAutoPlay() {
-      if (!navigator.onLine) {
-        console.log("Пристрій офлайн, пропускаємо відтворення");
-        return;
-      }
+      if (!navigator.onLine) return;
       if (!isPlaying || !stationItems?.length || currentIndex >= stationItems.length || !hasUserInteracted) {
-        console.log("Пропуск tryAutoPlay", { isPlaying, hasStationItems: !!stationItems?.length, isIndexValid: currentIndex < stationItems.length, hasUserInteracted });
         document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
         return;
       }
-      if (audio.src === stationItems[currentIndex].dataset.value && !audio.paused) {
-        console.log("Пропуск tryAutoPlay: аудіо вже відтворюється з правильним src");
-        return;
-      }
+      if (audio.src === stationItems[currentIndex].dataset.value && !audio.paused) return;
       if (!isValidUrl(stationItems[currentIndex].dataset.value)) {
-        console.error("Невалідний URL:", stationItems[currentIndex].dataset.value);
         errorCount++;
-        if (errorCount >= ERROR_LIMIT) {
-          console.error("Досягнуто ліміт помилок відтворення");
-        }
+        if (errorCount >= ERROR_LIMIT) console.error("Досягнуто ліміт помилок відтворення");
         document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
         return;
       }
-      // Скасувати попереднє відтворення
       audio.pause();
       audio.src = "";
       audio.src = stationItems[currentIndex].dataset.value;
-      console.log("Спроба відтворення:", audio.src);
       const playPromise = audio.play();
-
       playPromise
         .then(() => {
           errorCount = 0;
-          console.log("Відтворення розпочато успішно");
           document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
         })
         .catch(error => {
-          console.error("Помилка відтворення:", error);
           if (error.name !== "AbortError") {
             errorCount++;
-            if (errorCount >= ERROR_LIMIT) {
-              console.error("Досягнуто ліміт помилок відтворення");
-            }
+            if (errorCount >= ERROR_LIMIT) console.error("Досягнуто ліміт помилок відтворення");
           }
           document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
         });
     }
 
-    // Перемикання вкладок
     function switchTab(tab) {
       if (!["techno", "trance", "ukraine", "pop", "best"].includes(tab)) tab = "techno";
       currentTab = tab;
@@ -280,12 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (stationItems?.length && currentIndex < stationItems.length) tryAutoPlay();
     }
 
-    // Оновлення списку станцій
     function updateStationList() {
-      if (!stationList) {
-        console.error("stationList не знайдено");
-        return;
-      }
+      if (!stationList) return;
       let stations = currentTab === "best"
         ? favoriteStations
             .map(name => Object.values(stationLists).flat().find(s => s.name === name))
@@ -333,7 +272,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Перемикання улюблених станцій
     function toggleFavorite(stationName) {
       hasUserInteracted = true;
       if (favoriteStations.includes(stationName)) {
@@ -346,7 +284,6 @@ document.addEventListener("DOMContentLoaded", () => {
       else updateStationList();
     }
 
-    // Зміна станції
     function changeStation(index) {
       if (index < 0 || index >= stationItems.length || stationItems[index].classList.contains("empty")) return;
       const item = stationItems[index];
@@ -358,43 +295,24 @@ document.addEventListener("DOMContentLoaded", () => {
       tryAutoPlay();
     }
 
-    // Оновлення інформації про станцію
     function updateCurrentStationInfo(item) {
-      if (!currentStationInfo) {
-        console.error("currentStationInfo не знайдено");
-        return;
-      }
+      if (!currentStationInfo) return;
       const stationNameElement = currentStationInfo.querySelector(".station-name");
       const stationGenreElement = currentStationInfo.querySelector(".station-genre");
       const stationCountryElement = currentStationInfo.querySelector(".station-country");
 
-      console.log("Оновлення currentStationInfo з даними:", item.dataset);
-
-      if (stationNameElement) {
-        stationNameElement.textContent = item.dataset.name || "Unknown";
-      } else {
-        console.error("Елемент .station-name не знайдено в currentStationInfo");
-      }
-      if (stationGenreElement) {
-        stationGenreElement.textContent = `жанр: ${item.dataset.genre || "Unknown"}`;
-      } else {
-        console.error("Елемент .station-genre не знайдено в currentStationInfo");
-      }
-      if (stationCountryElement) {
-        stationCountryElement.textContent = `країна: ${item.dataset.country || "Unknown"}`;
-      } else {
-        console.error("Елемент .station-country не знайдено в currentStationInfo");
-      }
+      if (stationNameElement) stationNameElement.textContent = item.dataset.name || "Unknown";
+      if (stationGenreElement) stationGenreElement.textContent = `жанр: ${item.dataset.genre || "Unknown"}`;
+      if (stationCountryElement) stationCountryElement.textContent = `країна: ${item.dataset.country || "Unknown"}`;
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: item.dataset.name || "Unknown Station",
           artist: `${item.dataset.genre || "Unknown"} | ${item.dataset.country || "Unknown"}`,
-          album: "Radio Music"
+          album: "NeonWave Radio"
         });
       }
     }
 
-    // Керування відтворенням
     function prevStation() {
       hasUserInteracted = true;
       currentIndex = currentIndex > 0 ? currentIndex - 1 : stationItems.length - 1;
@@ -410,10 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function togglePlayPause() {
-      if (!playPauseBtn || !audio) {
-        console.error("playPauseBtn або audio не знайдено");
-        return;
-      }
+      if (!playPauseBtn || !audio) return;
       hasUserInteracted = true;
       if (audio.paused) {
         isPlaying = true;
@@ -429,7 +344,6 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("isPlaying", isPlaying);
     }
 
-    // Обробники подій
     const eventListeners = {
       keydown: e => {
         hasUserInteracted = true;
@@ -460,21 +374,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
-    // Додаємо слухачі
     function addEventListeners() {
       document.addEventListener("keydown", eventListeners.keydown);
       document.addEventListener("visibilitychange", eventListeners.visibilitychange);
       document.addEventListener("resume", eventListeners.resume);
     }
 
-    // Очищення слухачів
     function removeEventListeners() {
       document.removeEventListener("keydown", eventListeners.keydown);
       document.removeEventListener("visibilitychange", eventListeners.visibilitychange);
       document.removeEventListener("resume", eventListeners.resume);
     }
 
-    // Додаємо слухачі подій
     audio.addEventListener("playing", () => {
       isPlaying = true;
       playPauseBtn.textContent = "⏸";
@@ -494,7 +405,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     audio.addEventListener("error", () => {
       document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
-      console.error("Помилка аудіо:", audio.error?.message, "для URL:", audio.src);
       if (isPlaying && errorCount < ERROR_LIMIT) {
         errorCount++;
         setTimeout(nextStation, 1000);
@@ -507,9 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("volume", audio.volume);
     });
 
-    // Моніторинг мережі
     window.addEventListener("online", () => {
-      console.log("Мережа відновлена");
       if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
         audio.pause();
         audio.src = "";
@@ -518,19 +426,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    window.addEventListener("offline", () => {
-      console.log("Втрачено з'єднання з мережею");
-    });
+    window.addEventListener("offline", () => {});
 
-    // Ініціалізація слухачів
     addEventListeners();
 
-    // Очищення слухачів перед оновленням сторінки
     window.addEventListener("beforeunload", () => {
       removeEventListeners();
     });
 
-    // Media Session API
     if ("mediaSession" in navigator) {
       navigator.mediaSession.setActionHandler("play", togglePlayPause);
       navigator.mediaSession.setActionHandler("pause", togglePlayPause);
@@ -538,12 +441,10 @@ document.addEventListener("DOMContentLoaded", () => {
       navigator.mediaSession.setActionHandler("nexttrack", nextStation);
     }
 
-    // Відстеження взаємодії користувача
     document.addEventListener("click", () => {
       hasUserInteracted = true;
     });
 
-    // Ініціалізація
     applyTheme(currentTheme);
     loadStations();
   }

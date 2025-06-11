@@ -42,17 +42,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#00D4FF">
-  <title>Radio S O</title>
+  <meta name="theme-color" content="#FF00E6">
+  <title>NeonWave Radio</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   <link rel="icon" href="icon-192.png" type="image/png">
 </head>
 <body>
-  <div class="theme-toggle">🌙</div>
+  <div class="theme-toggle">⚡️</div>
   <div class="container">
-    <h1>🎧 RADIO S O</h1>
+    <h1>NEONWAVE RADIO</h1>
     <audio id="audioPlayer"></audio>
     <div class="current-station-info" id="currentStationInfo">
       <div class="station-info-content">
@@ -66,12 +66,20 @@
           <div class="wave-bar"></div>
         </div>
         <div class="station-text">
-          <div class="station-name">Обирайте станцію</div>
+          <div class="station-name">Виберіть станцію</div>
           <div class="station-genre">жанр: -</div>
           <div class="station-country">країна: -</div>
         </div>
       </div>
     </div>
+    <div class="tabs">
+      <button class="tab-btn active">FAVORITES</button>
+      <button class="tab-btn">TECHNO</button>
+      <button class="tab-btn">TRANCE</button>
+      <button class="tab-btn">UA</button>
+      <button class="tab-btn">POP</button>
+    </div>
+    <div class="station-list" id="stationList"></div>
     <div class="controls-container">
       <div class="controls">
         <button class="control-btn">⏮</button>
@@ -79,14 +87,6 @@
         <button class="control-btn">⏭</button>
       </div>
     </div>
-    <div class="tabs">
-      <button class="tab-btn">BEST</button>
-      <button class="tab-btn active">TECHNO</button>
-      <button class="tab-btn">TRANCE</button>
-      <button class="tab-btn">UA</button>
-      <button class="tab-btn">POP</button>
-    </div>
-    <div class="station-list" id="stationList"></div>
   </div>
   <script src="script.js"></script>
   <script src="sw.js"></script>
