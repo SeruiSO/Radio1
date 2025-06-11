@@ -1,10 +1,12 @@
+```css
 /* Updated on June 12, 2025 */
 :root {
-  --body-bg: #FFF0F5;
-  --container-bg: #FFE4E1;
-  --accent: #FF69B4;
-  --text: #4B2E39;
-  --accent-gradient: #FFB6C1;
+  --body-bg: #0A0A0A;
+  --container-bg: #121212;
+  --accent: #80D8FF;
+  --text: #E0E0E0;
+  --accent-gradient: #0288D1;
+  --accent-rgb: 128, 216, 255;
 }
 
 body {
@@ -70,7 +72,7 @@ h1 {
 }
 
 .current-station-info {
-  background: linear-gradient(45deg, var(--container-bg), var(--accent-gradient));
+  background: var(--container-bg);
   padding: 20px;
   border-radius: 12px;
   margin: 10px 0;
@@ -196,10 +198,11 @@ h1 {
   cursor: pointer;
   border-radius: 8px;
   font-weight: 500;
-  border: 1px solid var(--accent);
+  border: 1px solid transparent;
+  border-bottom: 1px solid var(--text);
   margin: 5px 0;
   color: var(--text);
-  background: linear-gradient(45deg, var(--container-bg), var(--accent-gradient));
+  background: var(--container-bg);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -207,9 +210,9 @@ h1 {
 }
 
 .station-item:hover, .station-item.selected {
-  background: var(--accent) !important;
-  border: 2px solid var(--accent) !important;
-  color: #0A0A0A;
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 2px solid var(--accent);
+  color: var(--text);
   transform: translateY(-2px);
 }
 
@@ -240,7 +243,6 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: var(--container-bg);
 }
 
 .station-item.empty::before {
@@ -416,3 +418,4 @@ h1 {
     max-height: 450px;
   }
 }
+```
