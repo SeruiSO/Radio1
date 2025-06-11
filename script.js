@@ -99,52 +99,52 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const themes = {
-      "cyber-neon": {
-        bgPrimary: "#0D0D1A",
-        bgSecondary: "#1A1A2E",
-        accentNeon: "#FF00E6",
-        accentGlow: "#00FFCC",
-        textPrimary: "#E6E6FA",
-        textSecondary: "#A3BFFA"
+      "nebula-magic": {
+        bgSpace: "#0A0B22",
+        bgNebula: "#1E1F4A",
+        accentMagic: "#7B00FF",
+        accentStar: "#FFD700",
+        textGlow: "#E6E6FF",
+        textDim: "#B0B0FF"
       },
-      "quantum-flare": {
-        bgPrimary: "#1A0D1A",
-        bgSecondary: "#2E1A2E",
-        accentNeon: "#FF6B6B",
-        accentGlow: "#FFD93D",
-        textPrimary: "#F5E6FA",
-        textSecondary: "#FABFA3"
+      "galactic-dream": {
+        bgSpace: "#0B1A2B",
+        bgNebula: "#2A3B5A",
+        accentMagic: "#00D1FF",
+        accentStar: "#FFEB3B",
+        textGlow: "#E6F0FF",
+        textDim: "#B0C4DE"
       },
-      "cosmo-pulse": {
-        bgPrimary: "#0D1A1A",
-        bgSecondary: "#1A2E2E",
-        accentNeon: "#4BFFD7",
-        accentGlow: "#FF4B4B",
-        textPrimary: "#E6FAFA",
-        textSecondary: "#A3FAFA"
+      "mystic-cosmos": {
+        bgSpace: "#0A1A0A",
+        bgNebula: "#1A3A1A",
+        accentMagic: "#00FF7F",
+        accentStar: "#FFDAB9",
+        textGlow: "#E6FFE6",
+        textDim: "#B0FFB0"
       }
     };
-    let currentTheme = localStorage.getItem("selectedTheme") || "cyber-neon";
+    let currentTheme = localStorage.getItem("selectedTheme") || "nebula-magic";
 
     function applyTheme(theme) {
       const root = document.documentElement;
-      root.style.setProperty("--bg-primary", themes[theme].bgPrimary);
-      root.style.setProperty("--bg-secondary", themes[theme].bgSecondary);
-      root.style.setProperty("--accent-neon", themes[theme].accentNeon);
-      root.style.setProperty("--accent-glow", themes[theme].accentGlow);
-      root.style.setProperty("--text-primary", themes[theme].textPrimary);
-      root.style.setProperty("--text-secondary", themes[theme].textSecondary);
+      root.style.setProperty("--bg-space", themes[theme].bgSpace);
+      root.style.setProperty("--bg-nebula", themes[theme].bgNebula);
+      root.style.setProperty("--accent-magic", themes[theme].accentMagic);
+      root.style.setProperty("--accent-star", themes[theme].accentStar);
+      root.style.setProperty("--text-glow", themes[theme].textGlow);
+      root.style.setProperty("--text-dim", themes[theme].textDim);
       localStorage.setItem("selectedTheme", theme);
       currentTheme = theme;
       document.documentElement.setAttribute("data-theme", theme);
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
       if (themeColorMeta) {
-        themeColorMeta.setAttribute("content", themes[theme].accentNeon);
+        themeColorMeta.setAttribute("content", themes[theme].accentMagic);
       }
     }
 
     function toggleTheme() {
-      const themesOrder = ["cyber-neon", "quantum-flare", "cosmo-pulse"];
+      const themesOrder = ["nebula-magic", "galactic-dream", "mystic-cosmos"];
       const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
       applyTheme(nextTheme);
     }
@@ -280,6 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
         favoriteStations.unshift(stationName);
       }
       localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
+ MWC
       if (currentTab === "best") switchTab("best");
       else updateStationList();
     }
@@ -308,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: item.dataset.name || "Unknown Station",
           artist: `${item.dataset.genre || "Unknown"} | ${item.dataset.country || "Unknown"}`,
-          album: "NeonWave Radio"
+          album: "StellarWave Radio"
         });
       }
     }
