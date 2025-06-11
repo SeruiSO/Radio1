@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "radio-pwa-cache-v965"; // Оновлено версію кешу
+const CACHE_NAME = "radio-pwa-cache-v3"; // Оновлено версію кешу
 const urlsToCache = [
   "/",
   "index.html",
@@ -12,6 +12,8 @@ const urlsToCache = [
 
 // Змінна для відстеження першого запиту до stations.json у сесії
 let isInitialLoad = true;
+// Змінна для зберігання стану Bluetooth
+let lastBluetoothStatus = false;
 
 self.addEventListener("install", event => {
   event.waitUntil(
@@ -128,4 +130,52 @@ setInterval(() => {
         });
       }
     });
-}, 1000);
+}, 5000); // Інтервал перевірки мережі: 5 секунд
+
+// Обробка повідомлень для Bluetooth
+self.addEventListener("message", event => {
+  if (event.data.type === "BLUETOOTH_STATUS") {
+    const { hasBluetooth, isPlaying, currentIndex, currentTab } = event.data;
+
+    // Логіка для фонового режиму
+    if (hasBluetooth && !lastBluetoothStatus && !isPlaying) {
+      // Bluetooth підключено
+      console.log("Service Worker: Bluetooth підключено, надсилаємо запит на відтворення");
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ type: "PLAY_REQUEST" });
+        });
+      });
+
+      // Показуємо сповіщення
+      self.registration.showNotification("Radio S O", {
+        body: "Bluetooth-пристрій підключено! Відкрийте додаток для відтворення.",
+        icon: "icon-192.png",
+        actions: [
+          { action: "open", title: "Відкрити додаток" }
+        ]
+      });
+    } else if (!hasBluetooth && lastBluetoothStatus && isPlaying) {
+      // Bluetooth відключено
+      console.log("Service Worker: Bluetooth відключено, надсилаємо запит на паузу");
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ type: "PAUSE_REQUEST" });
+        });
+      });
+    }
+
+    // Оновлюємо останній стан Bluetooth
+    lastBluetoothStatus = hasBluetooth;
+  }
+});
+
+// Обробка натискання на сповіщення
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  if (event.action === "open") {
+    event.waitUntil(
+      clients.openWindow("/") // Відкриває головну сторінку PWA
+    );
+  }
+});

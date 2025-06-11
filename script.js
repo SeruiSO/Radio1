@@ -30,10 +30,86 @@ document.addEventListener("DOMContentLoaded", () => {
   // Ініціалізація програми
   initializeApp();
 
-  function initializeApp() {
+  async function initializeApp() {
     // Налаштування аудіо
     audio.preload = "auto";
     audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
+
+    // Запит дозволу на доступ до медіапристроїв
+    async function requestMediaDevicePermission() {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log("Дозвіл на доступ до медіапристроїв отримано");
+      } catch (error) {
+        console.error("Помилка отримання дозволу на медіапристрої:", error);
+      }
+    }
+    requestMediaDevicePermission();
+
+    // Періодична перевірка аудіовиходів (кожні 5 секунд)
+    async function checkAudioOutputs() {
+      if (!navigator.mediaDevices) return;
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioOutputs = devices.filter(device => device.kind === "audiooutput");
+        console.log("Доступні аудіовиходи:", audioOutputs);
+
+        // Перевірка, чи є Bluetooth-пристрій
+        const hasBluetooth = audioOutputs.some(device => device.label.toLowerCase().includes("bluetooth"));
+
+        // Надсилання стану до Service Worker
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            type: "BLUETOOTH_STATUS",
+            hasBluetooth,
+            isPlaying,
+            currentIndex,
+            currentTab
+          });
+        }
+
+        // Логіка відтворення/зупинки
+        if (hasBluetooth && !isPlaying && stationItems?.length && currentIndex < stationItems.length) {
+          console.log("Bluetooth-пристрій підключено, запускаємо відтворення");
+          isPlaying = true;
+          localStorage.setItem("isPlaying", isPlaying);
+          playPauseBtn.textContent = "⏸";
+          tryAutoPlay();
+        } else if (!hasBluetooth && isPlaying) {
+          console.log("Bluetooth-пристрій відключено, зупиняємо відтворення");
+          audio.pause();
+          isPlaying = false;
+          localStorage.setItem("isPlaying", isPlaying);
+          playPauseBtn.textContent = "▶";
+          document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+        }
+      } catch (error) {
+        console.error("Помилка при перевірці аудіовиходів:", error);
+        stationList.innerHTML = "<div class='station-item empty'>Аудіовиходи не знайдено. Підключіть Bluetooth-пристрій.</div>";
+      }
+    }
+
+    // Запуск періодичної перевірки аудіовиходів
+    setInterval(checkAudioOutputs, 5000); // Перевірка кожні 5 секунд
+    checkAudioOutputs(); // Початкова перевірка
+
+    // Обробка повідомлень від Service Worker
+    navigator.serviceWorker.addEventListener("message", event => {
+      if (event.data.type === "PLAY_REQUEST" && stationItems?.length && currentIndex < stationItems.length) {
+        console.log("Отримано запит на відтворення від Service Worker");
+        isPlaying = true;
+        localStorage.setItem("isPlaying", isPlaying);
+        playPauseBtn.textContent = "⏸";
+        tryAutoPlay();
+      } else if (event.data.type === "PAUSE_REQUEST") {
+        console.log("Отримано запит на паузу від Service Worker");
+        audio.pause();
+        isPlaying = false;
+        localStorage.setItem("isPlaying", isPlaying);
+        playPauseBtn.textContent = "▶";
+        document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "paused");
+      }
+    });
 
     // Прив’язка обробників подій для кнопок вкладок
     document.querySelectorAll(".tab-btn").forEach((btn, index) => {
@@ -429,7 +505,8 @@ document.addEventListener("DOMContentLoaded", () => {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: item.dataset.name || "Unknown Station",
           artist: `${item.dataset.genre || "Unknown"} | ${item.dataset.country || "Unknown"}`,
-          album: "Radio Music"
+          album: "Radio Music",
+          artwork: [{ src: "icon-192.png", sizes: "192x192", type: "image/png" }]
         });
       }
     }
@@ -576,6 +653,11 @@ document.addEventListener("DOMContentLoaded", () => {
       navigator.mediaSession.setActionHandler("pause", togglePlayPause);
       navigator.mediaSession.setActionHandler("previoustrack", prevStation);
       navigator.mediaSession.setActionHandler("nexttrack", nextStation);
+      navigator.mediaSession.setActionHandler("seekto", details => {
+        if (details.seekTime) {
+          audio.currentTime = details.seekTime;
+        }
+      });
     }
 
     // Відстеження взаємодії користувача
@@ -586,5 +668,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Ініціалізація
     applyTheme(currentTheme);
     loadStations();
+
+    // Автоматичне відтворення, якщо isPlaying === true
+    if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
+      tryAutoPlay();
+      playPauseBtn.textContent = "⏸";
+      document.querySelectorAll(".wave-bar").forEach(bar => bar.style.animationPlayState = "running");
+    }
   }
 });
