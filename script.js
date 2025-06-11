@@ -23,7 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Перевірка наявності всіх необхідних елементів
   if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle) {
     console.error("Один із необхідних DOM-елементів не знайдено");
-    // Відкладена ініціалізація
     setTimeout(initializeApp, 100);
     return;
   }
@@ -39,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Прив’язка обробників подій для кнопок вкладок
     document.querySelectorAll(".tab-btn").forEach((btn, index) => {
       const tabs = ["best", "techno", "trance", "ukraine", "pop"];
-      const tab = tabs[index]; // Прив’язуємо вкладки за порядком
+      const tab = tabs[index];
       btn.addEventListener("click", () => switchTab(tab));
     });
 
@@ -59,11 +58,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const stationGenreElement = currentStationInfo.querySelector(".station-genre");
       const stationCountryElement = currentStationInfo.querySelector(".station-country");
       if (stationNameElement) stationNameElement.textContent = "Обирайте станцію";
-      else console.error("Елемент .station-name не знайдено в currentStationInfo");
+      else console.error("Елемент .station-name не знайдено");
       if (stationGenreElement) stationGenreElement.textContent = "жанр: -";
-      else console.error("Елемент .station-genre не знайдено в currentStationInfo");
+      else console.error("Елемент .station-genre не знайдено");
       if (stationCountryElement) stationCountryElement.textContent = "країна: -";
-      else console.error("Елемент .station-country не знайдено в currentStationInfo");
+      else console.error("Елемент .station-country не знайдено");
     }
 
     // Завантаження станцій
@@ -90,7 +89,17 @@ document.addEventListener("DOMContentLoaded", () => {
             throw new Error("Кеш не знайдено");
           }
         } else if (response.ok) {
-          stationLists = await response.json();
+          const data = await response.json();
+          // Перевірка формату даних
+          if (typeof data !== "object" || !Object.keys(data).length) {
+            throw new Error("Невалідний формат stations.json: порожній або не об’єкт");
+          }
+          for (const [key, stations] of Object.entries(data)) {
+            if (!Array.isArray(stations)) {
+              throw new Error(`Невалідний формат для ${key}: очікується масив`);
+            }
+          }
+          stationLists = data;
           localStorage.setItem("stationsLastModified", response.headers.get("Last-Modified") || "");
           console.log("Новий stations.json успішно завантажено");
         } else {
@@ -98,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         favoriteStations = favoriteStations.filter(name => 
           Object.values(stationLists).flat().some(s => s.name === name)
-        );
+        ;
         localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
         const validTabs = [...Object.keys(stationLists), "best"];
         if (!validTabs.includes(currentTab)) {
@@ -109,8 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
         switchTab(currentTab);
       } catch (error) {
         if (error.name !== 'AbortError') {
-          console.error("Помилка завантаження станцій:", error);
-          stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції</div>";
+          console.error("Помилка завантаження станцій:", error.message);
+          stationList.innerHTML = "<div class='station-item empty'>Не вдалось завантажити станції</div>";
         }
       } finally {
         console.timeEnd("loadStations");
@@ -142,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
         accentGradient: "#64DD17"
       },
       "sapphire-blitz": {
-        bodyBg: "#1C2526",
+        bodyBg": "#1C2526",
         containerBg: "#2E2E2E",
         accent: "#0288D1",
         text: "#FFFFFF",
@@ -156,14 +165,14 @@ document.addEventListener("DOMContentLoaded", () => {
         accentGradient: "#FFCA28"
       },
       // Чоловічі теми
-      "obsidian-gloss": {
-        bodyBg: "#0A0A0A",
+      "obsidian-dark": {
+        bodyBg: "#0A0A",
         containerBg: "#121212",
         accent: "#80D8FF",
         text: "#E0E0E0",
         accentGradient: "#0288D1"
       },
-      "midnight-flame": {
+      "midnight-blue": {
         bodyBg: "#000000",
         containerBg: "#1A1A1A",
         accent: "#FF5722",
@@ -171,28 +180,28 @@ document.addEventListener("DOMContentLoaded", () => {
         accentGradient: "#F4511E"
       },
       "iron-pulse": {
-        bodyBg: "#212121",
+        bodyBg": "#212121",
         containerBg: "#2E2E2E",
         accent: "#D32F2F",
         text: "#FFFFFF",
         accentGradient: "#C62828"
       },
-      "teal-strike": {
-        bodyBg: "#1A3C34",
+      "teal-dark": {
+        bodyBg: "#1A2526",
         containerBg: "#2E4A43",
         accent: "#26A69A",
         text: "#FFFFFF",
         accentGradient: "#009688"
       },
-      "neon-volt": {
+      "neon-dark": {
         bodyBg: "#000000",
-        containerBg: "#1A1A1A",
+        containerBg: "#1A1A",
         accent: "#00E676",
         text: "#FFFFFF",
         accentGradient: "#00C853"
       }
     };
-    let currentTheme = localStorage.getItem("selectedTheme") || "obsidian-gloss";
+    let currentTheme = localStorage.getItem("selectedTheme") || "obsidian-dark";
 
     function applyTheme(theme) {
       const root = document.documentElement;
@@ -214,20 +223,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const themesOrder = [
         "ruby-spark",
         "electric-lilac",
-        "lime-zest",
+        "lime-st",
         "sapphire-blitz",
-        "solar-flare",
-        "obsidian-gloss",
-        "midnight-flame",
-        "iron-pulse",
-        "teal-strike",
-        "neon-volt"
+        "solar-dark",
+        "obsidian-dark",
+        "midnight-dark",
+        "      iron-pulse",
+      "      teal-dark",
+      "      neon-dark"
       ];
-      const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
+      const nextTheme = themesOrder[themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
       applyTheme(nextTheme);
     }
 
-    // Додаємо обробник події для кнопки зміни теми
+    // Додаємо обробник події для кнопки
     themeToggle.addEventListener("click", toggleTheme);
 
     // Налаштування Service Worker
@@ -350,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ...stations.slice(0, currentIndex),
           ...stations.slice(currentIndex + 1)
         ];
-        currentIndex = 0; // Оновлюємо індекс, щоб відповідати новому порядку
+        currentIndex = 0;
       }
 
       const fragment = document.createDocumentFragment();
@@ -415,7 +424,7 @@ document.addEventListener("DOMContentLoaded", () => {
       updateCurrentStationInfo(item);
       localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
       tryAutoPlay();
-      if (currentTab !== "best") updateStationList(); // Оновлюємо список, щоб поточна станція була зверху
+      if (currentTab !== "best") updateStationList();
     }
 
     // Оновлення інформації про станцію
@@ -433,17 +442,17 @@ document.addEventListener("DOMContentLoaded", () => {
       if (stationNameElement) {
         stationNameElement.textContent = item.dataset.name || "Unknown";
       } else {
-        console.error("Елемент .station-name не знайдено в currentStationInfo");
+        console.error("Елемент .station-name не знайдено");
       }
       if (stationGenreElement) {
         stationGenreElement.textContent = `жанр: ${item.dataset.genre || "Unknown"}`;
       } else {
-        console.error("Елемент .station-genre не знайдено в currentStationInfo");
+        console.error("Елемент .station-genre не знайдено");
       }
       if (stationCountryElement) {
         stationCountryElement.textContent = `країна: ${item.dataset.country || "Unknown"}`;
       } else {
-        console.error("Елемент .station-country не знайдено в currentStationInfo");
+        console.error("Елемент .station-country не знайдено");
       }
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
