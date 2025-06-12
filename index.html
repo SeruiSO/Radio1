@@ -50,9 +50,6 @@
 </head>
 <body>
   <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
-  <select id="theme-select" aria-label="Select theme">
-    <!-- Options will be populated by script.js -->
-  </select>
   <button class="control-btn" id="bluetooth-btn" aria-label="Connect to Bluetooth">🔗</button>
   <div class="container">
     <h1>🎧 RADIO MUSIC</h1>
@@ -64,30 +61,30 @@
           <div class="station-genre">жанр: -</div>
           <div class="station-country">країна: -</div>
         </div>
+        <div class="wave-progress">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
       </div>
-    </div>
-    <div class="tabs">
-      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="station-list">BEST</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="station-list">TECHNO</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="station-list">TRANCE</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="station-list">UA</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="station-list">POP</button>
     </div>
     <div class="station-list" id="stationList"></div>
     <div class="controls-container">
+      <div class="tabs">
+        <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="station-list">BEST</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="station-list">TECHNO</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="station-list">TRANCE</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="station-list">UA</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="station-list">POP</button>
+      </div>
       <div class="controls">
         <button class="control-btn" aria-label="Previous station">⏮</button>
         <button class="control-btn" aria-label="Play/Pause">▶</button>
         <button class="control-btn" aria-label="Next station">⏭</button>
-      </div>
-      <div class="wave-progress">
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
       </div>
     </div>
   </div>
