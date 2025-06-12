@@ -159,12 +159,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     themeToggle.addEventListener("click", toggleTheme);
 
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js").then(registration => {
-        registration.update();
-      });
-    }
-
     function tryAutoPlay() {
       if (!navigator.onLine) return;
       if (!isPlaying || !stationItems?.length || currentIndex >= stationItems.length || !hasUserInteracted) {
