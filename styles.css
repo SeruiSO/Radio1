@@ -1,8 +1,8 @@
 /* Updated on June 12, 2025 */
 :root {
   --body-bg: #0A0A0A;
-  --container-bg: #121212;
-  --text: #F0F0F0;
+  --container-bg: #1C1C1C;
+  --text: #E0E0E0;
   --accent: #FF5722; /* Помаранчевий за замовчуванням */
   --accent-gradient: #BB361A;
 }
@@ -28,15 +28,14 @@ body {
   width: 100%;
   background: var(--container-bg);
   padding: 15px;
-  border-radius: 15px;
-  border: 1px solid var(--accent);
   margin: 0 10px;
   min-height: 90vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+  transition: background 0.4s ease, box-shadow 0.3s ease;
+  border-radius: 20px;
 }
 
 h1 {
@@ -52,8 +51,6 @@ h1 {
   top: 10px;
   left: 10px;
   background: var(--container-bg);
-  border: 2px solid var(--accent);
-  border-radius: 50%;
   padding: 8px;
   cursor: pointer;
   height: 40px;
@@ -61,8 +58,9 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
+  border-radius: 50%;
 }
 
 .theme-toggle:hover {
@@ -73,16 +71,14 @@ h1 {
 
 .theme-toggle:active {
   transform: scale(0.95);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .current-station-info {
   background: linear-gradient(45deg, var(--container-bg), var(--accent-gradient));
   padding: 20px;
-  border-radius: 12px;
   margin: 10px 0;
   color: var(--text);
-  border: 2px solid var(--accent);
   text-align: left;
   height: auto;
   display: flex;
@@ -90,18 +86,19 @@ h1 {
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
   transition: all 0.4s ease;
+  border-radius: 15px;
 }
 
 .current-station-info:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9);
 }
 
 .current-station-info:active {
   transform: translateY(0);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
 }
 
 .station-info-content {
@@ -145,58 +142,54 @@ h1 {
   z-index: 10;
   background: var(--container-bg);
   padding: 5px;
-  border-radius: 10px;
-  border: 1px solid var(--accent);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
   transition: all 0.4s ease;
+  border-radius: 10px;
 }
 
 .tab-btn {
   flex: 1;
   padding: 12px;
   background: var(--container-bg);
-  border: 2px solid var(--accent);
-  border-radius: 5px;
   color: var(--text);
   cursor: pointer;
   margin: 0 2px;
   text-align: center;
   font-size: 14px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
+  border-radius: 8px;
 }
 
 .tab-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 .tab-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .tab-btn.active {
   background: var(--accent);
-  border-color: var(--accent);
   color: #0A0A0A;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
 }
 
 .station-list {
   max-height: 500px;
   overflow-y: auto;
   background: var(--container-bg);
-  border: 2px solid var(--accent);
-  border-radius: 10px;
   margin: 10px 0 5px;
   padding: 10px;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) var(--container-bg);
   flex-grow: 1;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  transition: border-color 0.4s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+  transition: background 0.4s ease;
+  border-radius: 15px;
 }
 
 .station-list::-webkit-scrollbar {
@@ -215,30 +208,27 @@ h1 {
 .station-item {
   padding: 12px;
   cursor: pointer;
-  border-radius: 8px;
-  font-weight: 500;
-  border: 1px solid var(--text);
   margin: 5px 0;
   color: var(--text);
   background: var(--container-bg);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
+  border-radius: 10px;
 }
 
 .station-item:hover, .station-item.selected {
   background: var(--accent) !important;
-  border: 2px solid var(--accent) !important;
   color: #0A0A0A;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
 }
 
 .station-item:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .station-item .favorite-btn {
@@ -264,7 +254,6 @@ h1 {
   color: var(--text);
   opacity: 0.7;
   padding: 20px;
-  border: none;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -287,15 +276,15 @@ h1 {
   position: sticky;
   bottom: 0;
   background: var(--container-bg);
-  border-top: 2px solid var(--accent);
   padding: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
   z-index: 10;
-  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.7);
   transition: all 0.4s ease;
+  border-radius: 20px 20px 0 0;
 }
 
 .controls {
@@ -338,26 +327,25 @@ h1 {
   font-size: 32px;
   background: var(--container-bg);
   color: var(--text);
-  border: 4px solid var(--accent);
-  border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
 }
 
 .control-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
-  transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.9);
 }
 
 .control-btn:active {
   transform: translateY(0);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
 }
 
 @media (max-width: 720px) {
@@ -375,7 +363,6 @@ h1 {
     width: 70px;
     height: 70px;
     font-size: 24px;
-    border-width: 2px;
   }
 
   .station-list {
@@ -430,7 +417,6 @@ h1 {
   .tab-btn {
     padding: 10px;
     font-size: 12px;
-    border-width: 1px;
   }
 
   .tabs {

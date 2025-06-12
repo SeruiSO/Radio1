@@ -12,7 +12,6 @@ const ERROR_LIMIT = 5;
 
 // Очікування завантаження DOM
 document.addEventListener("DOMContentLoaded", () => {
-  // Отримання DOM-елементів
   const audio = document.getElementById("audioPlayer");
   const stationList = document.getElementById("stationList");
   const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
@@ -103,37 +102,37 @@ document.addEventListener("DOMContentLoaded", () => {
     const themes = {
       "fiery-orange": {
         bodyBg: "#0A0A0A",
-        containerBg: "#121212",
+        containerBg: "#1C1C1C",
         accent: "#FF5722",
-        text: "#F0F0F0",
+        text: "#E0E0E0",
         accentGradient: "#BB361A"
       },
       "neon-green": {
         bodyBg: "#0A0A0A",
-        containerBg: "#121212",
+        containerBg: "#1C1C1C",
         accent: "#76FF03",
-        text: "#F0F0F0",
+        text: "#E0E0E0",
         accentGradient: "#4B6A00"
       },
       "electric-blue": {
         bodyBg: "#0A0A0A",
-        containerBg: "#121212",
+        containerBg: "#1C1C1C",
         accent: "#2196F3",
-        text: "#F0F0F0",
+        text: "#E0E0E0",
         accentGradient: "#0D47A1"
       },
       "vibrant-purple": {
         bodyBg: "#0A0A0A",
-        containerBg: "#121212",
+        containerBg: "#1C1C1C",
         accent: "#AB47BC",
-        text: "#F0F0F0",
+        text: "#E0E0E0",
         accentGradient: "#6A1B9A"
       },
       "crimson-red": {
         bodyBg: "#0A0A0A",
-        containerBg: "#121212",
+        containerBg: "#1C1C1C",
         accent: "#D32F2F",
-        text: "#F0F0F0",
+        text: "#E0E0E0",
         accentGradient: "#801313"
       }
     };
