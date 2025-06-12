@@ -1,5 +1,5 @@
 /* Updated on June 12, 2025, 12:05 PM EEST */
-const CACHE_NAME = "radio-pwa-cache-v28";
+const CACHE_NAME = "radio-pwa-cache-v29";
 const urlsToCache = [
   "/",
   "/index.html",

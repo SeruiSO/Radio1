@@ -97,43 +97,78 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const themes = {
-      "olive-soft": {
-        bodyBg: "#1A2526",
-        containerBg: "#2E3A3A",
-        accent: "#AED581",
+      "emerald-deep": {
+        bodyBg: "#0A0F0F",
+        containerBg: "#152020",
+        accent: "#2E7D32",
         text: "#E0E8E6",
-        accentGradient: "#8BC34A"
+        accentGradient: "#00695C"
       },
-      "turquoise-gentle": {
-        bodyBg: "#1A2526",
-        containerBg: "#2E3A3A",
-        accent: "#4DD0E1",
+      "aquamarine-soft": {
+        bodyBg: "#0A0F0F",
+        containerBg: "#152020",
+        accent: "#00BCD4",
         text: "#E0E8E6",
-        accentGradient: "#00ACC1"
+        accentGradient: "#0097A7"
       },
-      "warm-peach": {
-        bodyBg: "#1A2526",
-        containerBg: "#2E3A3A",
-        accent: "#FFCCBC",
+      "terracotta-warm": {
+        bodyBg: "#0A0F0F",
+        containerBg: "#152020",
+        accent: "#EF6C00",
         text: "#E0E8E6",
-        accentGradient: "#EF9A9A"
+        accentGradient: "#F57C00"
       },
-      "deep-indigo": {
-        bodyBg: "#1A2526",
-        containerBg: "#2E3A3A",
-        accent: "#3F51B5",
+      "violet-gentle": {
+        bodyBg: "#0A0F0F",
+        containerBg: "#152020",
+        accent: "#9C27B0",
         text: "#E0E8E6",
-        accentGradient: "#283593"
+        accentGradient: "#7B1FA2"
       },
-      "light-cream": {
-        bodyBg: "#1A2526",
-        containerBg: "#2E3A3A",
-        accent: "#F5F5F0",
+      "quartz-light": {
+        bodyBg: "#0A0F0F",
+        containerBg: "#152020",
+        accent: "#ECEFF1",
         text: "#E0E8E6",
-        accentGradient: "#E0E0E0"
+        accentGradient: "#CFD8DC"
+      },
+      "sapphire-rich": {
+        bodyBg: "#0A0F0F",
+        containerBg: "#152020",
+        accent: "#1E88E5",
+        text: "#E0E8E6",
+        accentGradient: "#1976D2"
+      },
+      "khaki-warm": {
+        bodyBg: "#0A0F0F",
+        containerBg: "#152020",
+        accent: "#8A9A5B",
+        text: "#E0E8E6",
+        accentGradient: "#6F7B3A"
+      },
+      "coral-pale": {
+        bodyBg: "#0A0F0F",
+        containerBg: "#152020",
+        accent: "#FF8A80",
+        text: "#E0E8E6",
+        accentGradient: "#EF5350"
+      },
+      "burgundy-deep": {
+        bodyBg: "#0A0F0F",
+        containerBg: "#152020",
+        accent: "#880E4F",
+        text: "#E0E8E6",
+        accentGradient: "#AD1457"
+      },
+      "sand-soft": {
+        bodyBg: "#0A0F0F",
+        containerBg: "#152020",
+        accent: "#F1EDEB",
+        text: "#E0E8E6",
+        accentGradient: "#D7CCC8"
       }
     };
-    let currentTheme = localStorage.getItem("selectedTheme") || "olive-soft";
+    let currentTheme = localStorage.getItem("selectedTheme") || "emerald-deep";
 
     function applyTheme(theme) {
       const root = document.documentElement;
@@ -152,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function toggleTheme() {
-      const themesOrder = ["olive-soft", "turquoise-gentle", "warm-peach", "deep-indigo", "light-cream"];
+      const themesOrder = ["emerald-deep", "aquamarine-soft", "terracotta-warm", "violet-gentle", "quartz-light", "sapphire-rich", "khaki-warm", "coral-pale", "burgundy-deep", "sand-soft"];
       const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
       applyTheme(nextTheme);
     }
