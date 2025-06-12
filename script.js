@@ -8,6 +8,31 @@ let stationLists = {};
 let stationItems;
 let audioContext, analyser, source;
 
+// Визначаємо теми перед їх використанням
+const themes = {
+  "cyber-neon": {
+    bodyBg: "#0D0D0D",
+    containerBg: "#1A1A1A",
+    accent: "#FF2E63",
+    text: "#F5F5F5",
+    accentGradient: "#4B1A2E"
+  },
+  "retro-wave": {
+    bodyBg: "#1A0A2E",
+    containerBg: "#2A1A4E",
+    accent: "#FF00FF",
+    text: "#E0E0E0",
+    accentGradient: "#4B1A5E"
+  },
+  "solar-flare": {
+    bodyBg: "#0A0A0A",
+    containerBg: "#151515",
+    accent: "#FF9500",
+    text: "#FFE8CC",
+    accentGradient: "#4B2E1A"
+  }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   const audio = document.getElementById("audioPlayer");
   const stationList = document.getElementById("stationList");
@@ -36,41 +61,47 @@ document.addEventListener("DOMContentLoaded", () => {
     audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
     volumeSlider.value = audio.volume;
 
-    setupAudioVisualizer();
     setupEventListeners();
     applyTheme(localStorage.getItem("selectedTheme") || "cyber-neon");
     loadStations();
   }
 
   function setupAudioVisualizer() {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256;
-    source = audioContext.createMediaElementSource(audio);
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
+    if (!hasUserInteracted) return; // Відкладаємо до взаємодії користувача
+    if (audioContext) return; // Уникаємо повторної ініціалізації
 
-    const canvas = document.getElementById("audioVisualizer");
-    const ctx = canvas.getContext("2d");
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    try {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      source = audioContext.createMediaElementSource(audio);
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
 
-    function drawVisualizer() {
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      analyser.getByteFrequencyData(dataArray);
+      const canvas = document.getElementById("audioVisualizer");
+      const ctx = canvas.getContext("2d");
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const barWidth = canvas.width / bufferLength;
-      for (let i = 0; i < bufferLength; i++) {
-        const barHeight = dataArray[i] / 2;
-        ctx.fillStyle = `hsl(${i * 2}, 70%, 50%)`;
-        ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
+      function drawVisualizer() {
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const barWidth = canvas.width / bufferLength;
+        for (let i = 0; i < bufferLength; i++) {
+          const barHeight = dataArray[i] / 2;
+          ctx.fillStyle = `hsl(${i * 2}, 70%, 50%)`;
+          ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
+        }
+        requestAnimationFrame(drawVisualizer);
       }
-      requestAnimationFrame(drawVisualizer);
-    }
 
-    drawVisualizer();
+      drawVisualizer();
+    } catch (error) {
+      console.error("AudioContext setup error:", error);
+    }
   }
 
   function setupEventListeners() {
@@ -79,7 +110,11 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     document.querySelector(".controls .control-btn:nth-child(1)").addEventListener("click", prevStation);
-    playPauseBtn.addEventListener("click", togglePlayPause);
+    playPauseBtn.addEventListener("click", () => {
+      hasUserInteracted = true;
+      setupAudioVisualizer(); // Ініціалізуємо AudioContext після взаємодії
+      togglePlayPause();
+    });
     document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", nextStation);
 
     themeToggle.addEventListener("click", toggleTheme);
@@ -96,6 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("keydown", e => {
       hasUserInteracted = true;
+      setupAudioVisualizer();
       if (e.key === "ArrowLeft") prevStation();
       if (e.key === "ArrowRight") nextStation();
       if (e.key === " ") {
@@ -259,9 +295,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     stationList.onclick = e => {
+      hasUserInteracted = true;
+      setupAudioVisualizer();
       const item = e.target.closest(".station-item");
       const favoriteBtn = e.target.closest(".favorite-btn");
-      hasUserInteracted = true;
       if (item && !item.classList.contains("empty")) {
         currentIndex = Array.from(stationItems).indexOf(item);
         changeStation(currentIndex);
@@ -334,6 +371,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function prevStation() {
     hasUserInteracted = true;
+    setupAudioVisualizer();
+    if (!stationItems?.length) return; // Перевірка наявності stationItems
     currentIndex = currentIndex > 0 ? currentIndex - 1 : stationItems.length - 1;
     if (stationItems[currentIndex].classList.contains("empty")) currentIndex = 0;
     changeStation(currentIndex);
@@ -341,6 +380,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function nextStation() {
     hasUserInteracted = true;
+    setupAudioVisualizer();
+    if (!stationItems?.length) return; // Перевірка наявності stationItems
     currentIndex = currentIndex < stationItems.length - 1 ? currentIndex + 1 : 0;
     if (stationItems[currentIndex].classList.contains("empty")) currentIndex = 0;
     changeStation(currentIndex);
@@ -348,6 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function togglePlayPause() {
     hasUserInteracted = true;
+    setupAudioVisualizer();
     if (audio.paused) {
       isPlaying = true;
       tryAutoPlay();
@@ -370,37 +412,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  const themes = {
-    "cyber-neon": {
-      bodyBg: "#0D0D0D",
-      containerBg: "#1A1A1A",
-      accent: "#FF2E63",
-      text: "#F5F5F5",
-      accentGradient: "#4B1A2E"
-    },
-    "retro-wave": {
-      bodyBg: "#1A0A2E",
-      containerBg: "#2A1A4E",
-      accent: "#FF00FF",
-      text: "#E0E0E0",
-      accentGradient: "#4B1A5E"
-    },
-    "solar-flare": {
-      bodyBg: "#0A0A0A",
-      containerBg: "#151515",
-      accent: "#FF9500",
-      text: "#FFE8CC",
-      accentGradient: "#4B2E1A"
-    }
-  };
-
   function applyTheme(theme) {
+    const selectedTheme = themes[theme] || themes["cyber-neon"]; // Запасна тема
     const root = document.documentElement;
-    Object.entries(themes[theme]).forEach(([key, value]) =>
+    Object.entries(selectedTheme).forEach(([key, value]) =>
       root.style.setProperty(`--${key.replace(/([A-Z])/g, "-$1").toLowerCase()}`, value)
     );
     localStorage.setItem("selectedTheme", theme);
-    document.querySelector('meta[name="theme-color"]').setAttribute("content", themes[theme].accent);
+    document.querySelector('meta[name="theme-color"]').setAttribute("content", selectedTheme.accent);
   }
 
   function toggleTheme() {
