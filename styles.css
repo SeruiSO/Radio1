@@ -1,10 +1,10 @@
 /* Updated on June 12, 2025 */
 :root {
-  --body-bg: #000000;
-  --container-bg: #1A1A1A;
-  --accent: #FF1744;
-  --text: #FFFFFF;
-  --accent-gradient: #D81B60;
+  --body-bg: #0A0A0A;
+  --container-bg: #121212;
+  --text: #F0F0F0;
+  --accent: #FF5722; /* Помаранчевий за замовчуванням */
+  --accent-gradient: #BB361A;
 }
 
 body {
@@ -35,7 +35,8 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  transition: background 0.4s ease, border-color 0.4s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.3s ease;
 }
 
 h1 {
@@ -60,6 +61,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 }
 
@@ -67,6 +69,11 @@ h1 {
   background: var(--accent);
   color: #0A0A0A;
   transform: scale(1.1);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .current-station-info {
@@ -83,13 +90,18 @@ h1 {
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
-  transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.4s ease;
 }
 
 .current-station-info:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.5);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+}
+
+.current-station-info:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
 .station-info-content {
@@ -127,15 +139,16 @@ h1 {
 .tabs {
   display: flex;
   justify-content: space-between;
-  margin: 5px 0; /* Зменшено відступи */
+  margin: 5px 0;
   position: sticky;
-  bottom: 100px; /* Адаптовано для розташування над controls-container */
+  bottom: 100px;
   z-index: 10;
   background: var(--container-bg);
   padding: 5px;
   border-radius: 10px;
   border: 1px solid var(--accent);
-  transition: background 0.4s ease, border-color 0.4s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  transition: all 0.4s ease;
 }
 
 .tab-btn {
@@ -149,6 +162,7 @@ h1 {
   margin: 0 2px;
   text-align: center;
   font-size: 14px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 }
 
@@ -158,10 +172,16 @@ h1 {
   transform: translateY(-2px);
 }
 
+.tab-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
 .tab-btn.active {
   background: var(--accent);
   border-color: var(--accent);
   color: #0A0A0A;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
 .station-list {
@@ -175,6 +195,7 @@ h1 {
   scrollbar-width: thin;
   scrollbar-color: var(--accent) var(--container-bg);
   flex-grow: 1;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   transition: border-color 0.4s ease;
 }
 
@@ -203,6 +224,7 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 }
 
@@ -211,6 +233,12 @@ h1 {
   border: 2px solid var(--accent) !important;
   color: #0A0A0A;
   transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.station-item:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .station-item .favorite-btn {
@@ -240,6 +268,7 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: none;
 }
 
 .station-item.empty::before {
@@ -265,7 +294,8 @@ h1 {
   justify-content: center;
   gap: 20px;
   z-index: 10;
-  transition: background 0.4s ease, border-color 0.4s ease;
+  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.4s ease;
 }
 
 .controls {
@@ -309,8 +339,9 @@ h1 {
   background: var(--container-bg);
   color: var(--text);
   border: 4px solid var(--accent);
-  border-radius: 15px;
+  border-radius: 50%;
   cursor: pointer;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -320,11 +351,13 @@ h1 {
 .control-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
-  transform: scale(1.15);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
 }
 
 .control-btn:active {
-  transform: scale(0.95);
+  transform: translateY(0);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 @media (max-width: 720px) {
@@ -343,7 +376,6 @@ h1 {
     height: 70px;
     font-size: 24px;
     border-width: 2px;
-    border-radius: 10px;
   }
 
   .station-list {
@@ -402,7 +434,7 @@ h1 {
   }
 
   .tabs {
-    bottom: 90px; /* Адаптовано для нового розташування */
+    bottom: 90px;
   }
 }
 
