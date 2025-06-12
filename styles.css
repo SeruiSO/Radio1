@@ -1,10 +1,10 @@
-/* Updated on June 12, 2025 */
+/* Updated on June 12, 2025, 11:44 AM EEST */
 :root {
-  --body-bg: #0A0A0A;
-  --container-bg: #1C1C1C;
-  --text: #E0E0E0;
-  --accent: #FF5722; /* Помаранчевий за замовчуванням */
-  --accent-gradient: #BB361A;
+  --body-bg: #0F1419;
+  --container-bg: #1E272E;
+  --text: #D3D8DE;
+  --accent: #26A69A; /* М’ятний */
+  --accent-gradient: #00695C;
 }
 
 body {
@@ -33,8 +33,8 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
-  transition: background 0.4s ease, box-shadow 0.3s ease;
+  perspective: 1000px;
+  transition: background 0.4s ease;
   border-radius: 20px;
 }
 
@@ -58,19 +58,19 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  transition: all 0.3s ease;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  transition: transform 0.3s ease, background 0.3s ease;
+  border-radius: 50%;
 }
 
 .theme-toggle:hover {
   background: var(--accent);
-  color: #0A0A0A;
-  transform: scale(1.1);
+  color: #0F1419;
+  transform: translateZ(5px) scale(1.1);
 }
 
 .theme-toggle:active {
-  transform: scale(0.95);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  transform: translateZ(0) scale(0.95);
 }
 
 .current-station-info {
@@ -85,19 +85,17 @@ h1 {
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
-  transition: all 0.4s ease;
+  filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.4));
+  transition: transform 0.4s ease;
   border-radius: 15px;
 }
 
 .current-station-info:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9);
+  transform: translateZ(10px);
 }
 
 .current-station-info:active {
-  transform: translateY(0);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
+  transform: translateZ(0);
 }
 
 .station-info-content {
@@ -141,8 +139,8 @@ h1 {
   z-index: 10;
   background: var(--container-bg);
   padding: 5px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
-  transition: all 0.4s ease;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+  transition: transform 0.4s ease;
   border-radius: 10px;
 }
 
@@ -155,26 +153,25 @@ h1 {
   margin: 0 2px;
   text-align: center;
   font-size: 14px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s ease, background 0.3s ease;
   border-radius: 8px;
 }
 
 .tab-btn:hover {
   background: var(--accent);
-  color: #0A0A0A;
-  transform: translateY(-3px);
+  color: #0F1419;
+  transform: translateZ(5px);
 }
 
 .tab-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  transform: translateZ(0);
 }
 
 .tab-btn.active {
   background: var(--accent);
-  color: #0A0A0A;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
+  color: #0F1419;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
 }
 
 .station-list {
@@ -186,7 +183,7 @@ h1 {
   scrollbar-width: thin;
   scrollbar-color: var(--accent) var(--container-bg);
   flex-grow: 1;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
   transition: background 0.4s ease;
   border-radius: 15px;
 }
@@ -213,21 +210,19 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s ease;
   border-radius: 10px;
 }
 
 .station-item:hover, .station-item.selected {
   background: var(--accent) !important;
-  color: #0A0A0A;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
+  color: #0F1419;
+  transform: translateZ(5px);
 }
 
 .station-item:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  transform: translateZ(0);
 }
 
 .station-item .favorite-btn {
@@ -240,11 +235,11 @@ h1 {
 }
 
 .station-item .favorite-btn.favorited {
-  color: #FFD700;
+  color: #B0BEC5;
 }
 
 .station-item .favorite-btn:hover {
-  color: #FFD700;
+  color: #B0BEC5;
 }
 
 .station-item.empty {
@@ -256,7 +251,7 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: none;
+  filter: none;
 }
 
 .station-item.empty::before {
@@ -281,8 +276,8 @@ h1 {
   justify-content: center;
   gap: 20px;
   z-index: 10;
-  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.7);
-  transition: all 0.4s ease;
+  filter: drop-shadow(0 -4px 12px rgba(0, 0, 0, 0.3));
+  transition: transform 0.4s ease;
   border-radius: 20px 20px 0 0;
 }
 
@@ -327,23 +322,22 @@ h1 {
   background: var(--container-bg);
   color: var(--text);
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
-  transition: all 0.3s ease;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
+  transition: transform 0.3s ease, background 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 15px;
 }
 
 .control-btn:hover {
   background: var(--accent);
-  color: #0A0A0A;
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.9);
+  color: #0F1419;
+  transform: translateZ(8px);
 }
 
 .control-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+  transform: translateZ(0);
 }
 
 @media (max-width: 720px) {

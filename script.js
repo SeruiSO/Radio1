@@ -100,78 +100,43 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const themes = {
-      "fiery-orange": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#1C1C1C",
-        accent: "#FF5722",
-        text: "#E0E0E0",
-        accentGradient: "#BB361A"
-      },
-      "neon-green": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#1C1C1C",
-        accent: "#76FF03",
-        text: "#E0E0E0",
-        accentGradient: "#4B6A00"
-      },
-      "electric-blue": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#1C1C1C",
-        accent: "#2196F3",
-        text: "#E0E0E0",
-        accentGradient: "#0D47A1"
-      },
-      "vibrant-purple": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#1C1C1C",
-        accent: "#AB47BC",
-        text: "#E0E0E0",
-        accentGradient: "#6A1B9A"
-      },
-      "crimson-red": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#1C1C1C",
-        accent: "#D32F2F",
-        text: "#E0E0E0",
-        accentGradient: "#801313"
-      },
       "mint-green": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#1C1C1C",
+        bodyBg: "#0F1419",
+        containerBg: "#1E272E",
         accent: "#26A69A",
-        text: "#E0E0E0",
+        text: "#D3D8DE",
         accentGradient: "#00695C"
       },
       "lavender": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#1C1C1C",
+        bodyBg: "#0F1419",
+        containerBg: "#1E272E",
         accent: "#AB47BC",
-        text: "#E0E0E0",
+        text: "#D3D8DE",
         accentGradient: "#6A1B9A"
       },
       "cornflower-blue": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#1C1C1C",
+        bodyBg: "#0F1419",
+        containerBg: "#1E272E",
         accent: "#42A5F5",
-        text: "#E0E0E0",
+        text: "#D3D8DE",
         accentGradient: "#1976D2"
       },
-      "peach": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#1C1C1C",
-        accent: "#FF8A65",
-        text: "#E0E0E0",
-        accentGradient: "#BF360C"
-      },
       "sage-green": {
-        bodyBg: "#0A0A0A",
-        containerBg: "#1C1C1C",
+        bodyBg: "#0F1419",
+        containerBg: "#1E272E",
         accent: "#81C784",
-        text: "#E0E0E0",
+        text: "#D3D8DE",
         accentGradient: "#388E3C"
+      },
+      "sand-gray": {
+        bodyBg: "#0F1419",
+        containerBg: "#1E272E",
+        accent: "#B0BEC5",
+        text: "#D3D8DE",
+        accentGradient: "#78909C"
       }
     };
-    let currentTheme = localStorage.getItem("selectedTheme") || "fiery-orange";
+    let currentTheme = localStorage.getItem("selectedTheme") || "mint-green";
 
     function applyTheme(theme) {
       const root = document.documentElement;
@@ -190,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function toggleTheme() {
-      const themesOrder = ["fiery-orange", "neon-green", "electric-blue", "vibrant-purple", "crimson-red", "mint-green", "lavender", "cornflower-blue", "peach", "sage-green"];
+      const themesOrder = ["mint-green", "lavender", "cornflower-blue", "sage-green", "sand-gray"];
       const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
       applyTheme(nextTheme);
     }
