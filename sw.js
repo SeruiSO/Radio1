@@ -1,4 +1,4 @@
-const CACHE_NAME = "vibewave-cache-v1";
+const CACHE_NAME = "vibewave-cache-v3";
 const urlsToCache = [
   "/",
   "index.html",
@@ -17,7 +17,7 @@ self.addEventListener("install", event => {
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
       .then(() => self.skipWaiting())
-      .catch(error => console.error("Cache error:", error))
+      .catch(error => console.error("Cache installation error:", error))
   );
 });
 
@@ -51,13 +51,15 @@ self.addEventListener("activate", event => {
       Promise.all(
         cacheNames
           .filter(name => name !== CACHE_NAME)
-          .map(name => caches.delete(name))
+          .map(name => {
+            console.log(`Deleting old cache: ${name}`);
+            return caches.delete(name);
+          })
       )
     ).then(() => self.clients.claim())
   );
 });
 
-// Network status monitoring
 let wasOnline = navigator.onLine;
 
 setInterval(() => {
