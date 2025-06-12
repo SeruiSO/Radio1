@@ -1,4 +1,4 @@
-const CACHE_NAME = "radio-pwa-cache-v973";
+const CACHE_NAME = "vibewave-cache-v1";
 const urlsToCache = [
   "/",
   "index.html",
@@ -7,116 +7,57 @@ const urlsToCache = [
   "stations.json",
   "manifest.json",
   "icon-192.png",
-  "icon-512.png"
+  "icon-512.png",
+  "icon-256.png",
+  "icon-maskable-192.png"
 ];
-
-let isInitialLoad = true;
 
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log("Кешування файлів:", urlsToCache);
-        return cache.addAll(urlsToCache).catch(error => {
-          console.error("Помилка кешування:", error);
-        });
-      })
+      .then(cache => cache.addAll(urlsToCache))
       .then(() => self.skipWaiting())
+      .catch(error => console.error("Cache error:", error))
   );
 });
 
 self.addEventListener("fetch", event => {
   if (event.request.url.includes("stations.json")) {
-    if (isInitialLoad) {
-      event.respondWith(
-        fetch(event.request, { cache: "no-cache" })
-          .then(networkResponse => {
-            if (!networkResponse || networkResponse.status !== 200) {
-              return caches.match(event.request) || Response.error();
-            }
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-            isInitialLoad = false;
-            return networkResponse;
-          })
-          .catch(() => caches.match(event.request) || Response.error())
-      );
-    } else {
-      event.respondWith(
-        caches.match(event.request)
-          .then(cachedResponse => {
-            const fetchPromise = fetch(event.request, { cache: "no-cache" })
-              .then(networkResponse => {
-                if (networkResponse && networkResponse.status === 200) {
-                  const responseToCache = networkResponse.clone();
-                  caches.open(CACHE_NAME).then(cache => {
-                    cache.put(event.request, responseToCache);
-                  });
-                  return networkResponse;
-                }
-                return cachedResponse || Response.error();
-              })
-              .catch(() => cachedResponse || Response.error());
-            return cachedResponse || fetchPromise;
-          })
-      );
-    }
+    event.respondWith(
+      fetch(event.request, { cache: "no-cache" })
+        .then(response => {
+          if (!response.ok) throw new Error("Network error");
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+          return response;
+        })
+        .catch(() => caches.match(event.request) || new Response(JSON.stringify({ error: "Offline" }), {
+          status: 503,
+          statusText: "Service Unavailable"
+        }))
+    );
   } else {
     event.respondWith(
       caches.match(event.request)
         .then(response => response || fetch(event.request))
-        .catch(() => caches.match(event.request))
+        .catch(() => caches.match("/"))
     );
   }
 });
 
 self.addEventListener("activate", event => {
-  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (!cacheWhitelist.includes(cacheName)) {
-            console.log(`Видалення старого кешу: ${cacheName}`);
-            return caches.delete(cacheName).catch(err => console.error(`Помилка видалення кешу ${cacheName}:`, err));
-          }
-        })
-      );
-    }).then(() => {
-      console.log("Активація нового Service Worker");
-      isInitialLoad = true;
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-          client.postMessage({ type: "UPDATE", message: "Додаток оновлено до нової версії!" });
-        });
-      });
-      // Сповіщення про оновлення
-      if (Notification.permission === "granted") {
-        self.registration.showNotification("Оновлення доступне!", { body: "Додаток оновлено до нової версії." });
-      } else if (Notification.permission !== "denied") {
-        Notification.requestPermission().then(permission => {
-          if (permission === "granted") {
-            self.registration.showNotification("Оновлення доступне!", { body: "Додаток оновлено до нової версії." });
-          }
-        });
-      }
-      // Автоматичне оновлення через 5 секунд
-      setTimeout(() => {
-        self.clients.matchAll().then(clients => {
-          if (clients.length === 0) {
-            console.log("Немає активних клієнтів, перезавантаження...");
-            self.clients.claim().then(() => {
-              window.location.reload();
-            });
-          }
-        });
-      }, 5000);
-    }).then(() => self.clients.claim())
+    caches.keys().then(cacheNames =>
+      Promise.all(
+        cacheNames
+          .filter(name => name !== CACHE_NAME)
+          .map(name => caches.delete(name))
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
+// Network status monitoring
 let wasOnline = navigator.onLine;
 
 setInterval(() => {
@@ -124,22 +65,19 @@ setInterval(() => {
     .then(() => {
       if (!wasOnline) {
         wasOnline = true;
-        self.clients.matchAll().then(clients => {
-          clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: true });
-          });
-        });
+        notifyClients({ type: "NETWORK_STATUS", online: true });
       }
     })
-    .catch(error => {
-      console.error("Помилка перевірки мережі:", error);
+    .catch(() => {
       if (wasOnline) {
         wasOnline = false;
-        self.clients.matchAll().then(clients => {
-          clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: false });
-          });
-        });
+        notifyClients({ type: "NETWORK_STATUS", online: false });
       }
     });
-}, 1000);
+}, 2000);
+
+function notifyClients(message) {
+  self.clients.matchAll().then(clients =>
+    clients.forEach(client => client.postMessage(message))
+  );
+}
