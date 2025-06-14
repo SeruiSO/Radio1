@@ -4,7 +4,6 @@ let currentIndex = 0;
 let favoriteStations = JSON.parse(localStorage.getItem("favoriteStations")) || [];
 let isPlaying = localStorage.getItem("isPlaying") === "true" || false;
 let stationLists = JSON.parse(localStorage.getItem("stationLists")) || {};
-let deletedStations = JSON.parse(localStorage.getItem("deletedStations")) || { techno: [], trance: [], ukraine: [], pop: [], best: [] };
 let stationItems;
 let abortController = new AbortController();
 let errorCount = 0;
@@ -150,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
             stationLists[tab] = [
               ...newStations[tab].filter(s => !stationLists[tab].some(existing => existing.name === s.name)),
               ...stationLists[tab]
-            ].filter(s => !deletedStations[tab]?.includes(s.name));
+            ];
           });
           localStorage.setItem("stationsLastModified", response.headers.get("Last-Modified") || "");
           console.log("Новий stations.json успішно завантажено та об'єднано");
@@ -162,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
-        localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
         const validTabs = [...Object.keys(stationLists), "best"];
         if (!validTabs.includes(currentTab)) {
           currentTab = validTabs[0] || "techno";
@@ -300,22 +298,6 @@ document.addEventListener("DOMContentLoaded", () => {
         else updateStationList();
       } else {
         alert("Ця станція вже додана до обраної вкладки!");
-      }
-    }
-
-    function deleteStation(stationName, tab) {
-      if (!deletedStations[tab]) deletedStations[tab] = [];
-      if (!deletedStations[tab].includes(stationName)) {
-        deletedStations[tab].push(stationName);
-        stationLists[tab] = stationLists[tab]?.filter(s => s.name !== stationName) || [];
-        localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
-        localStorage.setItem("stationLists", JSON.stringify(stationLists));
-        if (tab === "best") {
-          favoriteStations = favoriteStations.filter(name => name !== stationName);
-          localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-        }
-        if (currentTab === tab) switchTab(currentTab);
-        else updateStationList();
       }
     }
 
@@ -527,9 +509,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       let stations = currentTab === "best"
         ? favoriteStations
-            .map(name => Object.values(stationLists).flat().find(s => s.name === name))
-            .filter(s => s && !deletedStations.best?.includes(s.name))
-        : stationLists[currentTab]?.filter(s => !deletedStations[currentTab]?.includes(s.name)) || [];
+            .map(name => Object.values(stationLists).flat().find(s => s.name === name) || Object.values(stationLists).flat().find(s => s.name === name))
+            .filter(s => s)
+        : stationLists[currentTab] || [];
 
       if (!stations.length) {
         currentIndex = 0;
@@ -546,7 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
         item.dataset.name = station.name;
         item.dataset.genre = shortenGenre(station.genre);
         item.dataset.country = station.country;
-        item.innerHTML = `${station.emoji || "🎶"} ${station.name}<button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button><button class="delete-btn">DEL</button>`;
+        item.innerHTML = `${station.emoji || "🎶"} ${station.name}<button class="delete-btn">🗑</button><button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button>`;
         fragment.appendChild(item);
       });
       stationList.innerHTML = "";
@@ -562,7 +544,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const favoriteBtn = e.target.closest(".favorite-btn");
         const deleteBtn = e.target.closest(".delete-btn");
         hasUserInteracted = true;
-        if (item && !item.classList.contains("empty") && !favoriteBtn && !deleteBtn) {
+        if (item && !item.classList.contains("empty")) {
           currentIndex = Array.from(stationItems).indexOf(item);
           changeStation(currentIndex);
         }
@@ -572,7 +554,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (deleteBtn) {
           e.stopPropagation();
-          deleteStation(item.dataset.name, currentTab);
+          if (confirm(`Ви впевнені, що хочете видалити станцію "${item.dataset.name}" зі списку?`)) {
+            deleteStation(item.dataset.name);
+          }
         }
       };
 
@@ -591,6 +575,20 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
       if (currentTab === "best") switchTab("best");
       else updateStationList();
+    }
+
+    function deleteStation(stationName) {
+      hasUserInteracted = true;
+      stationLists[currentTab] = stationLists[currentTab].filter(s => s.name !== stationName);
+      favoriteStations = favoriteStations.filter(name => name !== stationName);
+      localStorage.setItem("stationLists", JSON.stringify(stationLists));
+      localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
+      if (stationLists[currentTab].length === 0) {
+        currentIndex = 0;
+      } else if (currentIndex >= stationLists[currentTab].length) {
+        currentIndex = stationLists[currentTab].length - 1;
+      }
+      switchTab(currentTab);
     }
 
     function changeStation(index) {
