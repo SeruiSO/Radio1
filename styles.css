@@ -173,32 +173,31 @@ h1 {
   transform: translateY(-2px);
 }
 
-.station-item .favorite-btn, .station-item .add-btn, .station-item .delete-btn {
+.station-item .buttons {
+  display: flex;
+  align-items: center;
+  gap: 4px; /* Minimal gap between buttons */
+}
+
+.station-item .favorite-btn, .station-item .delete-btn {
   background: none;
   border: none;
   color: var(--text);
   font-size: 20px;
   cursor: pointer;
   transition: color 0.3s ease;
-  margin-left: 8px; /* Increased margin for spacing */
 }
 
 .station-item .favorite-btn.favorited {
   color: #FFD700;
 }
 
-.station-item .favorite-btn:hover, .station-item .add-btn:hover, .station-item .delete-btn:hover {
+.station-item .favorite-btn:hover, .station-item .delete-btn:hover {
   color: #FFD700;
 }
 
 .station-item .delete-btn {
   color: #FF4444;
-  margin-left: 8px; /* Small margin from favorite button */
-}
-
-.station-item .buttons {
-  display: flex;
-  align-items: center;
 }
 
 .station-item.empty {
