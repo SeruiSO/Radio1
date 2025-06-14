@@ -222,8 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
         item.innerHTML = `${station.emoji || "🎶"} ${station.name}<button class="add-btn">ADD</button>`;
         fragment.appendChild(item);
       });
-      stationList.innerHTML = "";
-      stationList.appendChild(fragment);
+      stationList.innerHTML += fragment.innerHTML; // Додаємо нові результати, не очищаючи попередні
       stationItems = stationList.querySelectorAll(".station-item");
       if (stationItems.length && currentIndex < stationItems.length) {
         changeStation(currentIndex);
@@ -528,7 +527,8 @@ document.addEventListener("DOMContentLoaded", () => {
         item.dataset.name = station.name;
         item.dataset.genre = shortenGenre(station.genre);
         item.dataset.country = station.country;
-        item.innerHTML = `${station.emoji || "🎶"} ${station.name}<button class="delete-btn">🗑</button><button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button>`;
+        item.dataset.tab = currentTab; // Додаємо атрибут для визначення вкладки
+        item.innerHTML = `${station.emoji || "🎶"} ${station.name}${currentTab !== "best" ? '<button class="delete-btn">🗑</button>' : ''}<button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button>`;
         fragment.appendChild(item);
       });
       stationList.innerHTML = "";
@@ -552,7 +552,7 @@ document.addEventListener("DOMContentLoaded", () => {
           e.stopPropagation();
           toggleFavorite(item.dataset.name);
         }
-        if (deleteBtn) {
+        if (deleteBtn && currentTab !== "best") {
           e.stopPropagation();
           if (confirm(`Ви впевнені, що хочете видалити станцію "${item.dataset.name}" зі списку?`)) {
             deleteStation(item.dataset.name);
@@ -579,16 +579,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function deleteStation(stationName) {
       hasUserInteracted = true;
-      stationLists[currentTab] = stationLists[currentTab].filter(s => s.name !== stationName);
-      favoriteStations = favoriteStations.filter(name => name !== stationName);
-      localStorage.setItem("stationLists", JSON.stringify(stationLists));
-      localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-      if (stationLists[currentTab].length === 0) {
-        currentIndex = 0;
-      } else if (currentIndex >= stationLists[currentTab].length) {
-        currentIndex = stationLists[currentTab].length - 1;
+      if (currentTab !== "best") {
+        stationLists[currentTab] = stationLists[currentTab].filter(s => s.name !== stationName);
+        favoriteStations = favoriteStations.filter(name => name !== stationName);
+        localStorage.setItem("stationLists", JSON.stringify(stationLists));
+        localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
+        if (stationLists[currentTab].length === 0) {
+          currentIndex = 0;
+        } else if (currentIndex >= stationLists[currentTab].length) {
+          currentIndex = stationLists[currentTab].length - 1;
+        }
+        switchTab(currentTab);
       }
-      switchTab(currentTab);
     }
 
     function changeStation(index) {

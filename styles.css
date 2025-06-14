@@ -176,7 +176,7 @@ h1 {
 .station-item .buttons {
   display: flex;
   align-items: center;
-  gap: 4px; /* Minimal gap between buttons */
+  gap: 4px; /* Мінімальний відступ між зірочкою і кошиком */
 }
 
 .station-item .favorite-btn, .station-item .delete-btn {
@@ -198,6 +198,11 @@ h1 {
 
 .station-item .delete-btn {
   color: #FF4444;
+}
+
+/* Прибираємо кошик для вкладки BEST */
+.station-item[data-tab="best"] .delete-btn {
+  display: none;
 }
 
 .station-item.empty {
@@ -487,7 +492,7 @@ h1 {
 
   .theme-toggle {
     top: 5px;
-    left: 5px;
+  left: 5px;
     padding: 4px;
     height: 35px;
     width: 35px;
