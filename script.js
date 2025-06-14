@@ -20,10 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("searchInput");
   const searchQuery = document.getElementById("searchQuery");
   const searchCountry = document.getElementById("searchCountry");
+  const searchGenre = document.getElementById("searchGenre");
   const searchBtn = document.querySelector(".search-btn");
   const pastSearchesList = document.getElementById("pastSearches");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !searchInput || !searchQuery || !searchCountry || !searchBtn || !pastSearchesList) {
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList) {
     console.error("Один із необхідних DOM-елементів не знайдено", {
       audio: !!audio,
       stationList: !!stationList,
@@ -33,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
       searchInput: !!searchInput,
       searchQuery: !!searchQuery,
       searchCountry: !!searchCountry,
+      searchGenre: !!searchGenre,
       searchBtn: !!searchBtn,
       pastSearchesList: !!pastSearchesList
     });
@@ -61,18 +63,19 @@ document.addEventListener("DOMContentLoaded", () => {
     searchBtn.addEventListener("click", () => {
       const query = searchQuery.value.trim();
       const country = normalizeCountry(searchCountry.value.trim());
-      console.log("Пошук запущено:", { query, country });
-      if (query || country) {
+      const genre = searchGenre.value.trim().toLowerCase();
+      console.log("Пошук запущено:", { query, country, genre });
+      if (query || country || genre) {
         if (query && !pastSearches.includes(query)) {
           pastSearches.unshift(query);
           if (pastSearches.length > 5) pastSearches.pop();
           localStorage.setItem("pastSearches", JSON.stringify(pastSearches));
           updatePastSearches();
         }
-        searchStations(query, country);
+        searchStations(query, country, genre);
       } else {
-        console.warn("Обидва поля пошуку порожні");
-        stationList.innerHTML = "<div class='station-item empty'>Введіть назву або країну</div>";
+        console.warn("Усі поля пошуку порожні");
+        stationList.innerHTML = "<div class='station-item empty'>Введіть назву, країну або жанр</div>";
       }
     });
 
@@ -81,6 +84,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     searchCountry.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") searchBtn.click();
+    });
+
+    searchGenre.addEventListener("keypress", (e) => {
       if (e.key === "Enter") searchBtn.click();
     });
 
@@ -181,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    async function searchStations(query, country) {
+    async function searchStations(query, country, genre) {
       stationList.innerHTML = "<div class='station-item empty'>Пошук...</div>";
       try {
         abortController.abort();
@@ -189,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const params = new URLSearchParams();
         if (query) params.append("name", query);
         if (country) params.append("country", country);
+        if (genre) params.append("tag", genre);
         const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`;
         console.log("Запит до API:", url);
         const response = await fetch(url, {
@@ -499,6 +507,7 @@ document.addEventListener("DOMContentLoaded", () => {
       searchInput.style.display = tab === "srch" ? "flex" : "none";
       searchQuery.value = "";
       searchCountry.value = "";
+      searchGenre.value = "";
       updateStationList();
       document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
       const activeBtn = document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ukraine", "pop", "srch"].indexOf(tab) + 1})`);
