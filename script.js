@@ -294,7 +294,9 @@ document.addEventListener("DOMContentLoaded", () => {
           emoji: "🎶"
         });
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
-        updateStationList();
+        if (currentTab !== "srch") {
+          updateStationList();
+        }
       } else {
         alert("Ця станція вже додана до обраної вкладки!");
       }
@@ -487,7 +489,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function switchTab(tab) {
       if (!["techno", "trance", "ukraine", "pop", "best", "srch"].includes(tab)) tab = "techno";
       currentTab = tab;
-      localStorage.setItem("currentTab", tab);
+      localStorage.setProperty("currentTab", tab);
       const savedIndex = parseInt(localStorage.getItem(`lastStation_${tab}`)) || 0;
       const maxIndex = tab === "best" ? favoriteStations.length : tab === "srch" ? 0 : stationLists[tab]?.length || 0;
       currentIndex = savedIndex < maxIndex ? savedIndex : 0;
