@@ -222,7 +222,8 @@ document.addEventListener("DOMContentLoaded", () => {
         item.innerHTML = `${station.emoji || "🎶"} ${station.name}<button class="add-btn">ADD</button>`;
         fragment.appendChild(item);
       });
-      stationList.innerHTML += fragment.innerHTML; // Додаємо нові результати, не очищаючи попередні
+      stationList.innerHTML = "";
+      stationList.appendChild(fragment);
       stationItems = stationList.querySelectorAll(".station-item");
       if (stationItems.length && currentIndex < stationItems.length) {
         changeStation(currentIndex);
@@ -293,8 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
           emoji: "🎶"
         });
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
-        if (currentTab === targetTab) switchTab(currentTab);
-        else updateStationList();
+        updateStationList();
       } else {
         alert("Ця станція вже додана до обраної вкладки!");
       }
@@ -527,8 +527,15 @@ document.addEventListener("DOMContentLoaded", () => {
         item.dataset.name = station.name;
         item.dataset.genre = shortenGenre(station.genre);
         item.dataset.country = station.country;
-        item.dataset.tab = currentTab; // Додаємо атрибут для визначення вкладки
-        item.innerHTML = `${station.emoji || "🎶"} ${station.name}${currentTab !== "best" ? '<button class="delete-btn">🗑</button>' : ''}<button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button>`;
+        const deleteButton = ["techno", "trance", "ukraine", "pop"].includes(currentTab)
+          ? `<button class="delete-btn">🗑</button>`
+          : "";
+        item.innerHTML = `
+          ${station.emoji || "🎶"} ${station.name}
+          <div class="buttons-container">
+            ${deleteButton}
+            <button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button>
+          </div>`;
         fragment.appendChild(item);
       });
       stationList.innerHTML = "";
@@ -552,7 +559,7 @@ document.addEventListener("DOMContentLoaded", () => {
           e.stopPropagation();
           toggleFavorite(item.dataset.name);
         }
-        if (deleteBtn && currentTab !== "best") {
+        if (deleteBtn) {
           e.stopPropagation();
           if (confirm(`Ви впевнені, що хочете видалити станцію "${item.dataset.name}" зі списку?`)) {
             deleteStation(item.dataset.name);
@@ -579,18 +586,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function deleteStation(stationName) {
       hasUserInteracted = true;
-      if (currentTab !== "best") {
-        stationLists[currentTab] = stationLists[currentTab].filter(s => s.name !== stationName);
-        favoriteStations = favoriteStations.filter(name => name !== stationName);
-        localStorage.setItem("stationLists", JSON.stringify(stationLists));
-        localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-        if (stationLists[currentTab].length === 0) {
-          currentIndex = 0;
-        } else if (currentIndex >= stationLists[currentTab].length) {
-          currentIndex = stationLists[currentTab].length - 1;
-        }
-        switchTab(currentTab);
+      stationLists[currentTab] = stationLists[currentTab].filter(s => s.name !== stationName);
+      favoriteStations = favoriteStations.filter(name => name !== stationName);
+      localStorage.setItem("stationLists", JSON.stringify(stationLists));
+      localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
+      if (stationLists[currentTab].length === 0) {
+        currentIndex = 0;
+      } else if (currentIndex >= stationLists[currentTab].length) {
+        currentIndex = stationLists[currentTab].length - 1;
       }
+      switchTab(currentTab);
     }
 
     function changeStation(index) {
