@@ -50,7 +50,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <button class="theme-toggle">🌙</button>
+  <button class="theme-toggle" title="Змінити тему">🌙</button>
+  <button class="share-btn" title="Поділитися">📤</button>
   <div class="container">
     <h1>🎧 Radio Music</h1>
     <div id="currentStationInfo">
@@ -91,15 +92,11 @@
     <div class="station-list" id="stationList"></div>
     <div class="controls-container">
       <div class="controls">
-        <button class="control-btn">⏮</button>
-        <button class="control-btn">▶</button>
-        <button class="control-btn">⏭</button>
+        <button class="control-btn" title="Попередня станція">⏮</button>
+        <button class="control-btn" title="Відтворити/Пауза">▶</button>
+        <button class="control-btn" title="Наступна станція">⏭</button>
       </div>
-      <div class="volume-container">
-        <span class="volume-icon">🔊</span>
-        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.9">
-      </div>
-      <button class="share-btn" title="Поділитися">📤</button>
+      <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.9">
     </div>
   </div>
   <audio id="audioPlayer"></audio>
