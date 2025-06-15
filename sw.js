@@ -1,4 +1,4 @@
-const CACHE_NAME = "radio-pwa-cache-v75";
+const CACHE_NAME = "radio-pwa-cache-v77";
 const urlsToCache = [
   "/",
   "index.html",
@@ -101,9 +101,9 @@ let wasOnline = navigator.onLine;
 self.addEventListener("online", () => {
   if (!wasOnline) {
     wasOnline = true;
-    self.clients.matchAll().then(clients => {
+    self.clients.matchAll({ includeUncontrolled: true, type: "window" }).then(clients => {
       clients.forEach(client => {
-        client.postMessage({ type: "NETWORK_STATUS", online: true });
+        client.postMessage({ type: "NETWORK_STATUS", online: true, retry: true });
       });
     });
   }
@@ -112,7 +112,7 @@ self.addEventListener("online", () => {
 self.addEventListener("offline", () => {
   if (wasOnline) {
     wasOnline = false;
-    self.clients.matchAll().then(clients => {
+    self.clients.matchAll({ includeUncontrolled: true, type: "window" }).then(clients => {
       clients.forEach(client => {
         client.postMessage({ type: "NETWORK_STATUS", online: false });
       });
@@ -123,9 +123,9 @@ self.addEventListener("offline", () => {
 setInterval(() => {
   if (wasOnline !== navigator.onLine) {
     wasOnline = navigator.onLine;
-    self.clients.matchAll().then(clients => {
+    self.clients.matchAll({ includeUncontrolled: true, type: "window" }).then(clients => {
       clients.forEach(client => {
-        client.postMessage({ type: "NETWORK_STATUS", online: wasOnline });
+        client.postMessage({ type: "NETWORK_STATUS", online: wasOnline, retry: wasOnline });
       });
     });
   }
