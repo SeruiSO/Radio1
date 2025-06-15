@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 
     updatePastSearches();
+    populateSearchSuggestions();
 
     document.querySelectorAll(".tab-btn").forEach((btn, index) => {
       const tabs = ["best", "techno", "trance", "ukraine", "pop", "search"];
@@ -91,6 +92,59 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.key === "Enter") searchBtn.click();
     });
 
+    function populateSearchSuggestions() {
+      const suggestedCountries = [
+        "Germany",
+        "France",
+        "United Kingdom",
+        "Italy",
+        "Spain",
+        "Netherlands",
+        "Switzerland",
+        "Belgium",
+        "Sweden",
+        "Norway",
+        "Denmark",
+        "Austria",
+        "Poland",
+        "Ukraine",
+        "Canada",
+        "United States",
+        "Australia",
+        "Japan",
+        "South Korea",
+        "New Zealand"
+      ];
+      const suggestedGenres = [
+        "Pop",
+        "Rock",
+        "Dance",
+        "Electronic",
+        "Techno",
+        "Trance",
+        "House",
+        "EDM",
+        "Hip-Hop",
+        "Rap",
+        "Jazz",
+        "Classical",
+        "Country",
+        "Reggae",
+        "Blues",
+        "Folk",
+        "Metal",
+        "R&B",
+        "Soul",
+        "Ambient"
+      ];
+
+      const countryDatalist = document.getElementById("suggestedCountries");
+      const genreDatalist = document.getElementById("suggestedGenres");
+
+      countryDatalist.innerHTML = suggestedCountries.map(country => `<option value="${country}">`).join("");
+      genreDatalist.innerHTML = suggestedGenres.map(genre => `<option value="${genre}">`).join("");
+    }
+
     function updatePastSearches() {
       pastSearchesList.innerHTML = "";
       pastSearches.forEach(search => {
@@ -120,14 +174,19 @@ document.addEventListener("DOMContentLoaded", () => {
         "belgium": "Belgium",
         "poland": "Poland",
         "austria": "Austria",
-        "ireland": "Ireland"
+        "sweden": "Sweden",
+        "norway": "Norway",
+        "denmark": "Denmark",
+        "japan": "Japan",
+        "south korea": "South Korea",
+        "new zealand": "New Zealand"
       };
       const normalized = country.toLowerCase();
       return countryMap[normalized] || country.charAt(0).toUpperCase() + country.slice(1).toLowerCase();
     }
 
     function isValidUrl(url) {
-      return /^https:\/\/[^\s/$.?#].[^\s]*$/i.test(url); // Змінено на перевірку лише HTTPS
+      return /^https:\/\/[^\s/$.?#].[^\s]*$/i.test(url);
     }
 
     function resetStationInfo() {
@@ -205,9 +264,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (query) params.append("name", query);
         if (country) params.append("country", country);
         if (genre) params.append("tag", genre);
-        params.append("order", "clickcount"); // Сортування за популярністю
-        params.append("reverse", "true"); // Найпопулярніші першими
-        params.append("limit", "500"); // Обмеження до 500 станцій
+        params.append("order", "clickcount");
+        params.append("reverse", "true");
+        params.append("limit", "500");
         const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`;
         console.log("Запит до API:", url);
         const response = await fetch(url, {
@@ -217,7 +276,6 @@ document.addEventListener("DOMContentLoaded", () => {
           throw new Error(`HTTP ${response.status}`);
         }
         let stations = await response.json();
-        // Фільтруємо лише HTTPS-потоки
         stations = stations.filter(station => station.url_resolved && isValidUrl(station.url_resolved));
         console.log("Отримано станцій (після фільтрації HTTPS):", stations.length);
         renderSearchResults(stations);
@@ -521,6 +579,7 @@ document.addEventListener("DOMContentLoaded", () => {
       searchQuery.value = "";
       searchCountry.value = "";
       searchGenre.value = "";
+      if (tab === "search") populateSearchSuggestions();
       updateStationList();
       document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
       const activeBtn = document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ukraine", "pop", "search"].indexOf(tab) + 1})`);
