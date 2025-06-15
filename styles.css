@@ -261,6 +261,7 @@ h1 {
   border-radius: 10px;
   border: 1px solid var(--accent);
   transition: background 0.4s ease, border-color 0.4s ease;
+  position: relative;
 }
 
 .tab-btn {
@@ -275,12 +276,35 @@ h1 {
   text-align: center;
   font-size: 14px;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .tab-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
   transform: translateY(-2px);
+}
+
+.tab-btn:hover::after {
+  opacity: 1;
+}
+
+.tab-btn::after {
+  content: attr(data-tab-name);
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #0A0A0A;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
 }
 
 .tab-btn.active {
@@ -351,9 +375,9 @@ h1 {
   border-top: 2px solid var(--accent);
   padding: 15px;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
   z-index: 10;
   transition: background 0.4s ease, border-color 0.4s ease;
 }
@@ -361,18 +385,29 @@ h1 {
 .controls {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  width: 100%;
+  align-items: center;
+  gap: 15px;
+  flex-grow: 1;
+}
+
+.volume-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 80px;
+  width: 30px;
 }
 
 #volumeSlider {
-  width: 100%;
+  width: 80px;
   height: 6px;
   background: var(--text);
   border-radius: 3px;
   appearance: none;
   cursor: pointer;
   transition: background 0.3s ease;
+  transform: rotate(-90deg);
+  transform-origin: center;
 }
 
 #volumeSlider::-webkit-slider-thumb {
@@ -557,11 +592,15 @@ datalist {
   }
 
   .control-btn {
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
     font-size: 24px;
     border-width: 2px;
     border-radius: 10px;
+  }
+
+  .controls {
+    gap: 10px;
   }
 
   .station-list {
@@ -664,8 +703,18 @@ datalist {
     padding: 8px;
   }
 
+  .controls-container {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .volume-wrapper {
+    height: 60px;
+    width: 25px;
+  }
+
   #volumeSlider {
-    width: 100%;
+    width: 60px;
   }
 }
 
