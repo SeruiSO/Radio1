@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePastSearches();
 
     document.querySelectorAll(".tab-btn").forEach((btn, index) => {
-      const tabs = ["best", "techno", "trance", "ukraine", "pop", "srch"];
+      const tabs = ["best", "techno", "trance", "ukraine", "pop", "search"];
       const tab = tabs[index];
       btn.addEventListener("click", () => switchTab(tab));
     });
@@ -112,14 +112,22 @@ document.addEventListener("DOMContentLoaded", () => {
         "usa": "United States",
         "united states": "United States",
         "uk": "United Kingdom",
-        "united kingdom": "United Kingdom"
+        "united kingdom": "United Kingdom",
+        "netherlands": "Netherlands",
+        "canada": "Canada",
+        "australia": "Australia",
+        "switzerland": "Switzerland",
+        "belgium": "Belgium",
+        "poland": "Poland",
+        "austria": "Austria",
+        "ireland": "Ireland"
       };
       const normalized = country.toLowerCase();
       return countryMap[normalized] || country.charAt(0).toUpperCase() + country.slice(1).toLowerCase();
     }
 
     function isValidUrl(url) {
-      return /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(url);
+      return /^https:\/\/[^\s/$.?#].[^\s]*$/i.test(url); // Змінено на перевірку лише HTTPS
     }
 
     function resetStationInfo() {
@@ -197,6 +205,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (query) params.append("name", query);
         if (country) params.append("country", country);
         if (genre) params.append("tag", genre);
+        params.append("order", "clickcount"); // Сортування за популярністю
+        params.append("reverse", "true"); // Найпопулярніші першими
+        params.append("limit", "500"); // Обмеження до 500 станцій
         const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`;
         console.log("Запит до API:", url);
         const response = await fetch(url, {
@@ -205,8 +216,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
-        const stations = await response.json();
-        console.log("Отримано станцій:", stations.length);
+        let stations = await response.json();
+        // Фільтруємо лише HTTPS-потоки
+        stations = stations.filter(station => station.url_resolved && isValidUrl(station.url_resolved));
+        console.log("Отримано станцій (після фільтрації HTTPS):", stations.length);
         renderSearchResults(stations);
       } catch (error) {
         if (error.name !== 'AbortError') {
@@ -305,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
           emoji: "🎶"
         });
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
-        if (currentTab !== "srch") {
+        if (currentTab !== "search") {
           updateStationList();
         }
       } else {
@@ -498,19 +511,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function switchTab(tab) {
-      if (!["techno", "trance", "ukraine", "pop", "best", "srch"].includes(tab)) tab = "techno";
+      if (!["techno", "trance", "ukraine", "pop", "best", "search"].includes(tab)) tab = "techno";
       currentTab = tab;
       localStorage.setItem("currentTab", tab);
       const savedIndex = parseInt(localStorage.getItem(`lastStation_${tab}`)) || 0;
-      const maxIndex = tab === "best" ? favoriteStations.length : tab === "srch" ? 0 : stationLists[tab]?.length || 0;
+      const maxIndex = tab === "best" ? favoriteStations.length : tab === "search" ? 0 : stationLists[tab]?.length || 0;
       currentIndex = savedIndex < maxIndex ? savedIndex : 0;
-      searchInput.style.display = tab === "srch" ? "flex" : "none";
+      searchInput.style.display = tab === "search" ? "flex" : "none";
       searchQuery.value = "";
       searchCountry.value = "";
       searchGenre.value = "";
       updateStationList();
       document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-      const activeBtn = document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ukraine", "pop", "srch"].indexOf(tab) + 1})`);
+      const activeBtn = document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ukraine", "pop", "search"].indexOf(tab) + 1})`);
       if (activeBtn) activeBtn.classList.add("active");
       if (stationItems?.length && currentIndex < stationItems.length) tryAutoPlay();
     }
