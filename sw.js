@@ -1,4 +1,4 @@
-const CACHE_NAME = "radio-pwa-cache-v77";
+const CACHE_NAME = "radio-pwa-cache-v83"; // Оновлено версію кешу
 const urlsToCache = [
   "/",
   "index.html",
@@ -10,6 +10,7 @@ const urlsToCache = [
   "icon-512.png"
 ];
 
+// Змінна для відстеження першого запиту до stations.json у сесії
 let isInitialLoad = true;
 
 self.addEventListener("install", event => {
@@ -28,22 +29,26 @@ self.addEventListener("install", event => {
 self.addEventListener("fetch", event => {
   if (event.request.url.includes("stations.json")) {
     if (isInitialLoad) {
+      // При першому запиті обходимо кеш і йдемо в мережу
       event.respondWith(
         fetch(event.request, { cache: "no-cache" })
           .then(networkResponse => {
             if (!networkResponse || networkResponse.status !== 200) {
+              // Якщо мережевий запит не вдався, повертаємо кеш
               return caches.match(event.request) || Response.error();
             }
+            // Оновлюємо кеш і позначаємо, що початкове завантаження завершено
             const responseToCache = networkResponse.clone();
             caches.open(CACHE_NAME).then(cache => {
               cache.put(event.request, responseToCache);
             });
-            isInitialLoad = false;
+            isInitialLoad = false; // Далі в цій сесії використовуємо кеш
             return networkResponse;
           })
           .catch(() => caches.match(event.request) || Response.error())
       );
     } else {
+      // Для наступних запитів використовуємо кеш із можливістю оновлення
       event.respondWith(
         caches.match(event.request)
           .then(cachedResponse => {
@@ -64,6 +69,7 @@ self.addEventListener("fetch", event => {
       );
     }
   } else {
+    // Для інших ресурсів використовуємо стандартну стратегію кешування
     event.respondWith(
       caches.match(event.request)
         .then(response => response || fetch(event.request))
@@ -86,7 +92,7 @@ self.addEventListener("activate", event => {
       );
     }).then(() => {
       console.log("Активація нового Service Worker");
-      isInitialLoad = true;
+      isInitialLoad = true; // Скидаємо для нової сесії
       self.clients.matchAll().then(clients => {
         clients.forEach(client => {
           client.postMessage({ type: "UPDATE", message: "Додаток оновлено до нової версії!" });
@@ -96,37 +102,30 @@ self.addEventListener("activate", event => {
   );
 });
 
+// Моніторинг стану мережі
 let wasOnline = navigator.onLine;
 
-self.addEventListener("online", () => {
-  if (!wasOnline) {
-    wasOnline = true;
-    self.clients.matchAll({ includeUncontrolled: true, type: "window" }).then(clients => {
-      clients.forEach(client => {
-        client.postMessage({ type: "NETWORK_STATUS", online: true, retry: true });
-      });
-    });
-  }
-});
-
-self.addEventListener("offline", () => {
-  if (wasOnline) {
-    wasOnline = false;
-    self.clients.matchAll({ includeUncontrolled: true, type: "window" }).then(clients => {
-      clients.forEach(client => {
-        client.postMessage({ type: "NETWORK_STATUS", online: false });
-      });
-    });
-  }
-});
-
 setInterval(() => {
-  if (wasOnline !== navigator.onLine) {
-    wasOnline = navigator.onLine;
-    self.clients.matchAll({ includeUncontrolled: true, type: "window" }).then(clients => {
-      clients.forEach(client => {
-        client.postMessage({ type: "NETWORK_STATUS", online: wasOnline, retry: wasOnline });
-      });
+  fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
+    .then(() => {
+      if (!wasOnline) {
+        wasOnline = true;
+        self.clients.matchAll().then(clients => {
+          clients.forEach(client => {
+            client.postMessage({ type: "NETWORK_STATUS", online: true });
+          });
+        });
+      }
+    })
+    .catch(error => {
+      console.error("Помилка перевірки мережі:", error);
+      if (wasOnline) {
+        wasOnline = false;
+        self.clients.matchAll().then(clients => {
+          clients.forEach(client => {
+            client.postMessage({ type: "NETWORK_STATUS", online: false });
+          });
+        });
+      }
     });
-  }
-}, 5000);
+}, 1000);
