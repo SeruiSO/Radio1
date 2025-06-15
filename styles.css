@@ -255,7 +255,7 @@ h1 {
 .tabs {
   display: flex;
   justify-content: space-between;
-  margin: 5px 0;
+  margin: 10px 0 5px;
   background: var(--container-bg);
   padding: 5px;
   border-radius: 10px;
@@ -619,6 +619,10 @@ datalist {
 
   .wave-bar {
     width: 8px;
+  }
+
+  .tabs {
+    margin: 8px 0 4px;
   }
 
   .tab-btn {
