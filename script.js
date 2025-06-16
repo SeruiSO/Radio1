@@ -280,6 +280,14 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         abortController.abort();
         abortController = new AbortController();
+
+        const developedCountries = [
+          "Germany", "France", "United Kingdom", "Italy", "Spain",
+          "United States", "Canada", "Australia", "Japan", "Switzerland",
+          "Netherlands", "Sweden", "Norway", "Denmark", "Austria",
+          "Belgium", "Finland"
+        ];
+
         const params = new URLSearchParams();
         if (query) params.append("name", query);
         if (country) params.append("country", country);
@@ -287,42 +295,39 @@ document.addEventListener("DOMContentLoaded", () => {
           if (genre.toLowerCase() === "pop") params.append("tagList", "pop,pop music,top 40");
           else params.append("tag", genre);
         }
-        // Оновлені параметри для топ-станцій
-        params.append("order", "clickcount");
-        params.append("reverse", "true"); // Сортування за спаданням
         params.append("limit", "5000");
         params.append("hidebroken", "true");
-        const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`;
-        console.log("Запит до API:", url);
-        const response = await fetch(url, {
-          signal: abortController.signal
+        params.append("order", "votes");
+        params.append("reverse", "true");
+
+        const fetchStations = async (country) => {
+          const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}${country ? `&country=${country}` : ""}`;
+          const response = await fetch(url, { signal: abortController.signal });
+          if (!response.ok) throw new Error(`HTTP ${response.status} for ${country}`);
+          return response.json();
+        };
+
+        const promises = developedCountries.map(country => fetchStations(country));
+        const results = await Promise.all(promises);
+        let stations = results.flat().filter(station => station.url_resolved && isValidUrl(station.url_resolved));
+
+        // Фільтрація за країнами
+        stations = stations.filter(station => developedCountries.includes(station.country));
+
+        // Сортування з пріоритетом votes, потім clickcount для станцій де clickcount > 0
+        const maxVotes = Math.max(...stations.map(s => s.votes || 0), 1);
+        stations.sort((a, b) => {
+          const aVoteScore = (a.votes || 0) / maxVotes;
+          const bVoteScore = (b.votes || 0) / maxVotes;
+          if (aVoteScore !== bVoteScore) return bVoteScore - aVoteScore;
+          if (a.clickcount > 0 && b.clickcount > 0) {
+            const maxClicks = Math.max(...stations.filter(s => s.clickcount > 0).map(s => s.clickcount), 1);
+            return ((b.clickcount || 0) / maxClicks) - ((a.clickcount || 0) / maxClicks);
+          }
+          return 0; // Якщо clickcount = 0 для обох, зберігаємо порядок за votes
         });
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        let stations = await response.json();
-        stations = stations.filter(station => station.url_resolved && isValidUrl(station.url_resolved));
-        
-        // Нормалізація та сортування з резервом за votes
-        if (stations.length > 0) {
-          const maxClick = Math.max(...stations.map(s => s.clickcount || 0), 1);
-          const maxVote = Math.max(...stations.map(s => s.votes || 0), 1);
-          stations.sort((a, b) => {
-            const aClick = (a.clickcount || 0) / maxClick;
-            const aVote = (a.votes || 0) / maxVote;
-            const bClick = (b.clickcount || 0) / maxClick;
-            const bVote = (b.votes || 0) / maxVote;
-            const aPopularity = aClick > 0 ? (aClick * 0.7) + (aVote * 0.3) : aVote; // Якщо clickcount = 0, використовуємо votes
-            const bPopularity = bClick > 0 ? (bClick * 0.7) + (bVote * 0.3) : bVote;
-            if (bPopularity !== aPopularity) {
-              return bPopularity - aPopularity;
-            }
-            return (a.name || "").localeCompare(b.name || "");
-          });
-          console.log("Сортування за популярністю:", stations.slice(0, 5).map(s => ({ name: s.name, votes: s.votes, clickcount: s.clickcount })));
-        }
-        
-        console.log("Отримано станцій (після фільтрації HTTPS):", stations.length);
+
+        console.log("Отримано станцій (після фільтрації HTTPS та країн):", stations.length);
         renderSearchResults(stations);
       } catch (error) {
         if (error.name !== 'AbortError') {
