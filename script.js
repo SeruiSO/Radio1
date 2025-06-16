@@ -287,6 +287,11 @@ document.addEventListener("DOMContentLoaded", () => {
           if (genre.toLowerCase() === "pop") params.append("tagList", "pop,pop music,top 40");
           else params.append("tag", genre);
         }
+        // Оновлені параметри для топ-станцій
+        params.append("order", "clickcount");
+        params.append("reverse", "true"); // Сортування за спаданням
+        params.append("limit", "5000");
+        params.append("hidebroken", "true");
         const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`;
         console.log("Запит до API:", url);
         const response = await fetch(url, {
@@ -298,23 +303,23 @@ document.addEventListener("DOMContentLoaded", () => {
         let stations = await response.json();
         stations = stations.filter(station => station.url_resolved && isValidUrl(station.url_resolved));
         
-        // Нормалізація та комбіноване сортування за vote і clickcount з обробкою null/0
+        // Нормалізація та сортування з резервом за votes
         if (stations.length > 0) {
-          const maxVote = Math.max(...stations.map(s => s.vote || 0), 1); // Мін. 1, щоб уникнути ділення на 0
-          const maxClick = Math.max(...stations.map(s => s.clickcount || 0), 1); // Мін. 1, щоб уникнути ділення на 0
+          const maxClick = Math.max(...stations.map(s => s.clickcount || 0), 1);
+          const maxVote = Math.max(...stations.map(s => s.votes || 0), 1);
           stations.sort((a, b) => {
-            const aVote = (a.vote || 0) / maxVote;
             const aClick = (a.clickcount || 0) / maxClick;
-            const bVote = (b.vote || 0) / maxVote;
+            const aVote = (a.votes || 0) / maxVote;
             const bClick = (b.clickcount || 0) / maxClick;
-            const aPopularity = (aVote + aClick) / 2;
-            const bPopularity = (bVote + bClick) / 2;
+            const bVote = (b.votes || 0) / maxVote;
+            const aPopularity = aClick > 0 ? (aClick * 0.7) + (aVote * 0.3) : aVote; // Якщо clickcount = 0, використовуємо votes
+            const bPopularity = bClick > 0 ? (bClick * 0.7) + (bVote * 0.3) : bVote;
             if (bPopularity !== aPopularity) {
               return bPopularity - aPopularity;
             }
             return (a.name || "").localeCompare(b.name || "");
           });
-          console.log("Сортування за популярністю:", stations.slice(0, 5).map(s => ({ name: s.name, vote: s.vote, clickcount: s.clickcount })));
+          console.log("Сортування за популярністю:", stations.slice(0, 5).map(s => ({ name: s.name, votes: s.votes, clickcount: s.clickcount })));
         }
         
         console.log("Отримано станцій (після фільтрації HTTPS):", stations.length);
