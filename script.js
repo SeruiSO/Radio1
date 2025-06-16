@@ -285,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (query) params.append("name", query);
         if (country) params.append("country", country);
         if (genre) params.append("tag", genre);
-        params.append("order", "clickcount");
+        params.append("order", "vote");
         params.append("reverse", "true");
         params.append("limit", "1000");
         const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`;
