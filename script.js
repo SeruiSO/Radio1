@@ -23,9 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchGenre = document.getElementById("searchGenre");
   const searchBtn = document.querySelector(".search-btn");
   const pastSearchesList = document.getElementById("pastSearches");
-  const shareBtn = document.querySelector(".share-btn");
+  const shareButton = document.querySelector(".share-button");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !shareBtn) {
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !shareButton) {
     console.error("Один із необхідних DOM-елементів не знайдено", {
       audio: !!audio,
       stationList: !!stationList,
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       searchGenre: !!searchGenre,
       searchBtn: !!searchBtn,
       pastSearchesList: !!pastSearchesList,
-      shareBtn: !!shareBtn
+      shareButton: !!shareButton
     });
     setTimeout(initializeApp, 100);
     return;
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initializeApp() {
     audio.preload = "auto";
-    audio.volume = 1.0; // Фіксована гучність 100%
+    audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 
     updatePastSearches();
     populateSearchSuggestions();
@@ -62,36 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector(".controls .control-btn:nth-child(1)").addEventListener("click", prevStation);
     document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", togglePlayPause);
     document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", nextStation);
-
-    shareBtn.addEventListener("click", async () => {
-      hasUserInteracted = true;
-      if (!stationItems.length || currentIndex >= stationItems.length) {
-        alert("Оберіть станцію для поширення!");
-        return;
-      }
-      const station = stationItems[currentIndex];
-      const shareData = {
-        title: `Слухаю ${station.dataset.name} на Radio Music`,
-        text: `Приєднуйся до прослуховування ${station.dataset.name} (${station.dataset.genre}, ${station.dataset.country}) на Radio Music!`,
-        url: window.location.href
-      };
-      if (navigator.share) {
-        try {
-          await navigator.share(shareData);
-          console.log("Успішно поширено");
-        } catch (error) {
-          console.error("Помилка поширення:", error);
-        }
-      } else {
-        const shareText = `${shareData.title}\n${shareData.text}\n${shareData.url}`;
-        navigator.clipboard.writeText(shareText).then(() => {
-          alert("Посилання скопійовано до буфера обміну!");
-        }).catch(error => {
-          console.error("Помилка копіювання:", error);
-          alert("Не вдалося скопіювати посилання. Спробуйте ще раз.");
-        });
-      }
-    });
 
     searchBtn.addEventListener("click", () => {
       const query = searchQuery.value.trim();
@@ -122,6 +92,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     searchGenre.addEventListener("keypress", (e) => {
       if (e.key === "Enter") searchBtn.click();
+    });
+
+    shareButton.addEventListener("click", () => {
+      hasUserInteracted = true;
+      const shareData = {
+        title: "Radio Music",
+        text: "Listen to your favorite radio stations with Radio Music!",
+        url: window.location.href
+      };
+      if (navigator.share) {
+        navigator.share(shareData)
+          .then(() => console.log("Поділитися успішно"))
+          .catch(error => console.error("Помилка під час поширення:", error));
+      } else {
+        // Fallback: Copy URL to clipboard
+        navigator.clipboard.writeText(shareData.url)
+          .then(() => alert("Посилання скопійовано до буфера обміну!"))
+          .catch(error => console.error("Помилка копіювання:", error));
+      }
     });
 
     function populateSearchSuggestions() {
@@ -869,6 +858,10 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (errorCount >= ERROR_LIMIT) {
         console.error("Досягнуто ліміт помилок відтворення");
       }
+    });
+
+    audio.addEventListener("volumechange", () => {
+      localStorage.setItem("volume", audio.volume);
     });
 
     window.addEventListener("online", () => {

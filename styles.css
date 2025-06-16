@@ -1,4 +1,4 @@
-/* Updated on June 16, 2025 */
+/* Updated on June 15, 2025 */
 :root {
   --body-bg: #0A0A0A;
   --container-bg: #121212;
@@ -30,7 +30,7 @@ body {
   padding: 15px;
   border-radius: 15px;
   border: 1px solid var(--accent);
-  margin: 0;
+  margin: 0 10px;
   min-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -46,55 +46,34 @@ h1 {
   transition: color 0.4s ease;
 }
 
+.theme-toggle, .share-button {
+  position: absolute;
+  top: 10px;
+  background: var(--container-bg);
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  padding: 8px;
+  cursor: pointer;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
 .theme-toggle {
-  position: absolute;
-  top: 10px;
   left: 10px;
-  background: var(--container-bg);
-  border: 2px solid var(--accent);
-  border-radius: 50%;
-  padding: 8px;
-  cursor: pointer;
-  height: 40px;
-  width: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
 }
 
-.theme-toggle:hover {
-  background: var(--accent);
-  color: #0A0A0A;
-  transform: scale(1.1);
-}
-
-.share-btn {
-  position: absolute;
-  top: 10px;
+.share-button {
   right: 10px;
-  background: var(--container-bg);
-  border: 2px solid var(--accent);
-  border-radius: 50%;
-  padding: 8px;
-  cursor: pointer;
-  height: 40px;
-  width: 40px;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
 }
 
-.share-btn:hover {
+.theme-toggle:hover, .share-button:hover {
   background: var(--accent);
   color: #0A0A0A;
   transform: scale(1.1);
-}
-
-.share-btn:active {
-  transform: scale(0.95);
 }
 
 #currentStationInfo {
@@ -255,13 +234,12 @@ h1 {
 .tabs {
   display: flex;
   justify-content: space-between;
-  margin: 10px 0 5px;
+  margin: 5px 0;
   background: var(--container-bg);
   padding: 5px;
   border-radius: 10px;
   border: 1px solid var(--accent);
   transition: background 0.4s ease, border-color 0.4s ease;
-  position: relative;
 }
 
 .tab-btn {
@@ -276,7 +254,6 @@ h1 {
   text-align: center;
   font-size: 14px;
   transition: all 0.3s ease;
-  position: relative;
 }
 
 .tab-btn:hover {
@@ -353,17 +330,17 @@ h1 {
   border-top: 2px solid var(--accent);
   padding: 15px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  gap: 20px;
   z-index: 10;
   transition: background 0.4s ease, border-color 0.4s ease;
 }
 
 .controls {
   display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  width: 100%;
+  justify-content: center;
+  gap: 50px;
 }
 
 .wave-progress {
@@ -395,9 +372,9 @@ h1 {
 }
 
 .control-btn {
-  width: 100px;
-  height: 100px;
-  font-size: 40px;
+  width: 80px;
+  height: 80px;
+  font-size: 32px;
   background: var(--container-bg);
   color: var(--text);
   border: 4px solid var(--accent);
@@ -497,7 +474,7 @@ input[list] {
 }
 
 datalist {
-  display: none;
+  display: none; /* datalist не відображається, але опції працюють */
 }
 
 #searchQuery[list], #searchCountry[list], #searchGenre[list] {
@@ -521,20 +498,16 @@ datalist {
 
   .container {
     padding: 10px;
-    margin: 0;
+    margin: 0 5px;
     min-height: 90vh;
   }
 
   .control-btn {
-    width: 80px;
-    height: 80px;
-    font-size: 32px;
+    width: 70px;
+    height: 70px;
+    font-size: 24px;
     border-width: 2px;
     border-radius: 10px;
-  }
-
-  .controls {
-    width: 100%;
   }
 
   .station-list {
@@ -548,20 +521,40 @@ datalist {
     margin: 4px 0;
   }
 
-  .theme-toggle, .share-btn {
+  .theme-toggle, .share-button {
     top: 5px;
     padding: 4px;
     height: 35px;
     width: 35px;
-    font-size: 18px;
   }
 
   .theme-toggle {
     left: 5px;
   }
 
-  .share-btn {
+  .share-button {
     right: 5px;
+  }
+
+  #currentStationInfo {
+    padding: 12px;
+    height: auto;
+  }
+
+  #currentStationInfo .station-name {
+    font-size: 24px;
+  }
+
+  #currentStationInfo .station-genre {
+    font-size: 16px;
+  }
+
+  #currentStationInfo .station-country {
+    font-size: 16px;
+  }
+
+  .station-info-content {
+    gap: 10px;
   }
 
   .wave-progress {
@@ -571,10 +564,6 @@ datalist {
 
   .wave-bar {
     width: 8px;
-  }
-
-  .tabs {
-    margin: 8px 0 4px;
   }
 
   .tab-btn {
@@ -614,10 +603,6 @@ datalist {
   .modal-tab-btn, .modal-cancel-btn {
     font-size: 14px;
     padding: 8px;
-  }
-
-  .controls-container {
-    padding: 10px;
   }
 }
 
