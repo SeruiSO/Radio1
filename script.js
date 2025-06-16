@@ -106,6 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .then(() => console.log("Поділитися успішно"))
           .catch(error => console.error("Помилка під час поширення:", error));
       } else {
+        // Fallback: Copy URL to clipboard
         navigator.clipboard.writeText(shareData.url)
           .then(() => alert("Посилання скопійовано до буфера обміну!"))
           .catch(error => console.error("Помилка копіювання:", error));
@@ -280,35 +281,23 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         abortController.abort();
         abortController = new AbortController();
-
         const params = new URLSearchParams();
         if (query) params.append("name", query);
         if (country) params.append("country", country);
-        if (genre) {
-          if (genre.toLowerCase() === "pop") params.append("tagList", "pop,pop music,top 40");
-          else params.append("tag", genre);
-        }
-        params.append("limit", "5000"); // Ліміт 5000 для всіх станцій
-        params.append("hidebroken", "true");
-
+        if (genre) params.append("tag", genre);
+        params.append("order", "clickcount");
+        params.append("reverse", "true");
+        params.append("limit", "1000");
         const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`;
-        const response = await fetch(url, { signal: abortController.signal });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        let stations = await response.json();
-
-        // Фільтрація лише HTTPS
-        stations = stations.filter(station => station.url_resolved && isValidUrl(station.url_resolved));
-
-        // Сортування за clickcount, потім votes (обидва reverse=true)
-        const maxClicks = Math.max(...stations.map(s => s.clickcount || 0), 1);
-        const maxVotes = Math.max(...stations.map(s => s.votes || 0), 1);
-        stations.sort((a, b) => {
-          const aClickScore = (a.clickcount || 0) / maxClicks;
-          const bClickScore = (b.clickcount || 0) / maxClicks;
-          if (aClickScore !== bClickScore) return bClickScore - aClickScore;
-          return ((b.votes || 0) / maxVotes) - ((a.votes || 0) / maxVotes);
+        console.log("Запит до API:", url);
+        const response = await fetch(url, {
+          signal: abortController.signal
         });
-
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        let stations = await response.json();
+        stations = stations.filter(station => station.url_resolved && isValidUrl(station.url_resolved));
         console.log("Отримано станцій (після фільтрації HTTPS):", stations.length);
         renderSearchResults(stations);
       } catch (error) {
@@ -540,7 +529,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
           }
         });
-      }).catch(error => console.error("Помилка реєстрації Service Worker:", error));
+      });
 
       navigator.serviceWorker.addEventListener("message", event => {
         if (event.data.type === "NETWORK_STATUS" && event.data.online && isPlaying && stationItems?.length && currentIndex < stationItems.length) {
