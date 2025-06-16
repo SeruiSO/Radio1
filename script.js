@@ -23,10 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchGenre = document.getElementById("searchGenre");
   const searchBtn = document.querySelector(".search-btn");
   const pastSearchesList = document.getElementById("pastSearches");
-  const volumeSlider = document.getElementById("volumeSlider");
   const shareBtn = document.querySelector(".share-btn");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !volumeSlider || !shareBtn) {
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !shareBtn) {
     console.error("Один із необхідних DOM-елементів не знайдено", {
       audio: !!audio,
       stationList: !!stationList,
@@ -39,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
       searchGenre: !!searchGenre,
       searchBtn: !!searchBtn,
       pastSearchesList: !!pastSearchesList,
-      volumeSlider: !!volumeSlider,
       shareBtn: !!shareBtn
     });
     setTimeout(initializeApp, 100);
@@ -50,8 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initializeApp() {
     audio.preload = "auto";
-    audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
-    volumeSlider.value = audio.volume;
+    audio.volume = 1.0; // Фіксована гучність 100%
 
     updatePastSearches();
     populateSearchSuggestions();
@@ -65,11 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector(".controls .control-btn:nth-child(1)").addEventListener("click", prevStation);
     document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", togglePlayPause);
     document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", nextStation);
-
-    volumeSlider.addEventListener("input", () => {
-      audio.volume = parseFloat(volumeSlider.value);
-      localStorage.setItem("volume", audio.volume);
-    });
 
     shareBtn.addEventListener("click", async () => {
       hasUserInteracted = true;
@@ -306,7 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (genre) params.append("tag", genre);
         params.append("order", "clickcount");
         params.append("reverse", "true");
-        params.append("limit", "500");
+        params.append("limit", "1000");
         const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`;
         console.log("Запит до API:", url);
         const response = await fetch(url, {
@@ -877,11 +869,6 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (errorCount >= ERROR_LIMIT) {
         console.error("Досягнуто ліміт помилок відтворення");
       }
-    });
-
-    audio.addEventListener("volumechange", () => {
-      localStorage.setItem("volume", audio.volume);
-      volumeSlider.value = audio.volume;
     });
 
     window.addEventListener("online", () => {

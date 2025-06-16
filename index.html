@@ -50,17 +50,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <button class="theme-toggle" title="Змінити тему">🌙</button>
-  <button class="share-btn" title="Поділитися">📤</button>
+  <button class="theme-toggle">🌙</button>
+  <button class="share-btn">📤</button>
   <div class="container">
     <h1>🎧 Radio Music</h1>
     <div id="currentStationInfo">
       <div class="station-info-content">
-        <div class="station-text">
-          <div class="station-name">Обирайте станцію</div>
-          <div class="station-genre">жанр: -</div>
-          <div class="station-country">країна: -</div>
-        </div>
         <div class="wave-progress">
           <div class="wave-bar"></div>
           <div class="wave-bar"></div>
@@ -70,34 +65,36 @@
           <div class="wave-bar"></div>
           <div class="wave-bar"></div>
         </div>
+        <div class="station-text">
+          <div class="station-name">Обирайте станцію</div>
+          <div class="station-genre">жанр: -</div>
+          <div class="station-country">країна: -</div>
+        </div>
       </div>
     </div>
-    <div class="station-list" id="stationList"></div>
     <div class="tabs">
-      <button class="tab-btn" data-tab-name="Улюблені">Best</button>
-      <button class="tab-btn" data-tab-name="Техно">Techno</button>
-      <button class="tab-btn" data-tab-name="Транс">Trance</button>
-      <button class="tab-btn" data-tab-name="Українське">UA</button>
-      <button class="tab-btn" data-tab-name="Поп">Pop</button>
-      <button class="tab-btn" data-tab-name="Пошук">Search</button>
+      <button class="tab-btn" data-tab-name="Best">Best</button>
+      <button class="tab-btn" data-tab-name="Techno">Techno</button>
+      <button class="tab-btn" data-tab-name="Trance">Trance</button>
+      <button class="tab-btn" data-tab-name="UA">UA</button>
+      <button class="tab-btn" data-tab-name="Pop">Pop</button>
+      <button class="tab-btn" data-tab-name="Search">Search</button>
     </div>
     <div id="searchInput">
-      <input id="searchQuery" type="text" placeholder="Назва станції" list="pastSearches">
-      <input id="searchCountry" type="text" placeholder="Країна" list="suggestedCountries">
-      <input id="searchGenre" type="text" placeholder="Жанр" list="suggestedGenres">
-      <button class="search-btn">🔍</button>
+      <input type="text" id="searchQuery" list="pastSearches" placeholder="Назва станції">
       <datalist id="pastSearches"></datalist>
+      <input type="text" id="searchCountry" list="suggestedCountries" placeholder="Країна">
       <datalist id="suggestedCountries"></datalist>
+      <input type="text" id="searchGenre" list="suggestedGenres" placeholder="Жанр">
       <datalist id="suggestedGenres"></datalist>
+      <button class="search-btn">🔍</button>
     </div>
+    <div id="stationList" class="station-list"></div>
     <div class="controls-container">
       <div class="controls">
-        <button class="control-btn" title="Попередня станція">⏮</button>
-        <button class="control-btn" title="Відтворити/Пауза">▶</button>
-        <button class="control-btn" title="Наступна станція">⏭</button>
-      </div>
-      <div class="volume-wrapper">
-        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.9" orient="vertical">
+        <button class="control-btn">⏮</button>
+        <button class="control-btn">▶</button>
+        <button class="control-btn">⏭</button>
       </div>
     </div>
   </div>
