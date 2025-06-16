@@ -295,7 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (genre.toLowerCase() === "pop") params.append("tagList", "pop,pop music,top 40");
           else params.append("tag", genre);
         }
-        params.append("limit", "5000");
+        params.append("limit", "5000"); // Встановлено ліміт 5000
         params.append("hidebroken", "true");
         params.append("order", "votes");
         params.append("reverse", "true");
@@ -307,6 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return response.json();
         };
 
+        // Виконуємо запити для всіх країн
         const promises = developedCountries.map(country => fetchStations(country));
         const results = await Promise.all(promises);
         let stations = results.flat().filter(station => station.url_resolved && isValidUrl(station.url_resolved));
@@ -417,7 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
       hasUserInteracted = true;
       const stationName = item.dataset.name;
       if (!stationLists[targetTab]) stationLists[targetTab] = [];
-      if (!stationLists[targetTab].some(s => s.name === stationName)) {
+      if (!stationLists[targetTab].some(s => s.name === s.name)) {
         stationLists[targetTab].unshift({
           value: item.dataset.value,
           name: item.dataset.name,
