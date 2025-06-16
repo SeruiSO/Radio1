@@ -287,7 +287,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (genre) params.append("tag", genre);
         params.append("order", "vote");
         params.append("reverse", "true");
-        params.append("limit", "1000");
         const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`;
         console.log("Запит до API:", url);
         const response = await fetch(url, {
