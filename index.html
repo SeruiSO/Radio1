@@ -50,17 +50,12 @@
 </head>
 <body>
   <button class="theme-toggle">🌙</button>
-  <button class="share-button">📤</button>
+  <button class="share-button">🔗</button>
   <div class="container">
     <h1>🎧 Radio Music</h1>
     <audio id="audioPlayer" preload="auto"></audio>
     <div id="currentStationInfo">
       <div class="station-info-content">
-        <div class="station-text">
-          <span class="station-name">Обирайте станцію</span>
-          <span class="station-genre">жанр: -</span>
-          <span class="station-country">країна: -</span>
-        </div>
         <div class="wave-progress">
           <div class="wave-bar"></div>
           <div class="wave-bar"></div>
@@ -70,8 +65,14 @@
           <div class="wave-bar"></div>
           <div class="wave-bar"></div>
         </div>
+        <div class="station-text">
+          <span class="station-name">Обирайте станцію</span>
+          <span class="station-genre">жанр: -</span>
+          <span class="station-country">країна: -</span>
+        </div>
       </div>
     </div>
+    <div id="stationList" class="station-list"></div>
     <div class="tabs">
       <button class="tab-btn">Best</button>
       <button class="tab-btn active">Techno</button>
@@ -89,7 +90,6 @@
       <datalist id="suggestedGenres"></datalist>
       <button class="search-btn">🔍</button>
     </div>
-    <div id="stationList" class="station-list"></div>
     <div class="controls-container">
       <div class="controls">
         <button class="control-btn">⏮</button>
