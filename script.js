@@ -285,8 +285,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (query) params.append("name", query);
         if (country) params.append("country", country);
         if (genre) params.append("tag", genre);
-        params.append("order", "vote");
-        params.append("reverse", "true");
         const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`;
         console.log("Запит до API:", url);
         const response = await fetch(url, {
@@ -297,6 +295,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         let stations = await response.json();
         stations = stations.filter(station => station.url_resolved && isValidUrl(station.url_resolved));
+        
+        // Нормалізація та комбіноване сортування за vote і clickcount
+        if (stations.length > 0) {
+          const maxVote = Math.max(...stations.map(s => s.vote || 0));
+          const maxClick = Math.max(...stations.map(s => s.clickcount || 0));
+          stations.sort((a, b) => {
+            // Нормалізовані значення (0–1)
+            const aVote = (a.vote || 0) / (maxVote || 1);
+            const aClick = (a.clickcount || 0) / (maxClick || 1);
+            const bVote = (b.vote || 0) / (maxVote || 1);
+            const bClick = (b.clickcount || 0) / (maxClick || 1);
+            // Комбінована популярність (середнє арифметичне)
+            const aPopularity = (aVote + aClick) / 2;
+            const bPopularity = (bVote + bClick) / 2;
+            // Основне сортування за популярністю (спадання)
+            if (bPopularity !== aPopularity) {
+              return bPopularity - aPopularity;
+            }
+            // Вторинне сортування за назвою (зростання)
+            return (a.name || "").localeCompare(b.name || "");
+          });
+        }
+        
         console.log("Отримано станцій (після фільтрації HTTPS):", stations.length);
         renderSearchResults(stations);
       } catch (error) {
