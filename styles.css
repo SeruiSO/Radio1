@@ -1,4 +1,4 @@
-/* Updated on June 16, 2025 */
+/* Updated on June 17, 2025 */
 :root {
   --body-bg: #0A0A0A;
   --container-bg: #121212;
@@ -101,7 +101,6 @@ h1 {
 
 .station-info-content {
   display: flex;
-  flex-direction: row;
   align-items: center;
   gap: 15px;
   width: 100%;
@@ -111,13 +110,18 @@ h1 {
   display: flex;
   flex-direction: column;
   flex: 1;
+  order: 2; /* Текст іде другим, щоб зображення було ліворуч */
 }
 
 #currentStationInfo .station-name {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
-  display: inline-flex;
-  align-items: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 #currentStationInfo .station-genre {
@@ -130,6 +134,45 @@ h1 {
   font-size: 18px;
   font-weight: 400;
   margin-top: 2px;
+}
+
+.station-icon {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  order: 1; /* Зображення перше */
+  font-size: 60px; /* Для емодзі, якщо немає іконки */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-equalizer {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  order: 3; /* Еквалайзер останній */
+}
+
+.equalizer-bar {
+  width: 6px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 3px;
+  animation: equalizer 1.2s infinite ease-in-out;
+  animation-play-state: paused;
+}
+
+.equalizer-bar.playing {
+  animation-play-state: running;
+}
+
+.equalizer-bar:nth-child(2) { animation-delay: 0.2s; }
+.equalizer-bar:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes equalizer {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
 }
 
 .station-list {
@@ -172,6 +215,23 @@ h1 {
   justify-content: space-between;
   align-items: center;
   transition: all 0.3s ease;
+}
+
+.station-item img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  margin-right: 10px;
+}
+
+.station-item .station-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  flex: 1; /* Назва займає доступний простір */
 }
 
 .station-item:hover, .station-item.selected {
@@ -522,6 +582,11 @@ datalist {
     margin: 4px 0;
   }
 
+  .station-item img {
+    width: 28px;
+    height: 28px;
+  }
+
   .theme-toggle, .share-button {
     top: 5px;
     padding: 4px;
@@ -543,7 +608,7 @@ datalist {
   }
 
   #currentStationInfo .station-name {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   #currentStationInfo .station-genre {
@@ -558,13 +623,15 @@ datalist {
     gap: 10px;
   }
 
-  .wave-progress {
-    width: 70px;
-    height: 50px;
+  .station-icon {
+    width: 65px;
+    height: 65px;
+    font-size: 50px; /* Для емодзі на мобільних */
   }
 
-  .wave-bar {
-    width: 8px;
+  .equalizer-bar {
+    width: 5px;
+    height: 16px;
   }
 
   .tab-btn {
