@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v4.0.20250618';
+const CACHE_NAME = 'radio-cache-v5.0.20250618';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -10,7 +10,15 @@ self.addEventListener('install', (event) => {
         '/script.js',
         '/stations.json',
         '/manifest.json'
-      ]);
+      ]).then(() => {
+        caches.keys().then((cacheNames) => {
+          return Promise.all(cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+          }));
+        });
+      });
     })
   );
 });
@@ -18,12 +26,15 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((networkResponse) => {
-        if (event.request.url.endsWith('stations.json')) {
+      if (event.request.url.endsWith('stations.json')) {
+        return fetch(event.request, { cache: 'no-store' }).then((networkResponse) => {
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, networkResponse.clone());
           });
-        }
+          return networkResponse;
+        }).catch(() => caches.match('/index.html'));
+      }
+      return response || fetch(event.request).then((networkResponse) => {
         return networkResponse;
       }).catch(() => caches.match('/index.html'));
     })
@@ -42,7 +53,6 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  // Повідомлення про оновлення версії
   self.clients.matchAll().then((clients) => {
     clients.forEach((client) => {
       client.postMessage({ type: 'CACHE_UPDATED' });
