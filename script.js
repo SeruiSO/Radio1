@@ -512,7 +512,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       navigator.serviceWorker.addEventListener("message", event => {
         if (event.data.type === "NETWORK_STATUS" && event.data.online && isPlaying && stationItems?.length && currentIndex < stationItems.length) {
-          console.log("Отримано повідомлення від Service Worker: мережа відновлена");
+          console.log("Відновлення відтворення після повернення мережі");
           audio.pause();
           audio.src = "";
           audio.src = stationItems[currentIndex].dataset.value;
