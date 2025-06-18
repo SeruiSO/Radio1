@@ -194,14 +194,12 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log(`Статус відповіді: ${response.status}`);
         if (response.ok) {
           const newStations = await response.json();
+          stationLists = {}; // Очищаємо старі дані
           Object.keys(newStations).forEach(tab => {
-            if (!stationLists[tab]) stationLists[tab] = [];
-            const newStationsForTab = newStations[tab].filter(s => 
-              !stationLists[tab].some(existing => existing.name === s.name) &&
-              (!Array.isArray(deletedStations) || !deletedStations.includes(s.name))
+            stationLists[tab] = newStations[tab].filter(s => 
+              !Array.isArray(deletedStations) || !deletedStations.includes(s.name)
             );
-            stationLists[tab] = [...stationLists[tab], ...newStationsForTab];
-            console.log(`Додано до ${tab}:`, newStationsForTab.map(s => s.name));
+            console.log(`Додано до ${tab}:`, stationLists[tab].map(s => s.name));
           });
           localStorage.setItem("stationLists", JSON.stringify(stationLists));
         } else {
@@ -479,8 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (event.data.type === "CACHE_UPDATED") {
           console.log("Отримано оновлення кешу, оновлюємо localStorage");
           const currentCacheVersion = localStorage.getItem("cacheVersion") || "0";
-          const newCacheVersion = Date.now().toString();
-          if (currentCacheVersion !== newCacheVersion) {
+          if (currentCacheVersion !== event.data.cacheVersion) {
             favoriteStations = favoriteStations.filter((name) =>
               Object.values(stationLists).flat().some((s) => s.name === name)
             );
@@ -489,7 +486,7 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
             localStorage.setItem("stationLists", JSON.stringify(stationLists));
             localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
-            localStorage.setItem("cacheVersion", newCacheVersion);
+            localStorage.setItem("cacheVersion", event.data.cacheVersion);
             loadStations();
           }
         }

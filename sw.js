@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v5.0.20250618';
+const CACHE_NAME = 'radio-cache-v5.1.20250618';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -27,7 +27,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (event.request.url.endsWith('stations.json')) {
-        return fetch(event.request, { cache: 'no-store' }).then((networkResponse) => {
+        return fetch(event.request, { cache: 'no-store', signal: new AbortController().signal }).then((networkResponse) => {
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, networkResponse.clone());
           });
@@ -55,7 +55,7 @@ self.addEventListener('activate', (event) => {
   );
   self.clients.matchAll().then((clients) => {
     clients.forEach((client) => {
-      client.postMessage({ type: 'CACHE_UPDATED' });
+      client.postMessage({ type: 'CACHE_UPDATED', cacheVersion: CACHE_NAME });
     });
   });
 });
