@@ -498,7 +498,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
         if (event.data.type === "NETWORK_STATUS" && event.data.online && isPlaying && stationItems?.length && currentIndex < stationItems.length) {
-          console.log("Мережа відновлена, пробує відтворити");
+          console.log("Мережа відновлена, пробуємо відтворити");
           audio.pause();
           audio.src = "";
           audio.src = stationItems[currentIndex].dataset.value;
@@ -572,16 +572,18 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
       const activeBtn = document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ukraine", "pop", "search"].indexOf(tab) + 1})`);
       if (activeBtn) activeBtn.classList.add("active");
-      if<|control154|>StationItems?.length && currentIndex < stationItems.length) tryAutoPlay();
+      if (stationItems?.length && currentIndex < stationItems.length) {
+        tryAutoPlay();
+      }
     }
 
     function updateStationList() {
       if (!stationList) {
-        console.error("stationList не найдена");
+        console.error("stationList не знайдено");
         return;
       }
-      let stations = currentTab === "best" ?
-        favoriteStations
+      let stations = currentTab === "best"
+        ? favoriteStations
             .map(name => Object.values(stationLists).flat().find(s => s.name === name))
             .filter(s => s)
         : stationLists[currentTab] || [];
@@ -589,7 +591,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!stations.length) {
         currentIndex = 0;
         stationItems = [];
-        stationList.innerHTML = `<div class='station-item empty'>${currentTab === "best" ? "Немає улюблених станцій" : "Немає станцій у цій категорії"}</div>`;
+        stationList.innerHTML = `<div class="station-item empty">${currentTab === "best" ? "Немає улюблених станцій" : "Немає станцій у цій категорії"}</div>`;
         return;
       }
 
