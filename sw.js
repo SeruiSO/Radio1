@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v10.0.20250619';
+const CACHE_NAME = 'radio-cache-v12.1.20250619';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -9,8 +9,7 @@ self.addEventListener('install', (event) => {
         '/styles.css',
         '/script.js',
         '/stations.json',
-        '/manifest.json',
-        '/icons.svg'
+        '/manifest.json'
       ]).then(() => {
         caches.keys().then((cacheNames) => {
           return Promise.all(cacheNames.map((cacheName) => {
@@ -61,6 +60,7 @@ self.addEventListener('activate', (event) => {
   });
 });
 
+// Моніторинг стану мережі
 let wasOnline = navigator.onLine;
 
 setInterval(() => {
@@ -76,7 +76,7 @@ setInterval(() => {
       }
     })
     .catch(error => {
-      console.error("Network check error:", error);
+      console.error("Помилка перевірки мережі:", error);
       if (wasOnline) {
         wasOnline = false;
         self.clients.matchAll().then(clients => {
