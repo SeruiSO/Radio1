@@ -12,6 +12,11 @@ const ERROR_LIMIT = 5;
 let pastSearches = JSON.parse(localStorage.getItem("pastSearches")) || [];
 let deletedStations = JSON.parse(localStorage.getItem("deletedStations")) || [];
 
+// Валідація customTabs при ініціалізації
+customTabs = customTabs.filter(tab => typeof tab === 'string' && tab.trim() && /^[a-zA-Z0-9]+$/.test(tab));
+localStorage.setItem("customTabs", JSON.stringify(customTabs));
+console.log("Валідовані customTabs:", customTabs);
+
 document.addEventListener("DOMContentLoaded", () => {
   const audio = document.getElementById("audioPlayer");
   const stationList = document.getElementById("stationList");
@@ -59,9 +64,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const tabsContainer = document.querySelector(".tabs");
     tabsContainer.innerHTML = "";
     allTabs.forEach((tab, index) => {
+      if (typeof tab !== 'string' || !tab.trim()) {
+        console.warn(`Невалідна вкладка пропущена:`, tab);
+        return;
+      }
       const btn = document.createElement("button");
       btn.className = "tab-btn";
-      btn.textContent = tab === "best" ? "Best" : tab === "search" ? "Search" : tab === "ukraine" ? "UA" : tab.charAt(0).toUpperCase() + tab.slice(1);
+      btn.textContent = tab === "best" ? "Best" : tab === "search" ? "Search" : tab === "ukraine" ? "UA" : typeof tab === 'string' ? tab.charAt(0).toUpperCase() + tab.slice(1) : tab;
       btn.dataset.tab = tab;
       tabsContainer.appendChild(btn);
     });
