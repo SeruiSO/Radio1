@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } finally {
         console.timeEnd("loadStations");
-        if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
+        if (stationItems?.length && currentIndex < stationItems.length) {
           tryAutoPlay();
         }
       }
@@ -724,8 +724,8 @@ document.addEventListener("DOMContentLoaded", () => {
             loadStations();
           }
         }
-        if (event.data.type === "NETWORK_STATUS" && event.data.online && isPlaying && stationItems?.length && currentIndex < stationItems.length) {
-          console.log("Мережа відновлена, пробуємо відтворити");
+        if (event.data.type === "NETWORK_STATUS" && event.data.online && stationItems?.length && currentIndex < stationItems.length) {
+          console.log("Мережа відновлена (SW), пробуємо відтворити");
           audio.pause();
           audio.src = "";
           audio.src = stationItems[currentIndex].dataset.value;
@@ -735,24 +735,53 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     let retryTimer = null;
-    const RETRY_INTERVAL = 5000; // 5 секунд між спробами
+    const FAST_RETRY_INTERVAL = 1000; // 1 секунда
+    const SLOW_RETRY_INTERVAL = 5000; // 5 секунд
+    const FAST_RETRY_DURATION = 30 * 1000; // 30 секунд
     const MAX_RETRY_DURATION = 5 * 60 * 1000; // 5 хвилин
 
     function startRetryTimer() {
       if (retryTimer) clearInterval(retryTimer);
       const startTime = Date.now();
+      let interval = FAST_RETRY_INTERVAL;
+
       retryTimer = setInterval(() => {
-        if (Date.now() - startTime > MAX_RETRY_DURATION) {
+        const elapsed = Date.now() - startTime;
+        if (elapsed > MAX_RETRY_DURATION) {
           console.log("Досягнуто максимальний час повторних спроб (5 хвилин)");
           clearInterval(retryTimer);
           retryTimer = null;
           return;
         }
-        if (navigator.onLine && isPlaying && stationItems?.length && currentIndex < stationItems.length) {
+        if (elapsed > FAST_RETRY_DURATION && interval !== SLOW_RETRY_INTERVAL) {
+          console.log("Перехід на повільні спроби (кожні 5 секунд)");
+          clearInterval(retryTimer);
+          interval = SLOW_RETRY_INTERVAL;
+          retryTimer = setInterval(() => {
+            if (Date.now() - startTime > MAX_RETRY_DURATION) {
+              console.log("Досягнуто максимальний час повторних спроб (5 хвилин)");
+              clearInterval(retryTimer);
+              retryTimer = null;
+              return;
+            }
+            if (navigator.onLine && stationItems?.length && currentIndex < stationItems.length) {
+              console.log("Періодична перевірка: мережа доступна, пробуємо відтворити");
+              audio.pause();
+              audio.src = "";
+              audio.src = stationItems[currentIndex].dataset.value;
+              tryAutoPlay();
+            }
+          }, SLOW_RETRY_INTERVAL);
+          return;
+        }
+        if (navigator.onLine && stationItems?.length && currentIndex < stationItems.length) {
           console.log("Періодична перевірка: мережа доступна, пробуємо відтворити");
+          audio.pause();
+          audio.src = "";
+          audio.src = stationItems[currentIndex].dataset.value;
           tryAutoPlay();
         }
-      }, RETRY_INTERVAL);
+      }, interval);
     }
 
     function stopRetryTimer() {
@@ -764,19 +793,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function tryAutoPlay() {
-      if (!navigator.onLine) {
-        console.log("Пристрій офлайн, пропускаємо відтворення");
-        startRetryTimer();
-        return;
-      }
-      if (!isPlaying || !stationItems?.length || currentIndex >= stationItems.length) {
-        console.log("Пропуск tryAutoPlay", { isPlaying, hasStationItems: !!stationItems?.length, isIndexValid: currentIndex < stationItems.length });
+      if (!stationItems?.length || currentIndex >= stationItems.length) {
+        console.log("Пропуск tryAutoPlay: немає станцій або невалідний індекс", {
+          hasStationItems: !!stationItems?.length,
+          isIndexValid: currentIndex < stationItems.length
+        });
         document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
-        stopRetryTimer();
-        return;
-      }
-      if (audio.src === stationItems[currentIndex].dataset.value && !audio.paused) {
-        console.log("Пропуск tryAutoPlay: аудіо вже відтворюється з правильним src");
         stopRetryTimer();
         return;
       }
@@ -784,6 +806,10 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Невалідний URL:", stationItems[currentIndex].dataset.value);
         startRetryTimer();
         return;
+      }
+      if (!navigator.onLine) {
+        console.log("Пристрій офлайн, пробуємо відтворити кеш або запускаємо таймер");
+        startRetryTimer();
       }
       audio.pause();
       audio.src = "";
@@ -1044,20 +1070,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       },
       visibilitychange: () => {
-        if (!document.hidden && isPlaying && navigator.onLine) {
-          if (!audio.paused) return;
+        if (!document.hidden && stationItems?.length && currentIndex < stationItems.length) {
+          console.log("Вкладка активна, пробуємо відтворити");
           audio.pause();
           audio.src = "";
-          audio.src = stationItems[currentIndex]?.dataset.value || "";
+          audio.src = stationItems[currentIndex].dataset.value;
           tryAutoPlay();
         }
       },
       resume: () => {
-        if (isPlaying && navigator.connection?.type !== "none") {
-          if (!audio.paused) return;
+        if (stationItems?.length && currentIndex < stationItems.length && navigator.connection?.type !== "none") {
+          console.log("Додаток відновлено, пробуємо відтворити");
           audio.pause();
           audio.src = "";
-          audio.src = stationItems[currentIndex]?.dataset.value || "";
+          audio.src = stationItems[currentIndex].dataset.value;
           tryAutoPlay();
         }
       }
@@ -1076,18 +1102,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     audio.addEventListener("playing", () => {
-      isPlaying = true;
       playPauseBtn.textContent = "⏸";
       document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
-      localStorage.setItem("isPlaying", isPlaying);
+      localStorage.setItem("isPlaying", true);
       stopRetryTimer();
     });
 
     audio.addEventListener("pause", () => {
-      isPlaying = false;
+      if (!navigator.onLine) {
+        console.log("Пауза через втрату мережі, зберігаємо намір відтворювати");
+        startRetryTimer();
+        return;
+      }
       playPauseBtn.textContent = "▶";
       document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
-      localStorage.setItem("isPlaying", isPlaying);
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = null;
       }
@@ -1096,9 +1124,7 @@ document.addEventListener("DOMContentLoaded", () => {
     audio.addEventListener("error", () => {
       document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
       console.error("Помилка:", audio.error?.message || "Невідома помилка", "для URL:", audio.src);
-      if (isPlaying) {
-        startRetryTimer();
-      }
+      startRetryTimer();
     });
 
     audio.addEventListener("volumechange", () => {
@@ -1107,7 +1133,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("online", () => {
       console.log("Мережа відновлена");
-      if (isPlaying && stationItems?.length && currentIndex < stationItems.length) {
+      if (stationItems?.length && currentIndex < stationItems.length) {
         audio.pause();
         audio.src = "";
         audio.src = stationItems[currentIndex].dataset.value;
@@ -1117,9 +1143,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("offline", () => {
       console.log("Втрачено зв’язок");
-      if (isPlaying) {
-        startRetryTimer();
-      }
+      startRetryTimer();
     });
 
     addEventListeners();
