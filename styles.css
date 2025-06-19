@@ -306,36 +306,35 @@ h1 {
   100% { transform: rotate(360deg); }
 }
 
+.tabs-wrapper {
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 5px 0;
+  position: sticky;
+  top: 100px;
+  z-index: 9;
+  background: var(--container-bg);
+}
+
+.tabs-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
 .tabs {
   display: flex;
-  justify-content: center;
-  margin: 5px 0;
+  justify-content: flex-start;
   background: var(--container-bg);
   padding: 5px;
   border-radius: 10px;
   border: 1px solid var(--accent);
-  position: sticky;
-  top: 130px; /* Adjusted to be below #currentStationInfo */
-  z-index: 9;
+  white-space: nowrap;
   transition: background 0.4s ease, border-color 0.4s ease;
-}
-
-.tabs-scroller {
-  display: flex;
-  overflow-x: auto;
-  scrollbar-width: none; /* Hide scrollbar in Firefox */
-  -ms-overflow-style: none; /* Hide scrollbar in IE/Edge */
-  padding: 2px;
-  gap: 4px;
-}
-
-.tabs-scroller::-webkit-scrollbar {
-  display: none; /* Hide scrollbar in Chrome/Safari */
 }
 
 .tab-btn, .add-tab-btn {
   flex: 0 0 auto;
-  padding: 12px 16px;
+  min-width: 80px;
+  padding: 12px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 5px;
@@ -345,12 +344,6 @@ h1 {
   text-align: center;
   font-size: 14px;
   transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.add-tab-btn {
-  font-size: 18px;
-  padding: 10px 14px;
 }
 
 .tab-btn:hover, .add-tab-btn:hover {
@@ -363,6 +356,11 @@ h1 {
   background: var(--accent);
   border-color: var(--accent);
   color: #0A0A0A;
+}
+
+.add-tab-btn {
+  width: 50px;
+  font-size: 18px;
 }
 
 #searchInput {
@@ -527,13 +525,13 @@ h1 {
   text-align: center;
 }
 
-.modal-tabs, .modal-content {
+.modal-tabs {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.modal-tab-btn, .modal-cancel-btn, .modal-confirm-btn {
+.modal-tab-btn, .modal-cancel-btn {
   padding: 10px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
@@ -545,7 +543,7 @@ h1 {
   transition: all 0.3s ease;
 }
 
-.modal-tab-btn:hover, .modal-cancel-btn:hover, .modal-confirm-btn:hover {
+.modal-tab-btn:hover, .modal-cancel-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
   transform: translateY(-2px);
@@ -561,24 +559,25 @@ h1 {
   color: var(--body-bg);
 }
 
-.modal-input {
+.new-tab-modal input, .edit-tab-modal input {
+  width: 100%;
   padding: 10px;
+  margin-bottom: 15px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 8px;
   color: var(--text);
   font-size: 16px;
-  outline: none;
-  width: 100%;
   box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
-.modal-input:focus {
+.new-tab-modal input:focus, .edit-tab-modal input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
+  outline: none;
 }
 
-/* Стилі для datalist */
 input[list]::-webkit-calendar-picker-indicator {
   display: none;
 }
@@ -655,8 +654,19 @@ datalist {
     right: 5px;
   }
 
-  .tabs {
-    top: 100px; /* Adjusted for mobile */
+  .tabs-wrapper {
+    top: 80px;
+  }
+
+  .tab-btn, .add-tab-btn {
+    min-width: 70px;
+    padding: 10px;
+    font-size: 12px;
+    border-width: 1px;
+  }
+
+  .add-tab-btn {
+    width: 40px;
   }
 
   #currentStationInfo {
@@ -695,16 +705,6 @@ datalist {
     height: 1px;
   }
 
-  .tab-btn, .add-tab-btn {
-    padding: 10px 12px;
-    font-size: 12px;
-    border-width: 1px;
-  }
-
-  .add-tab-btn {
-    padding: 8px 12px;
-  }
-
   #searchInput {
     padding: 8px;
     font-size: 14px;
@@ -733,12 +733,12 @@ datalist {
     font-size: 1.3em;
   }
 
-  .modal-tab-btn, .modal-cancel-btn, .modal-confirm-btn {
+  .modal-tab-btn, .modal-cancel-btn {
     font-size: 14px;
     padding: 8px;
   }
 
-  .modal-input {
+  .new-tab-modal input, .edit-tab-modal input {
     font-size: 14px;
     padding: 8px;
   }
