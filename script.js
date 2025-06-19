@@ -193,9 +193,10 @@ document.addEventListener("DOMContentLoaded", () => {
           signal: abortController.signal
         });
         console.log(`Статус відповіді: ${response.status}`);
+        const mergedStationLists = {};
         if (response.ok) {
           const newStations = await response.json();
-          const mergedStationLists = {};
+          // Process standard tabs from stations.json
           Object.keys(newStations).forEach(tab => {
             mergedStationLists[tab] = [
               ...(userAddedStations[tab] || []).filter(s => !deletedStations.includes(s.name)),
@@ -203,15 +204,21 @@ document.addEventListener("DOMContentLoaded", () => {
             ];
             console.log(`Додано до ${tab}:`, mergedStationLists[tab].map(s => s.name));
           });
-          stationLists = mergedStationLists;
-          localStorage.setItem("stationLists", JSON.stringify(stationLists));
         } else {
-          if (Object.keys(stationLists).length) {
-            console.warn("Використовуємо кешовані stationLists із localStorage");
-          } else {
-            throw new Error(`HTTP ${response.status}`);
-          }
+          console.warn("Не вдалося завантажити stations.json, використовуємо кешовані дані");
         }
+        // Preserve custom tabs' stations
+        customTabs.forEach(tab => {
+          if (!mergedStationLists[tab]) {
+            mergedStationLists[tab] = [
+              ...(userAddedStations[tab] || []).filter(s => !deletedStations.includes(s.name)),
+              ...(stationLists[tab] || []).filter(s => !deletedStations.includes(s.name))
+            ];
+            console.log(`Збережено для кастомної вкладки ${tab}:`, mergedStationLists[tab].map(s => s.name));
+          }
+        });
+        stationLists = mergedStationLists;
+        localStorage.setItem("stationLists", JSON.stringify(stationLists));
         favoriteStations = favoriteStations.filter(name => 
           Object.values(stationLists).flat().some(s => s.name === name)
         );
@@ -226,6 +233,16 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (error) {
         if (error.name !== 'AbortError') {
           console.error("Помилка завантаження станцій:", error);
+          // Preserve custom tabs even on error
+          customTabs.forEach(tab => {
+            if (!stationLists[tab]) {
+              stationLists[tab] = [
+                ...(userAddedStations[tab] || []).filter(s => !deletedStations.includes(s.name)),
+                ...(stationLists[tab] || []).filter(s => !deletedStations.includes(s.name))
+              ];
+            }
+          });
+          localStorage.setItem("stationLists", JSON.stringify(stationLists));
           stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції</div>";
         }
       } finally {
@@ -344,6 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function saveStation(item, targetTab) {
       const stationName = item.dataset.name;
+      // Initialize arrays if they don't exist
       if (!stationLists[targetTab]) stationLists[targetTab] = [];
       if (!userAddedStations[targetTab]) userAddedStations[targetTab] = [];
       if (!stationLists[targetTab].some(s => s.name === stationName)) {
@@ -358,6 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
         userAddedStations[targetTab].unshift(newStation);
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
         localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
+        console.log(`Додано станцію ${stationName} до ${targetTab}:`, newStation);
         if (currentTab !== "search") {
           updateStationList();
         }
@@ -438,11 +457,13 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
         customTabs.push(tabName);
+        // Initialize arrays for the new tab
+        stationLists[tabName] = [];
+        userAddedStations[tabName] = [];
         localStorage.setItem("customTabs", JSON.stringify(customTabs));
-        stationLists[tabName] = stationLists[tabName] || [];
-        userAddedStations[tabName] = userAddedStations[tabName] || [];
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
         localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
+        console.log(`Створено нову вкладку ${tabName}`);
         renderTabs();
         switchTab(tabName);
         closeModal();
