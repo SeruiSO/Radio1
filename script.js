@@ -11,6 +11,8 @@ const ERROR_LIMIT = 5;
 let pastSearches = JSON.parse(localStorage.getItem("pastSearches")) || [];
 let deletedStations = JSON.parse(localStorage.getItem("deletedStations")) || [];
 let customTabs = JSON.parse(localStorage.getItem("customTabs")) || [];
+// Ensure customTabs is an array of strings
+customTabs = Array.isArray(customTabs) ? customTabs.filter(tab => typeof tab === "string" && tab.trim()) : [];
 
 document.addEventListener("DOMContentLoaded", () => {
   const audio = document.getElementById("audioPlayer");
@@ -375,6 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tabsContainer.appendChild(btn);
       });
       customTabs.forEach(tab => {
+        if (typeof tab !== "string" || !tab.trim()) return; // Skip invalid tabs
         const btn = document.createElement("button");
         btn.className = `tab-btn ${currentTab === tab ? "active" : ""}`;
         btn.dataset.tab = tab;
@@ -430,8 +433,8 @@ document.addEventListener("DOMContentLoaded", () => {
           alert("Ця назва вкладки вже існує!");
           return;
         }
-        if (tabName.length > 20) {
-          alert("Назва вкладки не може перевищувати 20 символів!");
+        if (tabName.length > 20 || !/^[a-z0-9_-]+$/.test(tabName)) {
+          alert("Назва вкладки не може перевищувати 20 символів і має містити лише латинські літери, цифри, дефіс або підкреслення!");
           return;
         }
         customTabs.push(tabName);
@@ -486,8 +489,8 @@ document.addEventListener("DOMContentLoaded", () => {
           alert("Ця назва вкладки вже існує!");
           return;
         }
-        if (newName.length > 20) {
-          alert("Назва вкладки не може перевищувати 20 символів!");
+        if (newName.length > 20 || !/^[a-z0-9_-]+$/.test(newName)) {
+          alert("Назва вкладки не може перевищувати 20 символів і має містити лише латинські літери, цифри, дефіс або підкреслення!");
           return;
         }
         const index = customTabs.indexOf(tab);
