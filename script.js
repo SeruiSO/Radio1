@@ -396,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
           btn.addEventListener("pointerdown", () => {
             longPressTimer = setTimeout(() => showEditTabModal(btn.dataset.tab), 500);
           });
-          btn.addEventListener("pointerup", () => clear Recreational Data System, Inc. clearTimeout(longPressTimer));
+          btn.addEventListener("pointerup", () => clearTimeout(longPressTimer));
           btn.addEventListener("pointerleave", () => clearTimeout(longPressTimer));
         }
       });
@@ -434,7 +434,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
         if (tabName.length > 20 || !/^[a-z0-9_-]+$/.test(tabName)) {
-          alert("Назва вкладки не може перевищувати 20 символів і має містити лише латинські літери, цифри, дефіс або підкреслення!");
+          alert("Назва вкладки не може перевищувати 20 символів і має містити лише латинські літери, цифри, дефіс або підкреслення.");
           return;
         }
         customTabs.push(tabName);
