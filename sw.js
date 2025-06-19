@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v23.1.20250618';
+const CACHE_NAME = 'radio-cache-v25.2.20250619';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -24,6 +24,24 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  // Виключення аудіопотоків із кешу
+  if (
+    url.pathname.includes('stream') ||
+    url.pathname.includes('radio') ||
+    url.pathname.endsWith('.mp3') ||
+    url.pathname.endsWith('.aac') ||
+    url.searchParams.has('t')
+  ) {
+    event.respondWith(
+      fetch(event.request, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-store' }
+      }).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (event.request.url.endsWith('stations.json')) {
@@ -68,11 +86,13 @@ setInterval(() => {
     .then(() => {
       if (!wasOnline) {
         wasOnline = true;
-        self.clients.matchAll({ includeUncontrolled: true, type: 'window' }).then(clients => {
-          clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: true });
+        setTimeout(() => {
+          self.clients.matchAll({ includeUncontrolled: true, type: 'window' }).then(clients => {
+            clients.forEach(client => {
+              client.postMessage({ type: "NETWORK_STATUS", online: true });
+            });
           });
-        });
+        }, 500); // Затримка для стабілізації мережі
       }
     })
     .catch(error => {
