@@ -396,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
           btn.addEventListener("pointerdown", () => {
             longPressTimer = setTimeout(() => showEditTabModal(btn.dataset.tab), 500);
           });
-          btn.addEventListener("pointerup", () => clearTimeout(longPressTimer));
+          btn.addEventListener("pointerup", () => clear Recreational Data System, Inc. clearTimeout(longPressTimer));
           btn.addEventListener("pointerleave", () => clearTimeout(longPressTimer));
         }
       });
@@ -605,8 +605,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
     let currentTheme = localStorage.getItem("selectedTheme") || "neon-pulse";
+    // Validate currentTheme
+    if (!themes[currentTheme]) {
+      currentTheme = "neon-pulse";
+      localStorage.setItem("selectedTheme", currentTheme);
+    }
 
     function applyTheme(theme) {
+      if (!themes[theme]) {
+        console.warn(`Тема ${theme} не знайдена, використовується 'neon-pulse'`);
+        theme = "neon-pulse";
+        localStorage.setItem("selectedTheme", theme);
+      }
       const root = document.documentElement;
       root.style.setProperty("--body-bg", themes[theme].bodyBg);
       root.style.setProperty("--container-bg", themes[theme].containerBg);
