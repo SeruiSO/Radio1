@@ -1,5 +1,4 @@
-const CACHE_NAME = 'radio-cache-v67.1.20250618';
-const RECONNECTION_LIMIT = 20 * 60 * 1000; // 20 хвилин
+const CACHE_NAME = 'radio-cache-v60.1.20250618';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -66,6 +65,7 @@ let wasOnline = navigator.onLine;
 let networkCheckInterval = null;
 let networkStatus = { online: wasOnline, lastChecked: Date.now() };
 let reconnectionInterval = null;
+const RECONNECTION_LIMIT = 20 * 60 * 1000; // 20 хвилин
 
 function checkNetwork() {
   fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
