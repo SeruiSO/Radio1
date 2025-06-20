@@ -110,7 +110,7 @@ h1 {
   display: flex;
   flex-direction: column;
   flex: 1;
-  order: 2; /* Текст іде другим, щоб зображення було ліворуч */
+  order: 2;
 }
 
 #currentStationInfo .station-name {
@@ -140,8 +140,8 @@ h1 {
   width: 80px;
   height: 80px;
   object-fit: contain;
-  order: 1; /* Зображення перше */
-  font-size: 60px; /* Для емодзі, якщо немає іконки */
+  order: 1;
+  font-size: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,7 +152,7 @@ h1 {
   align-items: center;
   justify-content: center;
   margin-left: auto;
-  order: 3; /* Візуалізатор останній */
+  order: 3;
   width: 150px;
   height: 80px;
   position: relative;
@@ -245,7 +245,7 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
-  flex: 1; /* Назва займає доступний простір */
+  flex: 1;
 }
 
 .station-item:hover, .station-item.selected {
@@ -306,22 +306,33 @@ h1 {
   100% { transform: rotate(360deg); }
 }
 
+.tabs-wrapper {
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 5px 0;
+  position: sticky;
+  top: 100px;
+  z-index: 9;
+  background: var(--container-bg);
+}
+
+.tabs-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
 .tabs {
   display: flex;
-  overflow-x: auto;
-  white-space: nowrap;
-  margin: 5px 0;
+  justify-content: flex-start;
   background: var(--container-bg);
   padding: 5px;
   border-radius: 10px;
-  position: sticky;
-  bottom: 110px; /* Над controls-container */
-  z-index: 9;
+  white-space: nowrap;
   transition: background 0.4s ease;
 }
 
-.tab-btn {
+.tab-btn, .add-tab-btn {
   flex: 0 0 auto;
+  min-width: 80px;
   padding: 12px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
@@ -334,7 +345,7 @@ h1 {
   transition: all 0.3s ease;
 }
 
-.tab-btn:hover {
+.tab-btn:hover, .add-tab-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
   transform: translateY(-2px);
@@ -346,18 +357,9 @@ h1 {
   color: #0A0A0A;
 }
 
-.tab-btn.add-tab-btn {
-  min-width: 40px;
+.add-tab-btn {
+  width: 50px;
   font-size: 18px;
-}
-
-.tab-btn.long-press {
-  animation: pulse 0.5s ease-in-out;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
 }
 
 #searchInput {
@@ -433,34 +435,6 @@ h1 {
   display: flex;
   justify-content: center;
   gap: 50px;
-}
-
-.wave-progress {
-  display: flex;
-  gap: 4px;
-  height: 60px;
-  width: 84px;
-}
-
-.wave-bar {
-  width: 10px;
-  background: var(--accent);
-  border-radius: 5px;
-  animation: waveAnimation 1.2s infinite ease-in-out;
-  animation-play-state: paused;
-  transition: background 0.4s ease;
-}
-
-.wave-bar:nth-child(2) { animation-delay: 0.2s; }
-.wave-bar:nth-child(3) { animation-delay: 0.3s; }
-.wave-bar:nth-child(4) { animation-delay: 0.4s; }
-.wave-bar:nth-child(5) { animation-delay: 0.5s; }
-.wave-bar:nth-child(6) { animation-delay: 0.6s; }
-.wave-bar:nth-child(7) { animation-delay: 0.7s; }
-
-@keyframes waveAnimation {
-  0%, 100% { transform: scaleY(0.3); }
-  50% { transform: scaleY(1); }
 }
 
 .control-btn {
@@ -556,25 +530,25 @@ h1 {
   color: var(--body-bg);
 }
 
-.modal-input {
+.new-tab-modal input, .edit-tab-modal input {
   width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
+  padding: 10px;
+  margin-bottom: 15px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 8px;
   color: var(--text);
   font-size: 16px;
-  outline: none;
+  box-sizing: border-box;
   transition: all 0.3s ease;
 }
 
-.modal-input:focus {
+.new-tab-modal input:focus, .edit-tab-modal input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
+  outline: none;
 }
 
-/* Стилі для datalist */
 input[list]::-webkit-calendar-picker-indicator {
   display: none;
 }
@@ -584,7 +558,7 @@ input[list] {
 }
 
 datalist {
-  display: none; /* datalist не відображається, але опції працюють */
+  display: none;
 }
 
 #searchQuery[list], #searchCountry[list], #searchGenre[list] {
@@ -651,8 +625,19 @@ datalist {
     right: 5px;
   }
 
-  .tabs {
-    bottom: 100px; /* Над controls-container на мобільних */
+  .tabs-wrapper {
+    top: 80px;
+  }
+
+  .tab-btn, .add-tab-btn {
+    min-width: 70px;
+    padding: 10px;
+    font-size: 12px;
+    border-width: 1px;
+  }
+
+  .add-tab-btn {
+    width: 40px;
   }
 
   #currentStationInfo {
@@ -679,7 +664,7 @@ datalist {
   .station-icon {
     width: 65px;
     height: 65px;
-    font-size: 50px; /* Для емодзі на мобільних */
+    font-size: 50px;
   }
 
   .wave-visualizer {
@@ -689,12 +674,6 @@ datalist {
 
   .wave-line {
     height: 1px;
-  }
-
-  .tab-btn {
-    padding: 10px;
-    font-size: 12px;
-    border-width: 1px;
   }
 
   #searchInput {
@@ -730,9 +709,9 @@ datalist {
     padding: 8px;
   }
 
-  .modal-input {
+  .new-tab-modal input, .edit-tab-modal input {
     font-size: 14px;
-    padding: 6px;
+    padding: 8px;
   }
 }
 
