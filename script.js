@@ -1,3 +1,5 @@
+const RECONNECTION_LIMIT = 20 * 60 * 1000; // 20 хвилин
+
 let currentTab = localStorage.getItem("currentTab") || "techno";
 let currentIndex = 0;
 let favoriteStations = JSON.parse(localStorage.getItem("favoriteStations")) || [];
@@ -8,6 +10,7 @@ let stationItems = [];
 let abortController = new AbortController();
 let reconnectionTimeout = null;
 let reconnectionStartTime = null;
+let reconnectionAttempts = 0;
 let pastSearches = JSON.parse(localStorage.getItem("pastSearches")) || [];
 let deletedStations = JSON.parse(localStorage.getItem("deletedStations")) || [];
 let customTabs = JSON.parse(localStorage.getItem("customTabs")) || [];
@@ -61,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeApp();
 
   async function requestWakeLock() {
-    if ('wakeLock' in navigator && playerState.isPlaying) {
+    if ('wakeLock' in navigator && playerState.isPlaying && !document.hidden) {
       try {
         wakeLock = await navigator.wakeLock.request('screen');
         console.log("WakeLock активовано");
@@ -178,6 +181,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "germany": "Germany", "france": "France", "spain": "Spain",
         "usa": "United States", "united states": "United States",
         "uk": "United Kingdom", "united kingdom": "United Kingdom",
+        "netherlands": "Netherlands", "canada": "Canada", "australia": "Australia",
+        "swedade: "United States", "united states": "United States",
         "netherlands": "Netherlands", "canada": "Canada", "australia": "Australia",
         "switzerland": "Switzerland", "belgium": "Belgium", "poland": "Poland",
         "austria": "Austria", "sweden": "Sweden", "norway": "Norway",
@@ -724,8 +729,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      navigator.serviceWorker.ready.then(() => {
-        navigator.serviceWorker.controller.postMessage({ type: 'GET_NETWORK_STATUS' });
+      navigator.serviceWorker.ready.then(registration => {
+        console.log("Service Worker готовий");
+        registration.active?.postMessage({ type: 'GET_NETWORK_STATUS' });
       });
 
       navigator.serviceWorker.addEventListener("message", (event) => {
@@ -747,7 +753,7 @@ document.addEventListener("DOMContentLoaded", () => {
             debouncedTryAutoPlay();
           } else if (!event.data.online && playerState.isPlaying) {
             console.log("Мережа втрачена, запускаємо повторні спроби");
-            navigator.serviceWorker.controller.postMessage({ type: 'START_RECONNECTION' });
+            navigator.serviceWorker.controller?.postMessage({ type: 'START_RECONNECTION' });
           }
         } else if (event.data.type === "TRY_RECONNECT") {
           if (playerState.isPlaying && stationItems?.length && playerState.currentIndex < stationItems.length) {
@@ -810,14 +816,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       if (audio.src === targetSrc && !audio.paused) {
         console.log("Аудіо вже відтворюється, пропускаємо", { src: audio.src, playerState });
-        requestWakeLock();
+        if (!document.hidden) requestWakeLock();
         navigator.serviceWorker.controller?.postMessage({ type: 'STOP_RECONNECTION' });
         return;
       }
       audio.pause();
       audio.src = targetSrc;
       audio.currentTime = 0;
-      console.log("Спроба відтворення:", audio.src, { playerState });
+      console.log("Спроба відтворення:", audio.src, { playerState, reconnectionAttempts });
       const playPromise = audio.play();
       playPromise
         .then(() => {
@@ -825,7 +831,8 @@ document.addEventListener("DOMContentLoaded", () => {
           document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
           clearTimeout(reconnectionTimeout);
           reconnectionStartTime = null;
-          requestWakeLock();
+          reconnectionAttempts = 0;
+          if (!document.hidden) requestWakeLock();
           if ("mediaSession" in navigator) {
             navigator.mediaSession.playbackState = "playing";
           }
@@ -836,7 +843,8 @@ document.addEventListener("DOMContentLoaded", () => {
             message: error.message,
             code: audio.error?.code,
             src: audio.src,
-            playerState
+            playerState,
+            reconnectionAttempts
           });
           if (playerState.isPlaying && (!reconnectionStartTime || Date.now() - reconnectionStartTime < RECONNECTION_LIMIT)) {
             if (!reconnectionStartTime) reconnectionStartTime = Date.now();
@@ -858,15 +866,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function scheduleReconnection() {
       clearTimeout(reconnectionTimeout);
       const elapsed = reconnectionStartTime ? Date.now() - reconnectionStartTime : 0;
-      if (elapsed >= RECONNECTION_LIMIT) {
-        console.log("Досягнуто ліміт часу для відновлення, ставимо на паузу", { playerState });
+      if (elapsed >= RECONNECTION_LIMIT || reconnectionAttempts >= 100) {
+        console.log("Досягнуто ліміт часу або спроб для відновлення, ставимо на паузу", { playerState, reconnectionAttempts });
         togglePlayPause();
         releaseWakeLock();
         navigator.serviceWorker.controller?.postMessage({ type: 'STOP_RECONNECTION' });
         return;
       }
+      reconnectionAttempts++;
       const delay = getReconnectionDelay(elapsed);
-      console.log(`Плануємо повторну спробу через ${delay} мс`, { elapsed, delay, playerState });
+      console.log(`Плануємо повторну спробу через ${delay} мс`, { elapsed, delay, playerState, reconnectionAttempts });
       reconnectionTimeout = setTimeout(() => {
         debouncedTryAutoPlay();
       }, delay);
@@ -1024,6 +1033,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem(`lastStation_${playerState.currentTab}`, index);
       clearTimeout(reconnectionTimeout);
       reconnectionStartTime = null;
+      reconnectionAttempts = 0;
       navigator.serviceWorker.controller?.postMessage({ type: 'STOP_RECONNECTION' });
       if (playerState.isPlaying) debouncedTryAutoPlay();
     }
@@ -1110,7 +1120,7 @@ document.addEventListener("DOMContentLoaded", () => {
         isPlaying = true;
         debouncedTryAutoPlay();
         playPauseBtn.textContent = "⏸";
-        requestWakeLock();
+        if (!document.hidden) requestWakeLock();
       } else {
         audio.pause();
         playerState.isPlaying = false;
@@ -1119,6 +1129,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
         clearTimeout(reconnectionTimeout);
         reconnectionStartTime = null;
+        reconnectionAttempts = 0;
         releaseWakeLock();
         if ("mediaSession" in navigator) {
           navigator.mediaSession.playbackState = "paused";
@@ -1152,14 +1163,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (playerState.isPlaying && navigator.connection?.type !== "none") {
           console.log("Додаток відновлено, пробуємо відтворити", { playerState });
           debouncedTryAutoPlay();
-          requestWakeLock();
+          if (!document.hidden) requestWakeLock();
         }
       }, 500),
       online: debounce(() => {
         console.log("Мережа відновлена, пробуємо відтворити", { playerState });
         if (playerState.isPlaying && stationItems?.length && playerState.currentIndex < stationItems.length) {
           debouncedTryAutoPlay();
-          requestWakeLock();
+          if (!document.hidden) requestWakeLock();
         }
       }, 500)
     };
@@ -1186,7 +1197,8 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("isPlaying", playerState.isPlaying);
       clearTimeout(reconnectionTimeout);
       reconnectionStartTime = null;
-      requestWakeLock();
+      reconnectionAttempts = 0;
+      if (!document.hidden) requestWakeLock();
       if ("mediaSession" in navigator) {
         navigator.mediaSession.playbackState = "playing";
       }
@@ -1211,7 +1223,8 @@ document.addEventListener("DOMContentLoaded", () => {
         message: audio.error?.message || "Невідома помилка",
         code: audio.error?.code,
         src: audio.src,
-        playerState
+        playerState,
+        reconnectionAttempts
       });
       if (playerState.isPlaying && (!reconnectionStartTime || Date.now() - reconnectionStartTime < RECONNECTION_LIMIT)) {
         if (!reconnectionStartTime) reconnectionStartTime = Date.now();
