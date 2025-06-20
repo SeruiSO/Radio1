@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v20.1.20250618';
+const CACHE_NAME = 'radio-cache-v54.1.20250618';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -11,7 +11,7 @@ self.addEventListener('install', (event) => {
         '/stations.json',
         '/manifest.json'
       ]).then(() => {
-        caches.keys().then((cacheNames) => {
+        return caches.keys().then((cacheNames) => {
           return Promise.all(cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
               return caches.delete(cacheName);
@@ -62,8 +62,9 @@ self.addEventListener('activate', (event) => {
 
 // Моніторинг стану мережі
 let wasOnline = navigator.onLine;
+let networkCheckInterval = null;
 
-setInterval(() => {
+function checkNetwork() {
   fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
     .then(() => {
       if (!wasOnline) {
@@ -73,6 +74,9 @@ setInterval(() => {
             client.postMessage({ type: "NETWORK_STATUS", online: true });
           });
         });
+        clearInterval(networkCheckInterval);
+        networkCheckInterval = null;
+        console.log("Мережа відновлена, перевірка припинена");
       }
     })
     .catch(error => {
@@ -84,6 +88,15 @@ setInterval(() => {
             client.postMessage({ type: "NETWORK_STATUS", online: false });
           });
         });
+        if (!networkCheckInterval) {
+          networkCheckInterval = setInterval(checkNetwork, 2000);
+          console.log("Мережа втрачена, початок перевірки кожні 2 секунди");
+        }
       }
     });
-}, 1000);
+}
+
+if (!wasOnline && !networkCheckInterval) {
+  networkCheckInterval = setInterval(checkNetwork, 2000);
+  console.log("Початок перевірки мережі кожні 2 секунди");
+}
