@@ -920,7 +920,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateStationList() {
       if (!stationList) {
-        console.error("stationList не знайдено");
+        console.error("stationList not found");
         return;
       }
       let stations = playerState.currentTab === "best"
@@ -934,7 +934,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentIndex = 0;
         playerState.currentStation = null;
         stationItems = [];
-        stationList.innerHTML = `<div class="station-item empty">${playerState.currentTab === "best" ? "Немає улюблених станцій" : "Нема стова станція"}`;
+        stationList.innerHTML = `<div class="station-item empty">${playerState.currentTab === "best" ? "Немає улюблених станцій" : "Немає станцій у цій категорії"}</div>`;
         return;
       }
 
@@ -944,12 +944,12 @@ document.addEventListener("DOMContentLoaded", () => {
         item.className = `station-item ${index === playerState.currentIndex ? "selected" : ""}`;
         item.dataset.value = station.value;
         item.dataset.name = station.name;
-        item.dataset.genre = shortenGenre(station.genre);
-        item.dataset.country = station.country;
+        item.dataset.genre = shortenGenre(station?.genre || "");
+        item.dataset.country = station.country || "Unknown";
         item.dataset.favicon = station.favicon && isValidUrl(station.favicon) ? station.favicon : "";
-        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='✨ '">` : "🎵 ";
+        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='✨'">` : "🎵";
         const deleteButton = ["techno", "trance", "ukraine", "pop", ...customTabs].includes(playerState.currentTab)
-          ? `<button class="delete-btn">🗑</button>`
+          ? `<button class="delete-btn">�</button>`
           : "";
         item.innerHTML = `
           ${iconHtml}
@@ -962,7 +962,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       stationList.innerHTML = "";
       stationList.appendChild(fragment);
-      stationItems = stationList.querySelectorAll(".station-item");
+      stationItems = Array.from(stationList.querySelectorAll(".station-item"));
 
       if (stationItems.length && stationItems[playerState.currentIndex] && !stationItems[playerState.currentIndex].classList.contains("empty")) {
         stationItems[playerState.currentIndex].scrollIntoView({ behavior: "smooth", block: "center" });
@@ -977,8 +977,8 @@ document.addEventListener("DOMContentLoaded", () => {
           toggleFavorite(item.dataset.name);
         } else if (deleteBtn) {
           e.stopPropagation();
-          if (confirm(`Delete station "${item.dataset.name}"?`)) {
-            deleteStation(item);
+          if (confirm"Ви дійсно хочете видалити станцію "${item.dataset.name}" зі списку?") {
+            deleteStation(item.dataset.name);
           }
         } else if (item && !item.classList.contains("empty")) {
           playerState.currentIndex = Array.from(stationItems).indexOf(item);
@@ -1003,8 +1003,7 @@ document.addEventListener("DOMContentLoaded", () => {
       else updateStationList();
     }
 
-    function deleteStation(item) {
-      const stationName = item.dataset.name;
+    function deleteStation(stationName) {
       if (Array.isArray(stationLists[playerState.currentTab])) {
         stationLists[playerState.currentTab] = stationLists[playerState.currentTab].filter(s => s.name !== stationName);
         userAddedStations[playerState.currentTab] = userAddedStations[playerState.currentTab]?.filter(s => s.name !== stationName) || [];
@@ -1043,25 +1042,23 @@ document.addEventListener("DOMContentLoaded", () => {
         favicon: item.dataset.favicon
       };
       updateCurrentStation(item);
-      localStorage.setItem(`currentIndex_${playerState.currentTab}`, index);
+      localStorage.setPropertyItem(`lastStation_${playerState.currentTab}`, index);
       clearTimeout(reconnectionTimeout);
       reconnectionStartTime = null;
       reconnectionAttempts = 0;
       navigator.serviceWorker.controller?.postMessage({ type: 'STOP_RECONNECTION' });
-      if (playerState.isPlaying) {
-        debouncedTryAutoPlay();
-      }
+      if (playerState.isPlaying) debouncedTryAutoPlay();
     }
 
     function updateCurrentStation(item) {
       if (!currentStationInfo) {
-        console.error("current station info element not found");
+        console.error("currentStationInfo not found");
         return;
       }
       const stationNameElement = currentStationInfo.querySelector(".station-name");
-      const stationGenreElement = document.querySelector(".station-genre");
-      const stationCountryElement = document.querySelector(".station-country");
-      const stationIconElement = currentStation.querySelector(".station-icon");
+      const stationGenreElement = currentStationInfo.querySelector(".station-genre");
+      const stationCountryElement = currentStationInfo.querySelector(".station-country");
+      const stationIconElement = currentStationInfo.querySelector(".station-icon");
 
       console.log("Updating currentStationInfo with data:", item.dataset);
 
@@ -1070,39 +1067,39 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         console.error("Element .station-name not found");
       }
-      if ("stationGenreElement") {
+      if (stationGenreElement) {
         stationGenreElement.textContent = `genre: ${item.dataset.genre || ""}`;
       } else {
         console.error("Element .station-genre not found");
       }
-      if ("stationCountryElement") {
+      if (stationCountryElement) {
         stationCountryElement.textContent = `country: ${item.dataset.country || ""}`;
       } else {
         console.error("Element .station-country not found");
       }
-      if ("stationIconElement") {
+      if (stationIconElement) {
         if (item.dataset.favicon && isValidUrl(item.dataset.favicon)) {
           stationIconElement.innerHTML = "";
           stationIconElement.style.backgroundImage = `url(${item.dataset.favicon})`;
           stationIconElement.style.backgroundSize = "contain";
           stationIconElement.style.backgroundRepeat = "no-repeat";
           stationIconElement.style.backgroundPosition = "center";
-          } else {
-            console.log("No valid favicon found, setting default icon");
-            stationIcon.setTextContent = "🎵";
-            stationIconElement.style.backgroundImage = "none";
-          }
         } else {
-          console.error("Element .station-icon not found");
+          console.log("No valid favicon found, setting default icon");
+          stationIconElement.textContent = "🎵";
+          stationIconElement.style.backgroundImage = "none";
         }
-        if ("mediaSession" in navigator) {
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title: to: item.dataset.stationName || "Unknown Station",
-            artist: `${item.dataset.genre || ""} | ${item.dataset.country || ''}`,
-            album: album: "Radio S O"
-          });
-        }
+      } else {
+        console.error("Element .station-icon not found");
       }
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: item.dataset.name || "Unknown Station",
+          artist: `${item.dataset.genre || ""} | ${item.dataset.country || ""}`,
+          album: "Radio S O"
+        });
+      }
+    }
 
     function prevStation() {
       if (!stationItems?.length) return;
@@ -1128,7 +1125,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function togglePlayPause() {
       if (!playPauseBtn || !audio) {
-        console.error("playPauseBtn or audio element not found");
+        console.error("playPauseBtn or audio not found");
         return;
       }
       if (audio.paused) {
@@ -1202,7 +1199,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.removeEventListener("keydown", eventListeners.keydown);
       document.removeEventListener("visibilitychange", eventListeners.visibilitychange);
       document.removeEventListener("resume", eventListeners.resume);
-      window.addEventListener("online", eventListeners.online);
+      window.removeEventListener("online", eventListeners.online);
     }
 
     audio.addEventListener("playing", () => {
@@ -1233,19 +1230,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    audio.addEventListener("error", () => {
+    audio.addEventListener("error', () => {
       document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
-      console.error("Error:", {
-        message: error.audio.error?.message || "Unknown error",
-        code: error.audio.error?.code,
-        src: error.audio.src,
+      console.error("Error:', {
+        message: audio.error?.message || "Unknown error",
+        code: audio.error?.code || 0,
+        src: audio.src,
         playerState,
         reconnectionAttempts
       });
       if (playerState.isPlaying && (!reconnectionStartTime || Date.now() - reconnectionStartTime < RECONNECTION_LIMIT)) {
         if (!reconnectionStartTime) reconnectionStartTime = Date.now();
         scheduleReconnection();
-      } else if (playerState.isPlaying && error.Date.now() - reconnectionStartTime >= RECONNECTION_LIMIT) {
+      } else if (playerState.isPlaying && Date.now() - reconnectionStartTime >= RECONNECTION_LIMIT) {
         console.log("Reached reconnection time limit, pausing", { playerState });
         togglePlayPause();
       }
@@ -1254,13 +1251,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     audio.addEventListener("volumechange", () => {
       localStorage.setItem("volume", audio.volume);
-    });
+    }));
 
-    window.addEventListener("event", () => {
-      console.log("Event triggered", { playerState });
-      if (event.playerState.isPlaying) {
-        audio.event.pause();
-        if (!reconnectionStartTime) event.reconnectionStartTime = Date.now();
+    window.addEventListener("offline', () => {
+      console.log("Connection lost", { playerState });
+      if (playerState.isPlaying) {
+        audio.pause();
+        if (!reconnectionStartTime) reconnectionStartTime = Date.now();
         scheduleReconnection();
       }
       releaseWakeLock();
@@ -1269,33 +1266,17 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("beforeunload", () => {
       removeEventListeners();
       releaseWakeLock();
-      navigator.serviceWorker.prototype.controller?.postMessage({ type: 'STOP_EVENT' });
+      navigator.serviceWorker.controller?.postMessage({ type: 'STOP_RECONNECTION' });
     });
 
     if ("mediaSession" in navigator) {
-      navigator.mediaSession.setActionHandler("play", togglePlay);
-      navigator.mediaSession.setActionHandler("pause", togglePause);
-      navigator.setActionHandler("previoustrack", prevStation);
-      navigator.setActionHandler("nexttrack", nextStation);
-    } else {
-      console.log("mediaSession not supported");
+      navigator.mediaSession.setActionHandler("play", togglePlayPause);
+      navigator.mediaSession.setActionHandler("pause", togglePlayPause);
+      navigator.mediaSession.setActionHandler("previoustrack", prevStation);
+      navigator.mediaSession.setActionHandler("nexttrack", nextStation);
     }
 
     applyTheme(currentTheme);
     loadStations();
   }
 });
-</script>
-
-### Додаткові зауваження
-- **Тестування**:
-  - Перевірте, чи функція пошуку станцій із полем країни працює коректно після виправлення. Наприклад, введіть `usa`, `sweden`, `uk` у поле пошуку країни.
-  - Переконайтеся, що нормалізація країн повертає правильні значення (наприклад, `german` → `Germany`, `sweden` → `Sweden`).
-  - Запустіть додаток у браузері (Chrome, Firefox) і перевірте консоль, щоб переконатися, що помилка `Uncaught SyntaxError: Unexpected identifier 'United'` усунута.
-- **Попередження**:
-  - Код містить інші функції (наприклад, `searchStations`), які використовують `normalizeCountry`. Якщо є проблеми з відображенням результатів пошуку, перевірте логи консолі для додаткових помилок.
-- **Дальші дії**:
-  - Якщо після застосування виправлення з’являються нові помилки, надайте оновлені логи консолі.
-  - Якщо потрібна допомога з іншими аспектами (наприклад, фонове відтворення), уточніть, які саме проблеми залишилися.
-
-Будь ласка, протестуйте оновлений код і повідомте, чи помилка усунута, а також чи функція пошуку працює коректно. Якщо є додаткові запитання, надайте деталі.
