@@ -24,6 +24,8 @@ let playerState = {
   currentIndex: currentIndex
 };
 
+let wakeLock = null;
+
 document.addEventListener("DOMContentLoaded", () => {
   const audio = document.getElementById("audioPlayer");
   const stationList = document.getElementById("stationList");
@@ -60,6 +62,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   initializeApp();
+
+  async function requestWakeLock() {
+    if ('wakeLock' in navigator && playerState.isPlaying) {
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        console.log("WakeLock активовано");
+        wakeLock.addEventListener('release', () => {
+          console.log("WakeLock деактивовано");
+          wakeLock = null;
+        });
+      } catch (err) {
+        console.error("Помилка WakeLock:", err);
+      }
+    }
+  }
+
+  function releaseWakeLock() {
+    if (wakeLock) {
+      wakeLock.release().then(() => {
+        wakeLock = null;
+        console.log("WakeLock звільнено");
+      });
+    }
+  }
 
   function initializeApp() {
     audio.preload = "none";
@@ -701,6 +727,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
+      navigator.serviceWorker.ready.then(() => {
+        // Запитати поточний стан мережі після готовності Service Worker
+        navigator.serviceWorker.controller.postMessage({ type: 'GET_NETWORK_STATUS' });
+      });
+
       navigator.serviceWorker.addEventListener("message", (event) => {
         if (event.data.type === "CACHE_UPDATED") {
           console.log("Отримано оновлення кешу, оновлюємо stationLists");
@@ -714,9 +745,12 @@ document.addEventListener("DOMContentLoaded", () => {
             loadStations();
           }
         }
-        if (event.data.type === "NETWORK_STATUS" && event.data.online && playerState.isPlaying && stationItems?.length && playerState.currentIndex < stationItems.length) {
-          console.log("Мережа відновлена, пробуємо відтворити поточну станцію");
-          debouncedTryAutoPlay();
+        if (event.data.type === "NETWORK_STATUS") {
+          console.log("Отримано статус мережі:", event.data);
+          if (event.data.online && playerState.isPlaying && stationItems?.length && playerState.currentIndex < stationItems.length) {
+            console.log("Мережа відновлена, пробуємо відтворити поточну станцію");
+            debouncedTryAutoPlay();
+          }
         }
       });
     }
@@ -749,14 +783,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function tryAutoPlay() {
-      if (!navigator.onLine) {
-        console.log("Пристрій офлайн, пропускаємо відтворення", { playerState, reconnectionTimerCount });
-        if (playerState.isPlaying) {
-          if (!reconnectionStartTime) reconnectionStartTime = Date.now();
-          scheduleReconnection();
-        }
-        return;
-      }
       if (!playerState.isPlaying || !stationItems?.length || playerState.currentIndex >= stationItems.length || !stationItems[playerState.currentIndex]) {
         console.log("Пропуск tryAutoPlay", {
           isPlaying: playerState.isPlaying,
@@ -765,6 +791,7 @@ document.addEventListener("DOMContentLoaded", () => {
           stationExists: !!stationItems[playerState.currentIndex]
         });
         document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+        releaseWakeLock();
         return;
       }
       if (!isValidUrl(stationItems[playerState.currentIndex].dataset.value)) {
@@ -774,11 +801,13 @@ document.addEventListener("DOMContentLoaded", () => {
           scheduleReconnection();
         }
         document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+        releaseWakeLock();
         return;
       }
       const targetSrc = stationItems[playerState.currentIndex].dataset.value;
       if (audio.src === targetSrc && !audio.paused) {
         console.log("Аудіо вже відтворюється, пропускаємо", { src: audio.src, playerState });
+        requestWakeLock();
         return;
       }
       audio.pause();
@@ -793,6 +822,10 @@ document.addEventListener("DOMContentLoaded", () => {
           clearTimeout(reconnectionTimeout);
           reconnectionTimerCount--;
           reconnectionStartTime = null;
+          requestWakeLock();
+          if ("mediaSession" in navigator) {
+            navigator.mediaSession.playbackState = "playing";
+          }
         })
         .catch(error => {
           console.error("Помилка відтворення:", {
@@ -810,6 +843,10 @@ document.addEventListener("DOMContentLoaded", () => {
             togglePlayPause();
           }
           document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+          releaseWakeLock();
+          if ("mediaSession" in navigator) {
+            navigator.mediaSession.playbackState = "paused";
+          }
         });
     }
 
@@ -822,6 +859,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (elapsed >= RECONNECTION_LIMIT) {
         console.log("Досягнуто ліміт часу для відновлення, ставимо на паузу", { playerState, reconnectionTimerCount });
         togglePlayPause();
+        releaseWakeLock();
         return;
       }
       const delay = getReconnectionDelay(elapsed);
@@ -1070,6 +1108,7 @@ document.addEventListener("DOMContentLoaded", () => {
         isPlaying = true;
         debouncedTryAutoPlay();
         playPauseBtn.textContent = "⏸";
+        requestWakeLock();
       } else {
         audio.pause();
         playerState.isPlaying = false;
@@ -1079,6 +1118,10 @@ document.addEventListener("DOMContentLoaded", () => {
         clearTimeout(reconnectionTimeout);
         reconnectionTimerCount--;
         reconnectionStartTime = null;
+        releaseWakeLock();
+        if ("mediaSession" in navigator) {
+          navigator.mediaSession.playbackState = "paused";
+        }
       }
       localStorage.setItem("isPlaying", playerState.isPlaying);
     }
@@ -1095,21 +1138,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       },
       visibilitychange: debounce(() => {
-        if (!document.hidden && playerState.isPlaying && navigator.onLine) {
+        if (!document.hidden && playerState.isPlaying) {
           console.log("Вкладка активна, пробуємо відтворити", { playerState });
           debouncedTryAutoPlay();
+          requestWakeLock();
+        } else if (document.hidden) {
+          console.log("Вкладка неактивна", { playerState });
         }
       }, 500),
       resume: debounce(() => {
         if (playerState.isPlaying && navigator.connection?.type !== "none") {
           console.log("Додаток відновлено, пробуємо відтворити", { playerState });
           debouncedTryAutoPlay();
+          requestWakeLock();
         }
       }, 500),
       online: debounce(() => {
         console.log("Мережа відновлена, пробуємо відтворити", { playerState });
         if (playerState.isPlaying && stationItems?.length && playerState.currentIndex < stationItems.length) {
           debouncedTryAutoPlay();
+          requestWakeLock();
         }
       }, 500)
     };
@@ -1137,14 +1185,20 @@ document.addEventListener("DOMContentLoaded", () => {
       clearTimeout(reconnectionTimeout);
       reconnectionTimerCount--;
       reconnectionStartTime = null;
+      requestWakeLock();
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.playbackState = "playing";
+      }
     });
 
     audio.addEventListener("pause", () => {
       if (!playerState.isPlaying) {
         playPauseBtn.textContent = "▶";
         document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+        releaseWakeLock();
         if ("mediaSession" in navigator) {
           navigator.mediaSession.metadata = null;
+          navigator.mediaSession.playbackState = "paused";
         }
       }
     });
@@ -1165,6 +1219,7 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Досягнуто ліміт часу для відновлення, ставимо на паузу", { playerState });
         togglePlayPause();
       }
+      releaseWakeLock();
     });
 
     audio.addEventListener("volumechange", () => {
@@ -1178,12 +1233,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!reconnectionStartTime) reconnectionStartTime = Date.now();
         scheduleReconnection();
       }
+      releaseWakeLock();
     });
 
     addEventListeners();
 
     window.addEventListener("beforeunload", () => {
       removeEventListeners();
+      releaseWakeLock();
     });
 
     if ("mediaSession" in navigator) {

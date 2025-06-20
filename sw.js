@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v54.1.20250618';
+const CACHE_NAME = 'radio-cache-v56.1.20250618';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -51,7 +51,7 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim()) // Активуємо клієнтів після оновлення
   );
   self.clients.matchAll().then((clients) => {
     clients.forEach((client) => {
@@ -63,15 +63,17 @@ self.addEventListener('activate', (event) => {
 // Моніторинг стану мережі
 let wasOnline = navigator.onLine;
 let networkCheckInterval = null;
+let networkStatus = { online: wasOnline, lastChecked: Date.now() };
 
 function checkNetwork() {
   fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
     .then(() => {
       if (!wasOnline) {
         wasOnline = true;
-        self.clients.matchAll().then(clients => {
+        networkStatus = { online: true, lastChecked: Date.now() };
+        self.clients.matchAll({ includeUncontrolled: true, type: 'window' }).then(clients => {
           clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: true });
+            client.postMessage({ type: "NETWORK_STATUS", online: true, lastChecked: networkStatus.lastChecked });
           });
         });
         clearInterval(networkCheckInterval);
@@ -83,9 +85,10 @@ function checkNetwork() {
       console.error("Помилка перевірки мережі:", error);
       if (wasOnline) {
         wasOnline = false;
-        self.clients.matchAll().then(clients => {
+        networkStatus = { online: false, lastChecked: Date.now() };
+        self.clients.matchAll({ includeUncontrolled: true, type: 'window' }).then(clients => {
           clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: false });
+            client.postMessage({ type: "NETWORK_STATUS", online: false, lastChecked: networkStatus.lastChecked });
           });
         });
         if (!networkCheckInterval) {
@@ -96,7 +99,15 @@ function checkNetwork() {
     });
 }
 
+// Ініціалізація перевірки мережі
 if (!wasOnline && !networkCheckInterval) {
   networkCheckInterval = setInterval(checkNetwork, 2000);
   console.log("Початок перевірки мережі кожні 2 секунди");
 }
+
+// Обробка повідомлень від клієнтів
+self.addEventListener('message', (event) => {
+  if (event.data.type === 'GET_NETWORK_STATUS') {
+    event.source.postMessage({ type: 'NETWORK_STATUS', ...networkStatus });
+  }
+});
