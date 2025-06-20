@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v56.1.20250618';
+const CACHE_NAME = 'radio-cache-v60.1.20250618';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -51,7 +51,7 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => self.clients.claim()) // Активуємо клієнтів після оновлення
+    }).then(() => self.clients.claim())
   );
   self.clients.matchAll().then((clients) => {
     clients.forEach((client) => {
@@ -64,6 +64,8 @@ self.addEventListener('activate', (event) => {
 let wasOnline = navigator.onLine;
 let networkCheckInterval = null;
 let networkStatus = { online: wasOnline, lastChecked: Date.now() };
+let reconnectionInterval = null;
+const RECONNECTION_LIMIT = 20 * 60 * 1000; // 20 хвилин
 
 function checkNetwork() {
   fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
@@ -99,6 +101,29 @@ function checkNetwork() {
     });
 }
 
+// Запуск повторних спроб відтворення
+function scheduleReconnection() {
+  if (reconnectionInterval) return; // Запобігаємо множинним інтервалам
+  reconnectionInterval = setInterval(() => {
+    if (wasOnline) {
+      self.clients.matchAll({ includeUncontrolled: true, type: 'window' }).then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ type: "TRY_RECONNECT", lastChecked: Date.now() });
+        });
+      });
+    }
+  }, 2000);
+}
+
+// Зупинка повторних спроб
+function stopReconnection() {
+  if (reconnectionInterval) {
+    clearInterval(reconnectionInterval);
+    reconnectionInterval = null;
+    console.log("Повторні спроби відтворення припинено");
+  }
+}
+
 // Ініціалізація перевірки мережі
 if (!wasOnline && !networkCheckInterval) {
   networkCheckInterval = setInterval(checkNetwork, 2000);
@@ -109,5 +134,9 @@ if (!wasOnline && !networkCheckInterval) {
 self.addEventListener('message', (event) => {
   if (event.data.type === 'GET_NETWORK_STATUS') {
     event.source.postMessage({ type: 'NETWORK_STATUS', ...networkStatus });
+  } else if (event.data.type === 'START_RECONNECTION') {
+    scheduleReconnection();
+  } else if (event.data.type === 'STOP_RECONNECTION') {
+    stopReconnection();
   }
 });
