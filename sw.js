@@ -1,4 +1,7 @@
-const CACHE_NAME = 'radio-cache-v60.1.20250618';
+const CACHE_NAME = 'radio-cache-v100.1.20250618';
+let wasOnline = navigator.onLine;
+let networkCheckInterval = null;
+let isCheckingNetwork = false;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -27,16 +30,17 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (event.request.url.endsWith('stations.json')) {
-        return fetch(event.request, { cache: 'no-store', signal: new AbortController().signal }).then((networkResponse) => {
+        return fetch(event.request, { 
+          cache: 'no-store', 
+          signal: AbortSignal.timeout(5000) 
+        }).then((networkResponse) => {
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, networkResponse.clone());
           });
           return networkResponse;
         }).catch(() => caches.match('/index.html'));
       }
-      return response || fetch(event.request).then((networkResponse) => {
-        return networkResponse;
-      }).catch(() => caches.match('/index.html'));
+      return response || fetch(event.request).catch(() => caches.match('/index.html'));
     })
   );
 });
@@ -51,92 +55,82 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => {
+      return self.clients.matchAll();
+    }).then((clients) => {
+      clients.forEach((client) => {
+        client.postMessage({ type: 'CACHE_UPDATED', cacheVersion: CACHE_NAME });
+      });
+    })
   );
-  self.clients.matchAll().then((clients) => {
-    clients.forEach((client) => {
-      client.postMessage({ type: 'CACHE_UPDATED', cacheVersion: CACHE_NAME });
-    });
-  });
 });
 
-// Моніторинг стану мережі
-let wasOnline = navigator.onLine;
-let networkCheckInterval = null;
-let networkStatus = { online: wasOnline, lastChecked: Date.now() };
-let reconnectionInterval = null;
-const RECONNECTION_LIMIT = 20 * 60 * 1000; // 20 хвилин
-
-function checkNetwork() {
-  fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
-    .then(() => {
-      if (!wasOnline) {
-        wasOnline = true;
-        networkStatus = { online: true, lastChecked: Date.now() };
-        self.clients.matchAll({ includeUncontrolled: true, type: 'window' }).then(clients => {
-          clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: true, lastChecked: networkStatus.lastChecked });
-          });
-        });
-        clearInterval(networkCheckInterval);
-        networkCheckInterval = null;
-        console.log("Мережа відновлена, перевірка припинена");
-      }
-    })
-    .catch(error => {
-      console.error("Помилка перевірки мережі:", error);
-      if (wasOnline) {
-        wasOnline = false;
-        networkStatus = { online: false, lastChecked: Date.now() };
-        self.clients.matchAll({ includeUncontrolled: true, type: 'window' }).then(clients => {
-          clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: false, lastChecked: networkStatus.lastChecked });
-          });
-        });
-        if (!networkCheckInterval) {
-          networkCheckInterval = setInterval(checkNetwork, 2000);
-          console.log("Мережа втрачена, початок перевірки кожні 2 секунди");
-        }
-      }
+// Покращена функція перевірки мережі
+async function checkNetworkWithRetry() {
+  if (isCheckingNetwork) return;
+  isCheckingNetwork = true;
+  
+  try {
+    const response = await fetch('https://www.google.com', {
+      method: 'HEAD',
+      mode: 'no-cors',
+      cache: 'no-store',
+      signal: AbortSignal.timeout(2000)
     });
-}
-
-// Запуск повторних спроб відтворення
-function scheduleReconnection() {
-  if (reconnectionInterval) return; // Запобігаємо множинним інтервалам
-  reconnectionInterval = setInterval(() => {
-    if (wasOnline) {
-      self.clients.matchAll({ includeUncontrolled: true, type: 'window' }).then(clients => {
+    
+    if (!wasOnline) {
+      wasOnline = true;
+      self.clients.matchAll().then(clients => {
         clients.forEach(client => {
-          client.postMessage({ type: "TRY_RECONNECT", lastChecked: Date.now() });
+          client.postMessage({ type: 'NETWORK_STATUS', online: true });
         });
       });
+      clearInterval(networkCheckInterval);
+      networkCheckInterval = null;
     }
-  }, 2000);
-}
-
-// Зупинка повторних спроб
-function stopReconnection() {
-  if (reconnectionInterval) {
-    clearInterval(reconnectionInterval);
-    reconnectionInterval = null;
-    console.log("Повторні спроби відтворення припинено");
+  } catch (error) {
+    if (wasOnline) {
+      wasOnline = false;
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ type: 'NETWORK_STATUS', online: false });
+        });
+      });
+      if (!networkCheckInterval) {
+        startNetworkMonitoring();
+      }
+    }
+  } finally {
+    isCheckingNetwork = false;
   }
 }
 
-// Ініціалізація перевірки мережі
-if (!wasOnline && !networkCheckInterval) {
-  networkCheckInterval = setInterval(checkNetwork, 2000);
-  console.log("Початок перевірки мережі кожні 2 секунди");
+function startNetworkMonitoring() {
+  if (networkCheckInterval) {
+    clearInterval(networkCheckInterval);
+  }
+  
+  // Перші 3 хвилини - перевірка кожні 2 секунди
+  networkCheckInterval = setInterval(checkNetworkWithRetry, 2000);
+  
+  // Після 3 хвилин переходимо на перевірку кожні 5 секунд
+  setTimeout(() => {
+    if (networkCheckInterval && !wasOnline) {
+      clearInterval(networkCheckInterval);
+      networkCheckInterval = setInterval(checkNetworkWithRetry, 5000);
+    }
+  }, 3 * 60 * 1000); // 3 хвилини
 }
 
-// Обробка повідомлень від клієнтів
 self.addEventListener('message', (event) => {
-  if (event.data.type === 'GET_NETWORK_STATUS') {
-    event.source.postMessage({ type: 'NETWORK_STATUS', ...networkStatus });
-  } else if (event.data.type === 'START_RECONNECTION') {
-    scheduleReconnection();
-  } else if (event.data.type === 'STOP_RECONNECTION') {
-    stopReconnection();
+  if (event.data.type === 'START_NETWORK_MONITORING') {
+    if (!wasOnline && !networkCheckInterval) {
+      startNetworkMonitoring();
+    }
   }
 });
+
+// Початок моніторингу при активації Service Worker
+if (!wasOnline && !networkCheckInterval) {
+  startNetworkMonitoring();
+}
