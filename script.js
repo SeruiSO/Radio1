@@ -534,7 +534,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (autoPlayTimeout) {
         clearTimeout(autoPlayTimeout);
       }
-      autoPlayTimeout = setTimeout(() => tryAutoPlay(retryCount, delay), 500);
+      autoPlayTimeout = setTimeout(() => tryAutoPlay(retryCount, delay), 100);
     }
 
     async function tryAutoPlay(retryCount = 2, delay = 1000) {
