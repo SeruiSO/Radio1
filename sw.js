@@ -1,9 +1,9 @@
-const CACHE_NAME = 'radio-cache-v102.2.20250621';
+const CACHE_NAME = 'radio-cache-v104.3.20250621';
 let wasOnline = navigator.onLine;
 let networkCheckInterval = null;
 let isCheckingNetwork = false;
 const NETWORK_CHECK_ENDPOINT = 'https://de1.api.radio-browser.info/json/servers';
-const FIRST_5_MINUTES = 5 * 60 * 1000; // 5 хвилин
+const FIRST_5_MINUTES = 5 * 60 * 1000;
 
 self.addEventListener('install', (event) => {
   console.log('[SW] Установка Service Worker');
@@ -59,18 +59,17 @@ self.addEventListener('activate', (event) => {
           })
         );
       }),
-      // Перевірка дозволу перед реєстрацією Periodic Background Sync
-      self.registration.permissions.query({ name: 'periodic-background-sync' }).then((status) => {
+      self.permissions.query({ name: 'periodic-background-sync' }).then((status) => {
         if (status.state === 'granted') {
           return self.registration.periodicSync.register('network-check', {
-            minInterval: 60 * 1000 // 60 секунд
+            minInterval: 60 * 1000
           }).then(() => {
-            console.log('[SW] Periodic Background Sync успішно зареєстровано');
+            console.log('[SW] Periodic Background Sync зареєстровано');
           }).catch((error) => {
             console.error('[SW] Помилка реєстрації Periodic Background Sync:', error);
           });
         } else {
-          console.log('[SW] Дозвіл на Periodic Background Sync не надано, пропускаємо реєстрацію');
+          console.log('[SW] Дозвіл на Periodic Background Sync не надано');
         }
       }).catch((error) => {
         console.error('[SW] Помилка перевірки дозволу Periodic Background Sync:', error);
@@ -87,10 +86,9 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Покращена функція перевірки мережі
 async function checkNetworkWithRetry() {
   if (isCheckingNetwork) {
-    console.log('[SW] Перевірка мережі вже виконується, пропускаємо');
+    console.log('[SW] Перевірка мережі вже виконується');
     return;
   }
   isCheckingNetwork = true;
@@ -111,7 +109,6 @@ async function checkNetworkWithRetry() {
           client.postMessage({ type: 'NETWORK_STATUS', online: true });
         });
       });
-      // Зупиняємо інтервал, якщо мережа відновлена
       if (networkCheckInterval) {
         clearInterval(networkCheckInterval);
         networkCheckInterval = null;
@@ -139,24 +136,19 @@ async function checkNetworkWithRetry() {
 function startNetworkMonitoring() {
   if (networkCheckInterval) {
     clearInterval(networkCheckInterval);
-    console.log('[SW] Попередній інтервал перевірки мережі очищено');
   }
-  
-  // Перевірка кожну секунду в перші 5 хвилин
   networkCheckInterval = setInterval(checkNetworkWithRetry, 1000);
   console.log('[SW] Запущено моніторинг мережі кожну секунду');
   
-  // Після 5 хвилин зупиняємо інтервал, Periodic Background Sync візьме на себе перевірки
   setTimeout(() => {
     if (networkCheckInterval && !wasOnline) {
       clearInterval(networkCheckInterval);
       networkCheckInterval = null;
-      console.log('[SW] Перевірка мережі після 5 хвилин зупинена, переходимо на Periodic Background Sync');
+      console.log('[SW] Перевірка мережі зупинена після 5 хвилин');
     }
   }, FIRST_5_MINUTES);
 }
 
-// Обробка Periodic Background Sync
 self.addEventListener('periodicsync', (event) => {
   if (event.tag === 'network-check') {
     console.log('[SW] Виконується Periodic Background Sync');
@@ -167,14 +159,13 @@ self.addEventListener('periodicsync', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data.type === 'START_NETWORK_MONITORING') {
     if (!wasOnline && !networkCheckInterval) {
-      console.log('[SW] Отримано команду START_NETWORK_MONITORING');
+      console.log('[EVENT] START_NETWORK_MONITORING');
       startNetworkMonitoring();
     }
-  }
+  });
 });
 
-// Початок моніторингу при активації Service Worker
 if (!wasOnline && !networkCheckInterval) {
-  console.log('[SW] Початковий запуск моніторингу мережі');
+  console.log('[EVENTS] Початковий запуск моніторингу');
   startNetworkMonitoring();
 }
