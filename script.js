@@ -13,6 +13,7 @@ let pastSearches = JSON.parse(localStorage.getItem("pastSearches")) || [];
 let deletedStations = JSON.parse(localStorage.getItem("deletedStations")) || [];
 let isAutoPlayPending = false;
 let lastSuccessfulPlayTime = 0;
+let streamAbortController = null; // Новий AbortController для аудіопотоку
 
 document.addEventListener("DOMContentLoaded", () => {
   const audio = document.getElementById("audioPlayer");
@@ -534,7 +535,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (autoPlayTimeout) {
         clearTimeout(autoPlayTimeout);
       }
-      autoPlayTimeout = setTimeout(() => tryAutoPlay(retryCount, delay), 100);
+      autoPlayTimeout = setTimeout(() => tryAutoPlay(retryCount, delay), 0); // Зменшено затримку до 0ms
     }
 
     async function tryAutoPlay(retryCount = 2, delay = 1000) {
@@ -555,6 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
         const currentStationUrl = stationItems[currentIndex].dataset.value;
+        const initialStationUrl = currentStationUrl; // Зберігаємо початкову станцію
         const normalizedCurrentUrl = normalizeUrl(currentStationUrl);
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc === normalizedCurrentUrl && !audio.paused && !audio.error && audio.readyState >= 2 && audio.currentTime > 0) {
@@ -572,12 +574,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const attemptPlay = async (attemptsLeft) => {
+          // Перериваємо попередній потік
+          if (streamAbortController) {
+            streamAbortController.abort();
+            console.log("Попередній аудіопотік скасовано");
+          }
+          streamAbortController = new AbortController();
+
+          // Перевіряємо, чи не змінилася станція
+          if (stationItems[currentIndex].dataset.value !== initialStationUrl) {
+            console.log("tryAutoPlay: Станція змінилася, скасовуємо відтворення для", initialStationUrl);
+            return;
+          }
+
           audio.pause();
           audio.src = null;
+          audio.load(); // Скидаємо буфер
           audio.src = currentStationUrl + "?nocache=" + Date.now();
           console.log(`Спроба відтворення (${attemptsLeft} залишилось):`, audio.src);
 
           try {
+            // Використовуємо fetch для перевірки потоку з AbortController
+            const response = await fetch(audio.src, { signal: streamAbortController.signal });
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+            }
             await audio.play();
             errorCount = 0;
             isPlaying = true;
@@ -586,9 +607,18 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
             localStorage.setItem("isPlaying", isPlaying);
           } catch (error) {
+            if (error.name === 'AbortError') {
+              console.log("Запит до потоку скасовано");
+              return;
+            }
             console.error("Помилка відтворення:", error);
             document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
             if (attemptsLeft > 1) {
+              // Перевіряємо, чи не змінилася станція перед повторною спробою
+              if (stationItems[currentIndex].dataset.value !== initialStationUrl) {
+                console.log("tryAutoPlay: Станція змінилася під час повторної спроби, скасовуємо");
+                return;
+              }
               console.log(`Повторна спроба через ${delay}ms`);
               await new Promise(resolve => setTimeout(resolve, delay));
               await attemptPlay(attemptsLeft - 1);
