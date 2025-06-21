@@ -1,14 +1,10 @@
-/* Updated on June 21, 2025 */
+/* Updated on June 18, 2025 */
 :root {
   --body-bg: #0A0A0A;
   --container-bg: #121212;
   --accent: #00F0FF;
   --text: #F0F0F0;
   --accent-gradient: #003C4B;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 body {
@@ -22,18 +18,19 @@ body {
   justify-content: center;
   align-items: flex-start;
   overflow-x: hidden;
-  padding: 10px 5px;
+  padding-top: 10px;
+  box-sizing: border-box;
   transition: background 0.4s ease, color 0.4s ease;
 }
 
 .container {
-  max-width: 95%;
+  max-width: 100%;
   width: 100%;
   background: var(--container-bg);
   padding: 15px;
   border-radius: 15px;
   border: 1px solid var(--accent);
-  margin: 0 auto;
+  margin: 0 10px;
   min-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -93,13 +90,13 @@ h1 {
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
   transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 #currentStationInfo:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.5);
 }
 
 .station-info-content {
@@ -113,7 +110,7 @@ h1 {
   display: flex;
   flex-direction: column;
   flex: 1;
-  order: 2;
+  order: 2; /* Текст іде другим, щоб зображення було ліворуч */
 }
 
 #currentStationInfo .station-name {
@@ -143,8 +140,8 @@ h1 {
   width: 80px;
   height: 80px;
   object-fit: contain;
-  order: 1;
-  font-size: 60px;
+  order: 1; /* Зображення перше */
+  font-size: 60px; /* Для емодзі, якщо немає іконки */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -155,7 +152,7 @@ h1 {
   align-items: center;
   justify-content: center;
   margin-left: auto;
-  order: 3;
+  order: 3; /* Візуалізатор останній */
   width: 150px;
   height: 80px;
   position: relative;
@@ -248,12 +245,12 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
-  flex: 1;
+  flex: 1; /* Назва займає доступний простір */
 }
 
 .station-item:hover, .station-item.selected {
-  background: var(--accent);
-  border: 2px solid var(--accent);
+  background: var(--accent) !important;
+  border: 2px solid var(--accent) !important;
   color: #0A0A0A;
   transform: translateY(-2px);
 }
@@ -309,33 +306,22 @@ h1 {
   100% { transform: rotate(360deg); }
 }
 
-.tabs-wrapper {
-  overflow-x: auto;
-  scrollbar-width: none;
-  margin: 5px 0;
-  position: sticky;
-  top: 100px;
-  z-index: 9;
-  background: var(--container-bg);
-}
-
-.tabs-wrapper::-webkit-scrollbar {
-  display: none;
-}
-
 .tabs {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
+  margin: 5px 0;
   background: var(--container-bg);
   padding: 5px;
   border-radius: 10px;
-  white-space: nowrap;
-  transition: background 0.4s ease;
+  border: 1px solid var(--accent);
+  position: sticky;
+  top: 100px; /* Нижче #currentStationInfo */
+  z-index: 9;
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 
-.tab-btn, .add-tab-btn {
-  flex: 0 0 auto;
-  min-width: 80px;
+.tab-btn {
+  flex: 1;
   padding: 12px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
@@ -348,7 +334,7 @@ h1 {
   transition: all 0.3s ease;
 }
 
-.tab-btn:hover, .add-tab-btn:hover {
+.tab-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
   transform: translateY(-2px);
@@ -360,12 +346,8 @@ h1 {
   color: #0A0A0A;
 }
 
-.add-tab-btn {
-  width: 50px;
-  font-size: 18px;
-}
-
 #searchInput {
+  display: none;
   margin: 5px 0;
   padding: 10px;
   border-radius: 8px;
@@ -384,7 +366,7 @@ h1 {
 
 #searchInput:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
 }
 
 #searchQuery, #searchCountry, #searchGenre {
@@ -439,6 +421,34 @@ h1 {
   gap: 50px;
 }
 
+.wave-progress {
+  display: flex;
+  gap: 4px;
+  height: 60px;
+  width: 84px;
+}
+
+.wave-bar {
+  width: 10px;
+  background: var(--accent);
+  border-radius: 5px;
+  animation: waveAnimation 1.2s infinite ease-in-out;
+  animation-play-state: paused;
+  transition: background 0.4s ease;
+}
+
+.wave-bar:nth-child(2) { animation-delay: 0.2s; }
+.wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.wave-bar:nth-child(4) { animation-delay: 0.4s; }
+.wave-bar:nth-child(5) { animation-delay: 0.5s; }
+.wave-bar:nth-child(6) { animation-delay: 0.6s; }
+.wave-bar:nth-child(7) { animation-delay: 0.7s; }
+
+@keyframes waveAnimation {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
 .control-btn {
   width: 80px;
   height: 80px;
@@ -473,7 +483,6 @@ h1 {
   background: rgba(0, 0, 0, 0.6);
   z-index: 20;
   transition: opacity 0.3s ease;
-  display: none;
 }
 
 .modal {
@@ -488,7 +497,7 @@ h1 {
   z-index: 21;
   width: 300px;
   max-width: 90%;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
   transition: all 0.3s ease;
 }
 
@@ -533,29 +542,7 @@ h1 {
   color: var(--body-bg);
 }
 
-.new-tab-modal, .edit-tab-modal {
-  display: none;
-}
-
-.new-tab-modal input, .edit-tab-modal input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  background: var(--container-bg);
-  border: 2px solid var(--accent);
-  border-radius: 8px;
-  color: var(--text);
-  font-size: 16px;
-  box-sizing: border-box;
-  transition: all 0.3s ease;
-}
-
-.new-tab-modal input:focus, .edit-tab-modal input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-  outline: none;
-}
-
+/* Стилі для datalist */
 input[list]::-webkit-calendar-picker-indicator {
   display: none;
 }
@@ -565,7 +552,7 @@ input[list] {
 }
 
 datalist {
-  display: none;
+  display: none; /* datalist не відображається, але опції працюють */
 }
 
 #searchQuery[list], #searchCountry[list], #searchGenre[list] {
@@ -579,48 +566,7 @@ datalist {
 
 #searchQuery[list]:focus, #searchCountry[list]:focus, #searchGenre[list]:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-}
-
-.sync-permission-prompt {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 400px;
-  background: var(--container-bg);
-  color: var(--text);
-  padding: 15px;
-  border: 2px solid var(--accent);
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  text-align: center;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.sync-permission-prompt p {
-  margin: 0 0 10px;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.sync-permission-prompt button {
-  background: var(--container-bg);
-  border: 2px solid var(--accent);
-  color: var(--text);
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s ease, color 0.3s ease, transform 0.1s ease;
-}
-
-.sync-permission-prompt button:hover {
-  background: var(--accent);
-  color: #0A0A0A;
-  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
 }
 
 @media (max-width: 720px) {
@@ -629,8 +575,8 @@ datalist {
   }
 
   .container {
-    max-width: 98%;
     padding: 10px;
+    margin: 0 5px;
     min-height: 90vh;
   }
 
@@ -673,19 +619,8 @@ datalist {
     right: 5px;
   }
 
-  .tabs-wrapper {
-    top: 80px;
-  }
-
-  .tab-btn, .add-tab-btn {
-    min-width: 70px;
-    padding: 10px;
-    font-size: 12px;
-    border-width: 1px;
-  }
-
-  .add-tab-btn {
-    width: 40px;
+  .tabs {
+    top: 80px; /* Нижче #currentStationInfo на мобільних */
   }
 
   #currentStationInfo {
@@ -712,7 +647,7 @@ datalist {
   .station-icon {
     width: 65px;
     height: 65px;
-    font-size: 50px;
+    font-size: 50px; /* Для емодзі на мобільних */
   }
 
   .wave-visualizer {
@@ -722,6 +657,12 @@ datalist {
 
   .wave-line {
     height: 1px;
+  }
+
+  .tab-btn {
+    padding: 10px;
+    font-size: 12px;
+    border-width: 1px;
   }
 
   #searchInput {
@@ -755,26 +696,6 @@ datalist {
   .modal-tab-btn, .modal-cancel-btn {
     font-size: 14px;
     padding: 8px;
-  }
-
-  .new-tab-modal input, .edit-tab-modal input {
-    font-size: 14px;
-    padding: 8px;
-  }
-
-  .sync-permission-prompt {
-    top: 60px;
-    padding: 12px;
-    max-width: 95%;
-  }
-
-  .sync-permission-prompt p {
-    font-size: 12px;
-  }
-
-  .sync-permission-prompt button {
-    padding: 6px 12px;
-    font-size: 12px;
   }
 }
 

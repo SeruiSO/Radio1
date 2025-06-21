@@ -43,23 +43,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#00F0FF">
-  <title>Radio S O</title>
+  <title>Radio Music</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="favicon.ico">
+  <link rel="icon" href="icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="sync-permission-prompt" style="display: none;">
-    <p>Дозвольте фонову синхронізацію для швидшого відновлення радіо після втрати мережі.</p>
-    <button id="allowSyncBtn">Дозволити</button>
-  </div>
-
+  <button class="theme-toggle">🌙</button>
+  <button class="share-button">📤</button>
   <div class="container">
-    <button class="theme-toggle">🌙</button>
-    <button class="share-button">📤</button>
-    
-    <h1>Radio S O</h1>
-    
+    <h1>🎧 Radio Music</h1>
     <div id="currentStationInfo">
       <div class="station-info-content">
         <div class="station-icon">🎵</div>
@@ -81,67 +75,33 @@
         </div>
       </div>
     </div>
-
-    <div class="tabs-wrapper">
-      <div class="tabs" id="tabs">
-        <button class="tab-btn active" data-tab="best">Best</button>
-        <button class="tab-btn" data-tab="techno">Techno</button>
-        <button class="tab-btn" data-tab="trance">Trance</button>
-        <button class="tab-btn" data-tab="ukraine">UA</button>
-        <button class="tab-btn" data-tab="pop">Pop</button>
-        <button class="tab-btn" data-tab="search">Search</button>
-        <button class="add-tab-btn">+</button>
-      </div>
-    </div>
-
-    <div id="searchInput" style="display: none;">
-      <input type="text" id="searchQuery" placeholder="Назва радіо" list="pastSearches">
-      <datalist id="pastSearches"></datalist>
-      <input type="text" id="searchCountry" placeholder="Країна" list="suggestedCountries">
-      <datalist id="suggestedCountries"></datalist>
-      <input type="text" id="searchGenre" placeholder="Жанр" list="suggestedGenres">
-      <datalist id="suggestedGenres"></datalist>
-      <button class="search-btn">🔍</button>
-    </div>
-
     <div id="stationList" class="station-list"></div>
-
+    <div class="tabs">
+      <button class="tab-btn">Best</button>
+      <button class="tab-btn">Techno</button>
+      <button class="tab-btn">Trance</button>
+      <button class="tab-btn">UA</button>
+      <button class="tab-btn">Pop</button>
+      <button class="tab-btn">Search</button>
+    </div>
+    <div id="searchInput">
+      <input id="searchQuery" type="text" placeholder="Назва станції" list="pastSearches">
+      <input id="searchCountry" type="text" placeholder="Країна" list="suggestedCountries">
+      <input id="searchGenre" type="text" placeholder="Жанр" list="suggestedGenres">
+      <button class="search-btn">🔍</button>
+      <datalist id="pastSearches"></datalist>
+      <datalist id="suggestedCountries"></datalist>
+      <datalist id="suggestedGenres"></datalist>
+    </div>
     <div class="controls-container">
+      <audio id="audioPlayer"></audio>
       <div class="controls">
         <button class="control-btn">⏮</button>
         <button class="control-btn">▶</button>
         <button class="control-btn">⏭</button>
       </div>
     </div>
-
-    <div class="new-tab-modal" style="display: none;">
-      <div class="modal-overlay"></div>
-      <div class="modal">
-        <h2>Створити нову вкладку</h2>
-        <input type="text" id="newTabName" placeholder="Назва вкладки">
-        <div class="modal-tabs">
-          <button id="createTabBtn" class="modal-tab-btn">Створити</button>
-          <button class="modal-cancel-btn">Відміна</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="edit-tab-modal" style="display: none;">
-      <div class="modal-overlay"></div>
-      <div class="modal">
-        <h2>Дії з вкладкою</h2>
-        <input type="text" id="renameTabName" placeholder="Нова назва вкладки">
-        <div class="modal-tabs">
-          <button id="renameTabBtn" class="modal-tab-btn">Перейменувати</button>
-          <button id="deleteTabBtn" class="modal-tab-btn">Видалити</button>
-          <button class="modal-cancel-btn">Відміна</button>
-        </div>
-      </div>
-    </div>
-
-    <audio id="audioPlayer"></audio>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
