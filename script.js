@@ -520,7 +520,8 @@ document.addEventListener("DOMContentLoaded", () => {
         hasStationItems: !!stationItems?.length,
         isIndexValid: currentIndex < stationItems.length,
         currentStationUrl: stationItems?.[currentIndex]?.dataset?.value,
-        isAudioPlaying: audio.src && !audio.paused
+        isAudioPlaying: audio.src && !audio.paused,
+        hasAudioError: !!audio.error
       });
 
       if (!navigator.onLine) {
@@ -532,12 +533,13 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
         return;
       }
-      if (audio.src === stationItems[currentIndex].dataset.value && !audio.paused) {
-        console.log("Пропуск tryAutoPlay: аудіо вже відтворюється з правильним src");
+      const currentStationUrl = stationItems[currentIndex].dataset.value;
+      if (audio.src === currentStationUrl && !audio.paused && !audio.error) {
+        console.log("Пропуск tryAutoPlay: аудіо вже відтворюється з правильним src і без помилок");
         return;
       }
-      if (!isValidUrl(stationItems[currentIndex].dataset.value)) {
-        console.error("Невалідний URL:", stationItems[currentIndex].dataset.value);
+      if (!isValidUrl(currentStationUrl)) {
+        console.error("Невалідний URL:", currentStationUrl);
         errorCount++;
         if (errorCount >= ERROR_LIMIT) {
           console.error("Досягнуто ліміт помилок відтворення");
@@ -549,7 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const attemptPlay = async (attemptsLeft) => {
         audio.pause();
         audio.src = null;
-        audio.src = stationItems[currentIndex].dataset.value + "?nocache=" + Date.now();
+        audio.src = currentStationUrl + "?nocache=" + Date.now();
         console.log(`Спроба відтворення (${attemptsLeft} залишилось):`, audio.src);
 
         try {
@@ -597,8 +599,12 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
       const activeBtn = document.querySelector(`.tab-btn:nth-child(${["best", "techno", "trance", "ukraine", "pop", "search"].indexOf(tab) + 1})`);
       if (activeBtn) activeBtn.classList.add("active");
-      if (stationItems?.length && currentIndex < stationItems.length && intendedPlaying && (audio.src !== stationItems[currentIndex].dataset.value || audio.paused)) {
+      if (stationItems?.length && currentIndex < stationItems.length && intendedPlaying && 
+          (audio.src !== stationItems[currentIndex].dataset.value || audio.paused || audio.error)) {
+        console.log("switchTab: Запуск відтворення через зміну вкладки");
         debouncedTryAutoPlay();
+      } else {
+        console.log("switchTab: Пропуск відтворення, станція вже відтворюється або невалідний стан");
       }
     }
 
@@ -715,8 +721,11 @@ document.addEventListener("DOMContentLoaded", () => {
       currentIndex = index;
       updateCurrentStation(item);
       localStorage.setItem(`lastStation_${currentTab}`, index);
-      if (intendedPlaying && (audio.src !== item.dataset.value || audio.paused)) {
+      if (intendedPlaying && (audio.src !== item.dataset.value || audio.paused || audio.error)) {
+        console.log("changeStation: Запуск відтворення через зміну станції");
         debouncedTryAutoPlay();
+      } else {
+        console.log("changeStation: Пропуск відтворення, станція вже відтворюється або невалідний стан");
       }
     }
 
@@ -816,15 +825,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       },
       visibilitychange: () => {
-        if (!document.hidden && intendedPlaying && navigator.onLine) {
-          console.log("Вкладка активна, перевірка відтворення");
+        if (!document.hidden && intendedPlaying && navigator.onLine && stationItems?.length && currentIndex < stationItems.length &&
+            (audio.src !== stationItems[currentIndex].dataset.value || audio.paused || audio.error)) {
+          console.log("visibilitychange: Запуск відтворення через зміну видимості");
           debouncedTryAutoPlay();
+        } else {
+          console.log("visibilitychange: Пропуск відтворення, станція вже відтворюється або невалідний стан");
         }
       },
       resume: () => {
-        if (intendedPlaying && navigator.onLine) {
-          console.log("Додаток відновлено, перевірка відтворення");
+        if (intendedPlaying && navigator.onLine && stationItems?.length && currentIndex < stationItems.length &&
+            (audio.src !== stationItems[currentIndex].dataset.value || audio.paused || audio.error)) {
+          console.log("resume: Запуск відтворення через відновлення додатку");
           debouncedTryAutoPlay();
+        } else {
+          console.log("resume: Пропуск відтворення, станція вже відтворюється або невалідний стан");
         }
       }
     };
@@ -908,8 +923,12 @@ document.addEventListener("DOMContentLoaded", () => {
     applyTheme(currentTheme);
     loadStations();
     // Спроба автовідтворення після ініціалізації
-    if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
+    if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length &&
+        (audio.src !== stationItems[currentIndex].dataset.value || audio.paused || audio.error)) {
+      console.log("initializeApp: Запуск відтворення після ініціалізації");
       debouncedTryAutoPlay();
+    } else {
+      console.log("initializeApp: Пропуск відтворення, станція вже відтворюється або невалідний стан");
     }
   }
 });
