@@ -1,9 +1,12 @@
-const CACHE_NAME = 'radio-cache-v100.1.20250618';
+const CACHE_NAME = 'radio-cache-v102.1.20250618';
 let wasOnline = navigator.onLine;
 let networkCheckInterval = null;
 let isCheckingNetwork = false;
+const NETWORK_CHECK_ENDPOINT = 'https://de1.api.radio-browser.info/json/servers';
+const FIRST_5_MINUTES = 5 * 60 * 1000; // 5 хвилин
 
 self.addEventListener('install', (event) => {
+  console.log('[SW] Установка Service Worker');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll([
@@ -17,6 +20,7 @@ self.addEventListener('install', (event) => {
         return caches.keys().then((cacheNames) => {
           return Promise.all(cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
+              console.log('[SW] Видалення старого кешу:', cacheName);
               return caches.delete(cacheName);
             }
           }));
@@ -46,16 +50,28 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Активація Service Worker');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
+    Promise.all([
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('[SW] Видалення старого кешу під час активації:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Реєстрація Periodic Background Sync
+      self.registration.periodicSync.register('network-check', {
+        minInterval: 15 * 1000 // 15 секунд
+      }).then(() => {
+        console.log('[SW] Periodic Background Sync успішно зареєстровано');
+      }).catch((error) => {
+        console.error('[SW] Помилка реєстрації Periodic Background Sync:', error);
+      })
+    ]).then(() => {
       return self.clients.matchAll();
     }).then((clients) => {
       clients.forEach((client) => {
@@ -67,30 +83,39 @@ self.addEventListener('activate', (event) => {
 
 // Покращена функція перевірки мережі
 async function checkNetworkWithRetry() {
-  if (isCheckingNetwork) return;
+  if (isCheckingNetwork) {
+    console.log('[SW] Перевірка мережі вже виконується, пропускаємо');
+    return;
+  }
   isCheckingNetwork = true;
   
   try {
-    const response = await fetch('https://www.google.com', {
+    console.log('[SW] Перевірка мережі:', NETWORK_CHECK_ENDPOINT);
+    const response = await fetch(NETWORK_CHECK_ENDPOINT, {
       method: 'HEAD',
-      mode: 'no-cors',
       cache: 'no-store',
       signal: AbortSignal.timeout(2000)
     });
     
     if (!wasOnline) {
       wasOnline = true;
+      console.log('[SW] Мережа відновлена, повідомляємо клієнтів');
       self.clients.matchAll().then(clients => {
         clients.forEach(client => {
           client.postMessage({ type: 'NETWORK_STATUS', online: true });
         });
       });
-      clearInterval(networkCheckInterval);
-      networkCheckInterval = null;
+      // Зупиняємо інтервал, якщо мережа відновлена
+      if (networkCheckInterval) {
+        clearInterval(networkCheckInterval);
+        networkCheckInterval = null;
+        console.log('[SW] Інтервал перевірки мережі зупинено');
+      }
     }
   } catch (error) {
     if (wasOnline) {
       wasOnline = false;
+      console.log('[SW] Мережа втрачена, повідомляємо клієнтів');
       self.clients.matchAll().then(clients => {
         clients.forEach(client => {
           client.postMessage({ type: 'NETWORK_STATUS', online: false });
@@ -108,23 +133,35 @@ async function checkNetworkWithRetry() {
 function startNetworkMonitoring() {
   if (networkCheckInterval) {
     clearInterval(networkCheckInterval);
+    console.log('[SW] Попередній інтервал перевірки мережі очищено');
   }
   
-  // Перші 3 хвилини - перевірка кожні 2 секунди
-  networkCheckInterval = setInterval(checkNetworkWithRetry, 2000);
+  // Перевірка кожну секунду в перші 5 хвилин
+  networkCheckInterval = setInterval(checkNetworkWithRetry, 1000);
+  console.log('[SW] Запущено моніторинг мережі кожну секунду');
   
-  // Після 3 хвилин переходимо на перевірку кожні 5 секунд
+  // Після 5 хвилин зупиняємо інтервал, Periodic Background Sync візьме на себе перевірки
   setTimeout(() => {
     if (networkCheckInterval && !wasOnline) {
       clearInterval(networkCheckInterval);
-      networkCheckInterval = setInterval(checkNetworkWithRetry, 5000);
+      networkCheckInterval = null;
+      console.log('[SW] Перевірка мережі після 5 хвилин зупинена, переходимо на Periodic Background Sync');
     }
-  }, 3 * 60 * 1000); // 3 хвилини
+  }, FIRST_5_MINUTES);
 }
+
+// Обробка Periodic Background Sync
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'network-check') {
+    console.log('[SW] Виконується Periodic Background Sync');
+    event.waitUntil(checkNetworkWithRetry());
+  }
+});
 
 self.addEventListener('message', (event) => {
   if (event.data.type === 'START_NETWORK_MONITORING') {
     if (!wasOnline && !networkCheckInterval) {
+      console.log('[SW] Отримано команду START_NETWORK_MONITORING');
       startNetworkMonitoring();
     }
   }
@@ -132,5 +169,6 @@ self.addEventListener('message', (event) => {
 
 // Початок моніторингу при активації Service Worker
 if (!wasOnline && !networkCheckInterval) {
+  console.log('[SW] Початковий запуск моніторингу мережі');
   startNetworkMonitoring();
 }

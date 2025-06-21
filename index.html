@@ -38,114 +38,90 @@
         return gk_fileData[filename] || "";
         }
         </script><!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#00F0FF">
-  <title>Radio Music</title>
+  <title>🎧 Radio Music</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.ico">
 </head>
 <body>
-  <button class="theme-toggle">🌙</button>
-  <button class="share-button">📤</button>
-
+  <div id="syncPermissionPrompt" class="sync-permission-prompt" style="display: none;">
+    <p>Дозвольте фонову синхронізацію для швидшого відновлення радіо після втрати мережі.</p>
+    <button id="allowSyncBtn">Дозволити</button>
+  </div>
   <div class="container">
-    <h1>🎧 Radio Music</h1>
-
-    <div id="currentStationInfo">
-      <div class="station-info-content">
+    <header>
+      <button class="theme-toggle">🌙</button>
+      <button class="share-button">📤</button>
+    </header>
+    <main>
+      <div id="currentStationInfo" class="current-station">
         <div class="station-icon">🎵</div>
-        <div class="station-text">
+        <div class="station-info">
           <div class="station-name">Обирайте станцію</div>
           <div class="station-genre">жанр: -</div>
           <div class="station-country">країна: -</div>
         </div>
-        <div class="wave-visualizer">
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-        </div>
       </div>
+      <div id="stationList" class="station-list"></div>
+    </main>
+    <div id="tabs" class="tabs">
+      <button class="tab-btn active" data-tab="best">Best</button>
+      <button class="tab-btn" data-tab="techno">Techno</button>
+      <button class="tab-btn" data-tab="trance">Trance</button>
+      <button class="tab-btn" data-tab="ukraine">UA</button>
+      <button class="tab-btn" data-tab="pop">Pop</button>
+      <button class="tab-btn" data-tab="search">Search</button>
+      <button class="add-tab-btn">+</button>
     </div>
-
-    <div class="tabs-wrapper">
-      <div class="tabs" id="tabs">
-        <button class="tab-btn" data-tab="best">Best</button>
-        <button class="tab-btn" data-tab="techno">Techno</button>
-        <button class="tab-btn" data-tab="trance">Trance</button>
-        <button class="tab-btn" data-tab="ukraine">UA</button>
-        <button class="tab-btn" data-tab="pop">Pop</button>
-        <button class="tab-btn" data-tab="search">Search</button>
-        <button class="add-tab-btn">+</button>
-      </div>
-    </div>
-
-    <div id="searchInput">
-      <input id="searchQuery" list="pastSearches" placeholder="Назва станції">
+    <div id="searchInput" class="search-input" style="display: none;">
+      <input id="searchQuery" type="text" placeholder="Назва станції" list="pastSearches">
       <datalist id="pastSearches"></datalist>
-      <input id="searchCountry" list="suggestedCountries" placeholder="Країна">
+      <input id="searchCountry" type="text" placeholder="Країна" list="suggestedCountries">
       <datalist id="suggestedCountries"></datalist>
-      <input id="searchGenre" list="suggestedGenres" placeholder="Жанр">
+      <input id="searchGenre" type="text" placeholder="Жанр" list="suggestedGenres">
       <datalist id="suggestedGenres"></datalist>
       <button class="search-btn">🔍</button>
     </div>
-
-    <div class="station-list" id="stationList"></div>
-
-    <div class="controls-container">
-      <div class="controls">
-        <button class="control-btn">⏮</button>
-        <button class="control-btn">▶</button>
-        <button class="control-btn">⏭</button>
-      </div>
+    <audio id="audioPlayer" preload="none"></audio>
+    <div class="controls">
+      <button class="control-btn">⏮</button>
+      <button class="control-btn">▶</button>
+      <button class="control-btn">⏭</button>
     </div>
-
-    <audio id="audioPlayer"></audio>
-
-    <div class="new-tab-modal">
+    <div class="new-tab-modal" style="display: none;">
       <div class="modal">
         <h2>Створити нову вкладку</h2>
         <input id="newTabName" type="text" placeholder="Назва вкладки">
-        <div class="modal-tabs">
+        <div class="modal-actions">
           <button id="createTabBtn">Створити</button>
           <button class="modal-cancel-btn">Відміна</button>
         </div>
       </div>
     </div>
-
-    <div class="edit-tab-modal">
+    <div class="edit-tab-modal" style="display: none;">
       <div class="modal">
         <h2>Дії з вкладкою</h2>
-        <input id="renameTabName" type="text" placeholder="Нова назва вкладки">
-        <div class="modal-tabs">
+        <input id="renameTabName" type="text" placeholder="Нова назва">
+        <div class="modal-actions">
           <button id="renameTabBtn">Перейменувати</button>
           <button id="deleteTabBtn">Видалити</button>
           <button class="modal-cancel-btn">Відміна</button>
         </div>
       </div>
     </div>
-
+    <div class="wave-container">
+      <div class="wave-line"></div>
+      <div class="wave-line"></div>
+      <div class="wave-line"></div>
+      <div class="wave-line"></div>
+      <div class="wave-line"></div>
+    </div>
   </div>
-
   <script src="script.js"></script>
-  <script>
-    // Додати цей код для ініціалізації мережного моніторингу
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(registration => {
-        registration.active.postMessage({ 
-          type: 'START_NETWORK_MONITORING' 
-        });
-      });
-    }
-  </script>
 </body>
 </html>

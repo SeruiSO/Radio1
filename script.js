@@ -8,7 +8,6 @@ let stationItems = [];
 let abortController = new AbortController();
 let reconnectionTimeout = null;
 let reconnectionTimerCount = 0; // Лічильник активних таймерів
-const RECONNECTION_LIMIT = 20 * 60 * 1000; // 20 хвилин
 let reconnectionStartTime = null;
 let pastSearches = JSON.parse(localStorage.getItem("pastSearches")) || [];
 let deletedStations = JSON.parse(localStorage.getItem("deletedStations")) || [];
@@ -19,7 +18,7 @@ customTabs = Array.isArray(customTabs) ? customTabs.filter(tab => typeof tab ===
 // Централізований об’єкт стану
 let playerState = {
   isPlaying: isPlaying,
-  currentStation: null,
+  currentStation: JSON.parse(localStorage.getItem("currentStation")) || null,
   currentTab: currentTab,
   currentIndex: currentIndex
 };
@@ -38,8 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.querySelector(".search-btn");
   const pastSearchesList = document.getElementById("pastSearches");
   const tabsContainer = document.getElementById("tabs");
+  const syncPermissionPrompt = document.getElementById("syncPermissionPrompt");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer) {
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer || !syncPermissionPrompt) {
     console.error("Один із необхідних DOM-елементів не знайдено", {
       audio: !!audio,
       stationList: !!stationList,
@@ -53,7 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
       searchGenre: !!searchGenre,
       searchBtn: !!searchBtn,
       pastSearchesList: !!pastSearchesList,
-      tabsContainer: !!tabsContainer
+      tabsContainer: !!tabsContainer,
+      syncPermissionPrompt: !!syncPermissionPrompt
     });
     setTimeout(initializeApp, 100);
     return;
@@ -68,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePastSearches();
     populateSearchSuggestions();
     renderTabs();
+    requestPeriodicSyncPermission();
 
     shareButton.addEventListener("click", () => {
       const stationName = currentStationInfo.querySelector(".station-name").textContent || "Radio S O";
@@ -118,6 +120,32 @@ document.addEventListener("DOMContentLoaded", () => {
     searchGenre.addEventListener("keypress", (e) => {
       if (e.key === "Enter") searchBtn.click();
     });
+
+    function requestPeriodicSyncPermission() {
+      if ('permissions' in navigator) {
+        navigator.permissions.query({ name: 'periodic-background-sync' }).then(status => {
+          if (status.state === 'granted') {
+            console.log('[App] Дозвіл на Periodic Background Sync уже надано');
+            syncPermissionPrompt.style.display = 'none';
+          } else {
+            console.log('[App] Запит дозволу на Periodic Background Sync');
+            syncPermissionPrompt.style.display = 'block';
+            const allowBtn = syncPermissionPrompt.querySelector('#allowSyncBtn');
+            allowBtn.addEventListener('click', () => {
+              // Реєстрація в sw.js уже виконана, дозвіл активується автоматично
+              syncPermissionPrompt.style.display = 'none';
+              console.log('[App] Користувач натиснув "Дозволити" для Periodic Background Sync');
+            });
+          }
+        }).catch(error => {
+          console.error('[App] Помилка перевірки дозволу Periodic Background Sync:', error);
+          syncPermissionPrompt.style.display = 'none';
+        });
+      } else {
+        console.warn('[App] API Permissions не підтримується, Periodic Background Sync може не працювати');
+        syncPermissionPrompt.style.display = 'none';
+      }
+    }
 
     function populateSearchSuggestions() {
       const suggestedCountries = [
@@ -283,15 +311,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const uniqueStations = new Map();
             (userAddedStations[tab] || []).forEach(s => {
               if (!deletedStations.includes(s.name)) {
-                uniqueStations.set(s.name, s);
+                uniqueStations.add(s.name, s);
               }
             });
             (stationLists[tab] || []).forEach(s => {
               if (!deletedStations.includes(s.name)) {
-                uniqueStations.set(s.name, s);
+                uniqueStations.add(s.name, s);
               }
             });
-            mergedStationLists[tab] = Array.from(uniqueStations.values());
+            mergedStationLists[tab] = uniqueStations;
           });
           localStorage.setItem("stationLists", JSON.stringify(stationLists));
           localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
@@ -332,7 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
           stationList.innerHTML = "<div class='station-item empty'>Не вдалося знайти станції</div>";
         }
       }
-    }
+    });
 
     function renderSearchResults(stations) {
       if (!stations.length) {
@@ -346,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
         item.className = `station-item ${index === playerState.currentIndex ? "selected" : ""}`;
         item.dataset.value = station.url || station.url_resolved;
         item.dataset.name = station.name || "Unknown";
-        item.dataset.genre = shortenGenre(station.tags || "Unknown");
+        item.dataset.genre = shortenGenre(station.tags || "");
         item.dataset.country = station.country || "Unknown";
         item.dataset.favicon = station.favicon && isValidUrl(station.favicon) ? station.favicon : "";
         const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='🎵 '">` : "🎵 ";
@@ -390,7 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <button class="modal-tab-btn" data-tab="ukraine">UA</button>
           <button class="modal-tab-btn" data-tab="pop">POP</button>
           ${customTabs.map(tab => `<button class="modal-tab-btn" data-tab="${tab}">${tab.toUpperCase()}</button>`).join('')}
-          <button class="modal-cancel-btn">Відміна</button>
+          <button class="modal-cancel-btn">Cancel</button>
         </div>
       `;
       document.body.appendChild(overlay);
@@ -754,7 +782,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
         if (event.data.type === "NETWORK_STATUS" && event.data.online && playerState.isPlaying && stationItems?.length && playerState.currentIndex < stationItems.length) {
-          console.log("Мережа відновлена, пробуємо відтворити поточну станцію");
+          console.log("[App] Мережа відновлена через Service Worker, запускаємо відтворення");
           debouncedTryAutoPlay();
         }
       });
@@ -764,17 +792,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const twoMinutes = 2 * 60 * 1000;
       const fiveMinutes = 5 * 60 * 1000;
       if (attemptTime < twoMinutes) {
-        return 1000;
+        return 1000; // 1 секунда
       } else if (attemptTime < fiveMinutes) {
-        return 2000;
+        return 2000; // 2 секунди
       } else {
-        const elapsedAfterFive = attemptTime - fiveMinutes;
-        const attemptsAfterFive = Math.floor(elapsedAfterFive / 1000);
-        let delay = 4000;
-        for (let i = 0; i < attemptsAfterFive; i++) {
-          delay = Math.min(delay * 2, 32000);
-        }
-        return delay;
+        return 15000; // 15 секунд після 5 хвилин
       }
     }
 
@@ -789,7 +811,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function tryAutoPlay() {
       if (!navigator.onLine) {
-        console.log("Пристрій офлайн, пропускаємо відтворення", { playerState, reconnectionTimerCount });
+        console.log("[App] Пристрій офлайн, плануємо повторну спробу", { playerState, reconnectionTimerCount });
         if (playerState.isPlaying) {
           if (!reconnectionStartTime) reconnectionStartTime = Date.now();
           scheduleReconnection();
@@ -797,7 +819,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       if (!playerState.isPlaying || !stationItems?.length || playerState.currentIndex >= stationItems.length || !stationItems[playerState.currentIndex]) {
-        console.log("Пропуск tryAutoPlay", {
+        console.log("[App] Пропуск tryAutoPlay", {
           isPlaying: playerState.isPlaying,
           hasStationItems: !!stationItems?.length,
           isIndexValid: playerState.currentIndex < stationItems.length,
@@ -807,7 +829,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       if (!isValidUrl(stationItems[playerState.currentIndex].dataset.value)) {
-        console.error("Невалідний URL:", stationItems[playerState.currentIndex].dataset.value, { playerState });
+        console.error("[App] Невалідний URL:", stationItems[playerState.currentIndex].dataset.value, { playerState });
         if (playerState.isPlaying) {
           if (!reconnectionStartTime) reconnectionStartTime = Date.now();
           scheduleReconnection();
@@ -817,54 +839,49 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       const targetSrc = stationItems[playerState.currentIndex].dataset.value;
       if (audio.src === targetSrc && !audio.paused) {
-        console.log("Аудіо вже відтворюється, пропускаємо", { src: audio.src, playerState });
+        console.log("[App] Аудіо вже відтворюється, пропускаємо", { src: audio.src, playerState });
         return;
       }
       audio.pause();
       audio.src = targetSrc;
       audio.currentTime = 0; // Скинути позицію
-      console.log("Спроба відтворення:", audio.src, { playerState, reconnectionTimerCount });
+      console.log("[App] Спроба відтворення:", audio.src, { playerState, reconnectionTimerCount });
       const playPromise = audio.play();
       playPromise
         .then(() => {
-          console.log("Відтворення розпочато успішно", { src: audio.src, playerState });
+          console.log("[App] Відтворення розпочато успішно", { src: audio.src, playerState });
           document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
           clearTimeout(reconnectionTimeout);
           reconnectionTimerCount--;
           reconnectionStartTime = null;
         })
         .catch(error => {
-          console.error("Помилка відтворення:", {
+          console.error("[App] Помилка відтворення:", {
             message: error.message,
             code: audio.error?.code,
             src: audio.src,
             playerState,
             reconnectionTimerCount
           });
-          if (playerState.isPlaying && (!reconnectionStartTime || Date.now() - reconnectionStartTime < RECONNECTION_LIMIT)) {
+          if (playerState.isPlaying) {
             if (!reconnectionStartTime) reconnectionStartTime = Date.now();
             scheduleReconnection();
-          } else if (playerState.isPlaying && Date.now() - reconnectionStartTime >= RECONNECTION_LIMIT) {
-            console.log("Досягнуто ліміт часу для відновлення, ставимо на паузу", { playerState });
+          } else {
+            console.log("[App] Відтворення зупинено через помилку", { playerState });
             togglePlayPause();
           }
           document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
         });
     }
 
-    const debouncedTryAutoPlay = debounce(tryAutoPlay, 500);
+    const debouncedTryAutoPlay = debounce(tryAutoPlay, 200);
 
     function scheduleReconnection() {
       clearTimeout(reconnectionTimeout);
       reconnectionTimerCount--;
       const elapsed = reconnectionStartTime ? Date.now() - reconnectionStartTime : 0;
-      if (elapsed >= RECONNECTION_LIMIT) {
-        console.log("Досягнуто ліміт часу для відновлення, ставимо на паузу", { playerState, reconnectionTimerCount });
-        togglePlayPause();
-        return;
-      }
       const delay = getReconnectionDelay(elapsed);
-      console.log(`Плануємо повторну спробу через ${delay} мс`, { elapsed, delay, playerState });
+      console.log(`[App] Плануємо повторну спробу через ${delay} мс`, { elapsed, delay, playerState });
       audio.src = ""; // Очистити буфер
       reconnectionTimeout = setTimeout(() => {
         reconnectionTimerCount++;
@@ -1019,6 +1036,7 @@ document.addEventListener("DOMContentLoaded", () => {
         country: item.dataset.country,
         favicon: item.dataset.favicon
       };
+      localStorage.setItem("currentStation", JSON.stringify(playerState.currentStation));
       updateCurrentStation(item);
       localStorage.setItem(`lastStation_${playerState.currentTab}`, index);
       clearTimeout(reconnectionTimeout);
@@ -1120,6 +1138,7 @@ document.addEventListener("DOMContentLoaded", () => {
         reconnectionStartTime = null;
       }
       localStorage.setItem("isPlaying", playerState.isPlaying);
+      localStorage.setItem("currentStation", JSON.stringify(playerState.currentStation));
     }
 
     const eventListeners = {
@@ -1135,22 +1154,22 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       visibilitychange: debounce(() => {
         if (!document.hidden && playerState.isPlaying && navigator.onLine) {
-          console.log("Вкладка активна, пробуємо відтворити", { playerState });
+          console.log("[App] Вкладка активна, пробуємо відтворити", { playerState });
           debouncedTryAutoPlay();
         }
-      }, 500),
+      }, 200),
       resume: debounce(() => {
         if (playerState.isPlaying && navigator.connection?.type !== "none") {
-          console.log("Додаток відновлено, пробуємо відтворити", { playerState });
+          console.log("[App] Додаток відновлено, пробуємо відтворити", { playerState });
           debouncedTryAutoPlay();
         }
-      }, 500),
+      }, 200),
       online: debounce(() => {
-        console.log("Мережа відновлена, пробуємо відтворити", { playerState });
+        console.log("[App] Мережа відновлена через подію online, пробуємо відтворити", { playerState });
         if (playerState.isPlaying && stationItems?.length && playerState.currentIndex < stationItems.length) {
           debouncedTryAutoPlay();
         }
-      }, 500)
+      }, 200)
     };
 
     function addEventListeners() {
@@ -1173,6 +1192,7 @@ document.addEventListener("DOMContentLoaded", () => {
       playPauseBtn.textContent = "⏸";
       document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
       localStorage.setItem("isPlaying", playerState.isPlaying);
+      localStorage.setItem("currentStation", JSON.stringify(playerState.currentStation));
       clearTimeout(reconnectionTimeout);
       reconnectionTimerCount--;
       reconnectionStartTime = null;
@@ -1190,18 +1210,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     audio.addEventListener("error", () => {
       document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
-      console.error("Помилка:", {
+      console.error("[App] Помилка аудіо:", {
         message: audio.error?.message || "Невідома помилка",
         code: audio.error?.code,
         src: audio.src,
         playerState,
         reconnectionTimerCount
       });
-      if (playerState.isPlaying && (!reconnectionStartTime || Date.now() - reconnectionStartTime < RECONNECTION_LIMIT)) {
+      if (playerState.isPlaying) {
         if (!reconnectionStartTime) reconnectionStartTime = Date.now();
         scheduleReconnection();
-      } else if (playerState.isPlaying && Date.now() - reconnectionStartTime >= RECONNECTION_LIMIT) {
-        console.log("Досягнуто ліміт часу для відновлення, ставимо на паузу", { playerState });
+      } else {
+        console.log("[App] Відтворення зупинено через помилку", { playerState });
         togglePlayPause();
       }
     });
@@ -1211,7 +1231,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     window.addEventListener("offline", () => {
-      console.log("Втрачено зв’язок", { playerState });
+      console.log("[App] Втрачено зв’язок", { playerState });
       if (playerState.isPlaying) {
         audio.pause();
         if (!reconnectionStartTime) reconnectionStartTime = Date.now();

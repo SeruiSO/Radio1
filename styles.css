@@ -93,13 +93,13 @@ h1 {
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 #currentStationInfo:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.5);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
 .station-info-content {
@@ -252,8 +252,8 @@ h1 {
 }
 
 .station-item:hover, .station-item.selected {
-  background: var(--accent) !important;
-  border: 2px solid var(--accent) !important;
+  background: var(--accent);
+  border: 2px solid var(--accent);
   color: #0A0A0A;
   transform: translateY(-2px);
 }
@@ -366,7 +366,6 @@ h1 {
 }
 
 #searchInput {
-  display: none;
   margin: 5px 0;
   padding: 10px;
   border-radius: 8px;
@@ -385,7 +384,7 @@ h1 {
 
 #searchInput:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
 }
 
 #searchQuery, #searchCountry, #searchGenre {
@@ -489,7 +488,7 @@ h1 {
   z-index: 21;
   width: 300px;
   max-width: 90%;
-  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 }
 
@@ -553,7 +552,7 @@ h1 {
 
 .new-tab-modal input:focus, .edit-tab-modal input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   outline: none;
 }
 
@@ -580,7 +579,48 @@ datalist {
 
 #searchQuery[list]:focus, #searchCountry[list]:focus, #searchGenre[list]:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.sync-permission-prompt {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  background: var(--container-bg);
+  color: var(--text);
+  padding: 15px;
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  text-align: center;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.sync-permission-prompt p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.sync-permission-prompt button {
+  background: var(--container-bg);
+  border: 2px solid var(--accent);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.1s ease;
+}
+
+.sync-permission-prompt button:hover {
+  background: var(--accent);
+  color: #0A0A0A;
+  transform: scale(1.05);
 }
 
 @media (max-width: 720px) {
@@ -591,7 +631,6 @@ datalist {
   .container {
     max-width: 98%;
     padding: 10px;
-    margin: 0 auto;
     min-height: 90vh;
   }
 
@@ -721,6 +760,21 @@ datalist {
   .new-tab-modal input, .edit-tab-modal input {
     font-size: 14px;
     padding: 8px;
+  }
+
+  .sync-permission-prompt {
+    top: 60px;
+    padding: 12px;
+    max-width: 95%;
+  }
+
+  .sync-permission-prompt p {
+    font-size: 12px;
+  }
+
+  .sync-permission-prompt button {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }
 
