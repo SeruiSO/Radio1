@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v102.1.20250618';
+const CACHE_NAME = 'radio-cache-v102.2.20250621';
 let wasOnline = navigator.onLine;
 let networkCheckInterval = null;
 let isCheckingNetwork = false;
@@ -9,23 +9,19 @@ self.addEventListener('install', (event) => {
   console.log('[SW] Установка Service Worker');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
+      console.log('[SW] Кешування ресурсів');
       return cache.addAll([
         '/',
         '/index.html',
         '/styles.css',
         '/script.js',
         '/stations.json',
-        '/manifest.json'
-      ]).then(() => {
-        return caches.keys().then((cacheNames) => {
-          return Promise.all(cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              console.log('[SW] Видалення старого кешу:', cacheName);
-              return caches.delete(cacheName);
-            }
-          }));
-        });
-      });
+        '/manifest.json',
+        '/icons/icon-192x192.png',
+        '/icons/icon-512x512.png'
+      ]);
+    }).then(() => {
+      self.skipWaiting();
     })
   );
 });
@@ -57,19 +53,27 @@ self.addEventListener('activate', (event) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
-              console.log('[SW] Видалення старого кешу під час активації:', cacheName);
+              console.log('[SW] Видалення старого кешу:', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       }),
-      // Реєстрація Periodic Background Sync
-      self.registration.periodicSync.register('network-check', {
-        minInterval: 15 * 1000 // 15 секунд
-      }).then(() => {
-        console.log('[SW] Periodic Background Sync успішно зареєстровано');
+      // Перевірка дозволу перед реєстрацією Periodic Background Sync
+      self.registration.permissions.query({ name: 'periodic-background-sync' }).then((status) => {
+        if (status.state === 'granted') {
+          return self.registration.periodicSync.register('network-check', {
+            minInterval: 60 * 1000 // 60 секунд
+          }).then(() => {
+            console.log('[SW] Periodic Background Sync успішно зареєстровано');
+          }).catch((error) => {
+            console.error('[SW] Помилка реєстрації Periodic Background Sync:', error);
+          });
+        } else {
+          console.log('[SW] Дозвіл на Periodic Background Sync не надано, пропускаємо реєстрацію');
+        }
       }).catch((error) => {
-        console.error('[SW] Помилка реєстрації Periodic Background Sync:', error);
+        console.error('[SW] Помилка перевірки дозволу Periodic Background Sync:', error);
       })
     ]).then(() => {
       return self.clients.matchAll();
@@ -77,6 +81,8 @@ self.addEventListener('activate', (event) => {
       clients.forEach((client) => {
         client.postMessage({ type: 'CACHE_UPDATED', cacheVersion: CACHE_NAME });
       });
+    }).then(() => {
+      self.clients.claim();
     })
   );
 });

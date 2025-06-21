@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.querySelector(".search-btn");
   const pastSearchesList = document.getElementById("pastSearches");
   const tabsContainer = document.getElementById("tabs");
-  const syncPermissionPrompt = document.getElementById("syncPermissionPrompt");
+  const syncPermissionPrompt = document.querySelector(".sync-permission-prompt");
 
   if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer || !syncPermissionPrompt) {
     console.error("Один із необхідних DOM-елементів не знайдено", {
@@ -121,28 +121,44 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.key === "Enter") searchBtn.click();
     });
 
-    function requestPeriodicSyncPermission() {
-      if ('permissions' in navigator) {
-        navigator.permissions.query({ name: 'periodic-background-sync' }).then(status => {
+    async function requestPeriodicSyncPermission() {
+      if ('permissions' in navigator && 'periodicSync' in self.registration) {
+        try {
+          const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
           if (status.state === 'granted') {
             console.log('[App] Дозвіл на Periodic Background Sync уже надано');
             syncPermissionPrompt.style.display = 'none';
-          } else {
+            // Спроба зареєструвати Periodic Background Sync
+            await self.registration.periodicSync.register('network-check', {
+              minInterval: 60 * 1000 // 60 секунд
+            });
+            console.log('[App] Periodic Background Sync зареєстровано');
+          } else if (status.state === 'prompt') {
             console.log('[App] Запит дозволу на Periodic Background Sync');
             syncPermissionPrompt.style.display = 'block';
             const allowBtn = syncPermissionPrompt.querySelector('#allowSyncBtn');
-            allowBtn.addEventListener('click', () => {
-              // Реєстрація в sw.js уже виконана, дозвіл активується автоматично
-              syncPermissionPrompt.style.display = 'none';
-              console.log('[App] Користувач натиснув "Дозволити" для Periodic Background Sync');
+            allowBtn.addEventListener('click', async () => {
+              try {
+                await self.registration.periodicSync.register('network-check', {
+                  minInterval: 60 * 1000 // 60 секунд
+                });
+                console.log('[App] Користувач натиснув "Дозволити" і Periodic Background Sync зареєстровано');
+                syncPermissionPrompt.style.display = 'none';
+              } catch (error) {
+                console.error('[App] Помилка реєстрації Periodic Background Sync після дозволу:', error);
+                syncPermissionPrompt.style.display = 'none';
+              }
             });
+          } else {
+            console.warn('[App] Дозвіл на Periodic Background Sync відхилено');
+            syncPermissionPrompt.style.display = 'none';
           }
-        }).catch(error => {
+        } catch (error) {
           console.error('[App] Помилка перевірки дозволу Periodic Background Sync:', error);
           syncPermissionPrompt.style.display = 'none';
-        });
+        }
       } else {
-        console.warn('[App] API Permissions не підтримується, Periodic Background Sync може не працювати');
+        console.warn('[App] API Permissions або Periodic Background Sync не підтримується');
         syncPermissionPrompt.style.display = 'none';
       }
     }
@@ -311,15 +327,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const uniqueStations = new Map();
             (userAddedStations[tab] || []).forEach(s => {
               if (!deletedStations.includes(s.name)) {
-                uniqueStations.add(s.name, s);
+                uniqueStations.set(s.name, s);
               }
             });
             (stationLists[tab] || []).forEach(s => {
               if (!deletedStations.includes(s.name)) {
-                uniqueStations.add(s.name, s);
+                uniqueStations.set(s.name, s);
               }
             });
-            mergedStationLists[tab] = uniqueStations;
+            mergedStationLists[tab] = Array.from(uniqueStations.values());
           });
           localStorage.setItem("stationLists", JSON.stringify(stationLists));
           localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
@@ -360,7 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
           stationList.innerHTML = "<div class='station-item empty'>Не вдалося знайти станції</div>";
         }
       }
-    });
+    }
 
     function renderSearchResults(stations) {
       if (!stations.length) {
