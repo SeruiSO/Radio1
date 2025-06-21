@@ -803,8 +803,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       },
       resume: () => {
-        if (intendedPlaying && navigator.connection?.type !== "none") {
+        if (intendedPlaying && navigator.onLine) {
           console.log("Додаток відновлено, перевірка відтворення");
+          tryAutoPlay();
+        }
+      },
+      connectionchange: () => {
+        if (navigator.onLine && intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
+          console.log("Зміна стану мережі, пробуємо відтворити");
           tryAutoPlay();
         }
       }
@@ -814,12 +820,18 @@ document.addEventListener("DOMContentLoaded", () => {
       document.addEventListener("keydown", eventListeners.keydown);
       document.addEventListener("visibilitychange", eventListeners.visibilitychange);
       document.addEventListener("resume", eventListeners.resume);
+      if ("connection" in navigator) {
+        navigator.connection.addEventListener("change", eventListeners.connectionchange);
+      }
     }
 
     function removeEventListeners() {
       document.removeEventListener("keydown", eventListeners.keydown);
       document.removeEventListener("visibilitychange", eventListeners.visibilitychange);
       document.removeEventListener("resume", eventListeners.resume);
+      if ("connection" in navigator) {
+        navigator.connection.removeEventListener("change", eventListeners.connectionchange);
+      }
     }
 
     audio.addEventListener("playing", () => {
