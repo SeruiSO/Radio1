@@ -7,34 +7,31 @@
   --accent-gradient: #003C4B;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
   font-family: 'Roboto', sans-serif;
   background: var(--body-bg);
   color: var(--text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  min-height: 100vh;
   overflow-x: hidden;
-  padding-top: 8px;
+  padding-top: 10px;
+  box-sizing: border-box;
   transition: background 0.4s ease, color 0.4s ease;
 }
 
 .container {
-  max-width: 400px;
+  max-width: 100%;
   width: 100%;
   background: var(--container-bg);
-  padding: 8px;
+  padding: 15px;
   border-radius: 15px;
   border: 1px solid var(--accent);
-  margin: 0;
-  min-height: 95vh;
+  margin: 0 10px;
+  min-height: 90vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -42,7 +39,7 @@ body {
 }
 
 h1 {
-  font-size: 2.2em;
+  font-size: 2.5em;
   margin: 5px 0;
   text-align: center;
   color: var(--accent);
@@ -81,9 +78,9 @@ h1 {
 
 #currentStationInfo {
   background: linear-gradient(45deg, var(--container-bg), var(--container-bg), var(--accent-gradient));
-  padding: 12px;
+  padding: 20px;
   border-radius: 12px;
-  margin: 8px 0;
+  margin: 10px 0;
   color: var(--text);
   border: 2px solid var(--accent);
   text-align: left;
@@ -105,7 +102,7 @@ h1 {
 .station-info-content {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
   width: 100%;
 }
 
@@ -117,7 +114,7 @@ h1 {
 }
 
 #currentStationInfo .station-name {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -128,23 +125,23 @@ h1 {
 }
 
 #currentStationInfo .station-genre {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 400;
   margin-top: 5px;
 }
 
 #currentStationInfo .station-country {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 400;
   margin-top: 2px;
 }
 
 .station-icon {
-  width: 65px;
-  height: 65px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
   order: 1;
-  font-size: 50px;
+  font-size: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -156,15 +153,15 @@ h1 {
   justify-content: center;
   margin-left: auto;
   order: 3;
-  width: 120px;
-  height: 65px;
+  width: 150px;
+  height: 80px;
   position: relative;
   overflow: hidden;
 }
 
 .wave-line {
   position: absolute;
-  height: 1px;
+  height: 2px;
   background: var(--accent);
   animation: wavePulse 1.5s infinite;
   animation-play-state: paused;
@@ -193,13 +190,13 @@ h1 {
 }
 
 .station-list {
-  max-height: 450px;
+  max-height: 500px;
   overflow-y: auto;
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 10px;
-  margin: 8px 0;
-  padding: 8px;
+  margin: 10px 0;
+  padding: 10px;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) var(--container-bg);
   flex-grow: 1;
@@ -220,12 +217,12 @@ h1 {
 }
 
 .station-item {
-  padding: 10px;
+  padding: 12px;
   cursor: pointer;
   border-radius: 8px;
   font-weight: 500;
   border: 1px solid var(--text);
-  margin: 4px 0;
+  margin: 5px 0;
   color: var(--text);
   background: var(--container-bg);
   display: flex;
@@ -235,8 +232,8 @@ h1 {
 }
 
 .station-item img {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   margin-right: 10px;
 }
@@ -311,22 +308,34 @@ h1 {
 
 .tabs {
   display: flex;
-  justify-content: flex-start;
-  margin: 0;
+  overflow-x: auto;
+  margin: 5px 0;
   background: var(--container-bg);
   padding: 5px;
-  border-radius: 10px;
+  border: none;
   position: sticky;
-  top: 80px;
+  top: 100px;
   z-index: 9;
   transition: background 0.4s ease;
-  overflow-x: auto;
   white-space: nowrap;
+}
+
+.tabs::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tabs::-webkit-scrollbar-track {
+  background: var(--container-bg);
+}
+
+.tabs::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
 }
 
 .tab-btn, .add-tab-btn {
   flex: 0 0 auto;
-  padding: 10px;
+  padding: 12px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 5px;
@@ -334,8 +343,13 @@ h1 {
   cursor: pointer;
   margin: 0 2px;
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
   transition: all 0.3s ease;
+}
+
+.add-tab-btn {
+  width: 40px;
+  padding: 8px;
 }
 
 .tab-btn:hover, .add-tab-btn:hover {
@@ -350,29 +364,20 @@ h1 {
   color: #0A0A0A;
 }
 
-.add-tab-btn {
-  font-size: 18px;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 #searchInput {
   display: none;
-  margin: 8px 0;
-  padding: 8px;
+  margin: 5px 0;
+  padding: 10px;
   border-radius: 8px;
   border: 2px solid var(--accent);
   background: var(--container-bg);
   color: var(--text);
-  font-size: 14px;
+  font-size: 16px;
   width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
   transition: all 0.3s ease;
 }
@@ -383,18 +388,17 @@ h1 {
 }
 
 #searchQuery, #searchCountry, #searchGenre {
-  flex: 1;
-  min-width: 8px;
+  flex: 1 1 200px;
+  min-width: 120px;
   background: transparent;
   border: none;
   color: var(--text);
-  font-size: 14px;
-  padding: 6px;
+  font-size: 16px;
   outline: none;
+  padding: 8px;
 }
 
-#searchQuery::placeholder, #searchQuery::placeholder, #searchCountry::placeholder, #searchInput button.search-btn {
-  background: var(--container-bg);
+#searchQuery::placeholder, #searchCountry::placeholder, #searchGenre::placeholder {
   color: var(--text);
   opacity: 0.6;
 }
@@ -403,10 +407,9 @@ h1 {
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 8px;
-  padding: var(--text);
-  color: var(--container-bg);
+  padding: 8px 12px;
+  color: var(--text);
   cursor: pointer;
-  padding: 6px 10px;
   transition: all 0.3s ease;
 }
 
@@ -417,15 +420,17 @@ h1 {
 }
 
 .controls-container {
+  position: sticky;
+  bottom: 0;
   background: var(--container-bg);
   border-top: 2px solid var(--accent);
-  padding: 8px;
+  padding: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 20px;
   z-index: 10;
-  transition: background 0 0.4s ease;
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 
 .controls {
@@ -434,10 +439,38 @@ h1 {
   gap: 50px;
 }
 
+.wave-progress {
+  display: flex;
+  gap: 4px;
+  height: 60px;
+  width: 84px;
+}
+
+.wave-bar {
+  width: 10px;
+  background: var(--accent);
+  border-radius: 5px;
+  animation: waveAnimation 1.2s infinite ease-in-out;
+  animation-play-state: paused;
+  transition: background 0.4s ease;
+}
+
+.wave-bar:nth-child(2) { animation-delay: 0.2s; }
+.wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.wave-bar:nth-child(4) { animation-delay: 0.4s; }
+.wave-bar:nth-child(5) { animation-delay: 0.5s; }
+.wave-bar:nth-child(6) { animation-delay: 0.6s; }
+.wave-bar:nth-child(7) { animation-delay: 0.7s; }
+
+@keyframes waveAnimation {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
 .control-btn {
-  width: 70px;
-  height: 70px;
-  font-size: 28px;
+  width: 80px;
+  height: 80px;
+  font-size: 32px;
   background: var(--container-bg);
   color: var(--text);
   border: 4px solid var(--accent);
@@ -452,7 +485,7 @@ h1 {
 .control-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 
 .control-btn:active {
@@ -471,11 +504,11 @@ h1 {
 }
 
 .modal {
-  position: 50fixed;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  px-background: var(--container-bg);
+  background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 12px;
   padding: 20px;
@@ -499,13 +532,25 @@ h1 {
   gap: 10px;
 }
 
-.modal-tab-btn, .modal-cancel-btn, .modal-confirm-btn {
+.modal-input {
+  width: 100%;
   padding: 8px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
-  border-radius: 5px;
+  border-radius: 8px;
   color: var(--text);
-  font-size: 14px;
+  font-size: 16px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.modal-tab-btn, .modal-cancel-btn, .modal-confirm-btn {
+  padding: 10px;
+  background: var(--container-bg);
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 16px;
   cursor: pointer;
   text-align: center;
   transition: all 0.3s ease;
@@ -514,7 +559,7 @@ h1 {
 .modal-tab-btn:hover, .modal-cancel-btn:hover, .modal-confirm-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .modal-cancel-btn {
@@ -527,185 +572,178 @@ h1 {
   color: var(--body-bg);
 }
 
-.modal-input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 8px;
-  background: var(--container-bg);
-  border: 2px solid var(--accent);
-  border-radius: 5px;
-  color: var(--text);
-  font-size: 14px;
-  box-sizing: border-box;
-  transition: border-color 0.3s ease;
-}
-
-.modal-input:focus {
-  border-color: var(--accent);
-  outline: none;
-  box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.3);
-}
-
-input[type="text"], input[list] {
-  background: var(--container-bg);
-  border: 1px solid var(--accent);
-  border-radius: 4px;
-  padding: 6px;
-  color: var(--text);
-  transition: all 0.3s ease;
-}
-
-input[type="text"]:focus, input[list]:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.5);
-}
-
 input[list]::-webkit-calendar-picker-indicator {
   display: none;
+}
+
+input[list] {
+  position: relative;
 }
 
 datalist {
   display: none;
 }
 
-@media (max-width: 400px) {
-  .container {
-    padding: 6px;
+#searchQuery[list], #searchCountry[list], #searchGenre[list] {
+  background: var(--container-bg);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 8px;
+  color: var(--text);
+  transition: all 0.3s ease;
+}
+
+#searchQuery[list]:focus, #searchCountry[list]:focus, #searchGenre[list]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
+}
+
+@media (max-width: 720px) {
+  h1 {
+    font-size: 2em;
   }
 
-  h1 {
-    font-size: 1.8em;
+  .container {
+    padding: 10px;
+    margin: 0 5px;
+    min-height: 90vh;
   }
 
   .control-btn {
-    width: 60px;
-    height: 60px;
-    font-size: 12px;
+    width: 70px;
+    height: 70px;
+    font-size: 24px;
     border-width: 2px;
-    border-radius: 8px;
+    border-radius: 10px;
   }
 
   .station-list {
     max-height: 400px;
-    margin: 6px 0;
-    padding: 6px;
+    margin: 8px 0;
+    padding: 8px;
   }
 
   .station-item {
-    padding: 8px;
-    margin: 3px 0;
+    padding: 10px;
+    margin: 4px 0;
   }
 
   .station-item img {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
   }
 
   .theme-toggle, .share-button {
-    top: 4px;
+    top: 5px;
     padding: 4px;
     height: 35px;
     width: 35px;
   }
 
   .theme-toggle {
-    left: 4px;
+    left: 5px;
   }
 
   .share-button {
-    right: 4px;
+    right: 5px;
   }
 
   .tabs {
-    top: 8px;
-    padding: 4px;
-  }
-
-  .tab-btn, .add-tab-btn {
-    padding: 8px;
-    font-size: 12px;
-    border-width: 1px;
+    top: 80px;
   }
 
   #currentStationInfo {
-    padding: 10px;
-    margin: 6px 0;
+    padding: 12px;
+    height: auto;
   }
 
   #currentStationInfo .station-name {
-    font-size: 18px;
+    font-size: 20px;
   }
 
   #currentStationInfo .station-genre {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   #currentStationInfo .station-country {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .station-info-content {
-    gap: 8px;
+    gap: 10px;
   }
 
   .station-icon {
-    width: 60px;
-    height: 60px;
-    font-size: 45px;
+    width: 65px;
+    height: 65px;
+    font-size: 50px;
   }
 
   .wave-visualizer {
-    width: 100px;
-    height: 60px;
+    width: 120px;
+    height: 65px;
   }
 
   .wave-line {
     height: 1px;
   }
 
-  #searchInput {
-    margin: 6px 0;
-    padding: 6px;
+  .tab-btn, .add-tab-btn {
+    padding: 10px;
     font-size: 12px;
-    gap: 6px;
+    border-width: 1px;
+  }
+
+  .add-tab-btn {
+    width: 35px;
+    padding: 6px;
+  }
+
+  #searchInput {
+    padding: 8px;
+    font-size: 14px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   #searchQuery, #searchCountry, #searchGenre {
-    font-size: 12px;
-    padding: 5px;
+    font-size: 14px;
+    padding: 6px;
+    flex: 1 1 120px;
     min-width: 100px;
   }
 
   #searchInput button.search-btn {
-    padding: 5px 8px;
+    padding: 6px 10px;
+    flex: 0 0 auto;
   }
 
   .modal {
-    width: 85%;
-    padding: 12px;
+    width: 80%;
+    padding: 15px;
   }
 
   .modal h2 {
-    font-size: 1.2em;
+    font-size: 1.3em;
   }
 
   .modal-tab-btn, .modal-cancel-btn, .modal-confirm-btn {
-    font-size: 12px;
-    padding: 6px;
+    font-size: 14px;
+    padding: 8px;
   }
 
   .modal-input {
-    font-size: 12px;
+    font-size: 14px;
     padding: 6px;
   }
 }
 
 @media (max-height: 1600px) {
   .container {
-    min-height: 90vh;
+    min-height: 85vh;
   }
 
   .station-list {
-    max-height: 400px;
+    max-height: 450px;
   }
 }
