@@ -1,20 +1,60 @@
-<!DOCTYPE html>
-<html lang="uk">
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#00F0FF">
-  <title>Radio S O</title>
+  <title>Radio Music S O</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon-192.png" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <span class="theme-toggle">🌙</span>
-  <span class="share-button">📤</span>
+  <button class="theme-toggle">🌙</button>
+  <button class="share-button">📤</button>
+
   <div class="container">
     <h1>🎧 Radio Music</h1>
+
     <div id="currentStationInfo">
       <div class="station-info-content">
         <div class="station-icon">🎵</div>
@@ -36,27 +76,31 @@
         </div>
       </div>
     </div>
-    <div class="tabs">
-      <button class="tab-btn">Best</button>
-      <button class="tab-btn">Techno</button>
-      <button class="tab-btn">Trance</button>
-      <button class="tab-btn">UA</button>
-      <button class="tab-btn">Pop</button>
-      <!-- Динамічні вкладки додаються через JS -->
-      <button class="tab-btn">Search</button>
-      <button class="add-tab-btn">+</button>
+
+    <div class="station-list" id="stationList"></div>
+
+    <div class="tabs-wrapper">
+      <div class="tabs" id="tabs">
+        <button class="tab-btn active" data-tab="best">Best</button>
+        <button class="tab-btn" data-tab="techno">Techno</button>
+        <button class="tab-btn" data-tab="trance">Trance</button>
+        <button class="tab-btn" data-tab="ukraine">UA</button>
+        <button class="tab-btn" data-tab="pop">Pop</button>
+        <button class="tab-btn" data-tab="search">Search</button>
+        <button class="add-tab-btn">+</button>
+      </div>
     </div>
+
     <div id="searchInput">
-      <input id="searchQuery" type="text" placeholder="Назва станції" list="pastSearches">
-      <input id="searchCountry" type="text" placeholder="Країна" list="suggestedCountries">
-      <input id="searchGenre" type="text" placeholder="Жанр" list="suggestedGenres">
-      <button class="search-btn">🔍</button>
+      <input id="searchQuery" type="text" placeholder="Назва станції..." list="pastSearches">
       <datalist id="pastSearches"></datalist>
+      <input id="searchCountry" type="text" placeholder="Країна..." list="suggestedCountries">
       <datalist id="suggestedCountries"></datalist>
+      <input id="searchGenre" type="text" placeholder="Жанр..." list="suggestedGenres">
       <datalist id="suggestedGenres"></datalist>
+      <button class="search-btn">🔍</button>
     </div>
-    <div id="stationList" class="station-list"></div>
-    <audio id="audioPlayer"></audio>
+
     <div class="controls-container">
       <div class="controls">
         <button class="control-btn">⏮</button>
@@ -64,7 +108,33 @@
         <button class="control-btn">⏭</button>
       </div>
     </div>
+
+    <audio id="audioPlayer" preload="none"></audio>
+
+    <div class="modal-overlay new-tab-modal" style="display: none;">
+      <div class="modal">
+        <h2>Створити нову вкладку</h2>
+        <input id="newTabName" type="text" placeholder="Назва вкладки..." maxlength="20">
+        <div class="modal-tabs">
+          <button class="modal-tab-btn" id="createTabBtn">Створити</button>
+          <button class="modal-cancel-btn">Відміна</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay edit-tab-modal" style="display: none;">
+      <div class="modal">
+        <h2>Дії з вкладкою</h2>
+        <input id="renameTabName" type="text" placeholder="Нова назва..." maxlength="20">
+        <div class="modal-tabs">
+          <button class="modal-tab-btn" id="renameTabBtn">Перейменувати</button>
+          <button class="modal-tab-btn" id="deleteTabBtn">Видалити</button>
+          <button class="modal-cancel-btn">Відміна</button>
+        </div>
+      </div>
+    </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
