@@ -308,16 +308,17 @@ h1 {
 
 .tabs {
   display: flex;
-  overflow-x: auto;
-  flex-wrap: nowrap;
+  justify-content: flex-start;
   margin: 5px 0;
   background: var(--container-bg);
   padding: 5px;
-  border: none;
+  border-radius: 10px;
   position: sticky;
   top: 100px;
   z-index: 9;
   transition: background 0.4s ease;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .tab-btn, .add-tab-btn {
@@ -334,15 +335,6 @@ h1 {
   transition: all 0.3s ease;
 }
 
-.add-tab-btn {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
 .tab-btn:hover, .add-tab-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
@@ -353,6 +345,15 @@ h1 {
   background: var(--accent);
   border-color: var(--accent);
   color: #0A0A0A;
+}
+
+.add-tab-btn {
+  font-size: 18px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #searchInput {
@@ -523,7 +524,7 @@ h1 {
   gap: 10px;
 }
 
-.modal-tab-btn, .modal-cancel-btn, .confirm-btn {
+.modal-tab-btn, .modal-cancel-btn, .modal-confirm-btn {
   padding: 10px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
@@ -535,7 +536,7 @@ h1 {
   transition: all 0.3s ease;
 }
 
-.modal-tab-btn:hover, .modal-cancel-btn:hover, .confirm-btn:hover {
+.modal-tab-btn:hover, .modal-cancel-btn:hover, .modal-confirm-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
   transform: translateY(-2px);
@@ -551,29 +552,26 @@ h1 {
   color: var(--body-bg);
 }
 
-.create-tab-modal input {
+.modal-input {
   width: 100%;
   padding: 10px;
   margin-bottom: 15px;
+  background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 8px;
-  background: var(--container-bg);
   color: var(--text);
   font-size: 16px;
   box-sizing: border-box;
+  transition: border-color 0.3s ease;
 }
 
-.create-tab-modal input:focus {
-  outline: none;
+.modal-input:focus {
   border-color: var(--accent);
+  outline: none;
   box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
 }
 
-.create-tab-modal input::placeholder {
-  color: var(--text);
-  opacity: 0.6;
-}
-
+/* Стилі для datalist */
 input[list]::-webkit-calendar-picker-indicator {
   display: none;
 }
@@ -587,70 +585,160 @@ datalist {
 }
 
 #searchQuery[list], #searchCountry[list], #searchGenre[list] {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
+  background: var(--container-bg);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 8px;
+  color: var(--text);
+  transition: all 0.3s ease;
 }
 
-@media (max-width: 600px) {
-  .container {
-    padding: 10px;
-    margin: 0 5px;
-  }
+#searchQuery[list]:focus, #searchCountry[list]:focus, #searchGenre[list]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
+}
 
+@media (max-width: 720px) {
   h1 {
     font-size: 2em;
   }
 
-  #currentStationInfo {
-    padding: 15px;
+  .container {
+    padding: 10px;
+    margin: 0 5px;
+    min-height: 90vh;
   }
 
-  #currentStationInfo .station-name {
-    font-size: 20px;
+  .control-btn {
+    width: 70px;
+    height: 70px;
+    font-size: 24px;
+    border-width: 2px;
+    border-radius: 10px;
   }
 
-  #currentStationInfo .station-genre,
-  #currentStationInfo .station-country {
-    font-size: 16px;
-  }
-
-  .station-icon {
-    width: 60px;
-    height: 60px;
-    font-size: 40px;
-  }
-
-  .wave-visualizer {
-    width: 100px;
+  .station-list {
+    max-height: 400px;
+    margin: 8px 0;
+    padding: 8px;
   }
 
   .station-item {
     padding: 10px;
-    font-size: 14px;
+    margin: 4px 0;
   }
 
-  .control-btn {
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
+  .station-item img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .theme-toggle, .share-button {
+    top: 5px;
+    padding: 4px;
+    height: 35px;
+    width: 35px;
+  }
+
+  .theme-toggle {
+    left: 5px;
+  }
+
+  .share-button {
+    right: 5px;
   }
 
   .tabs {
     top: 80px;
   }
 
-  .tab-btn, .add-tab-btn {
-    font-size: 12px;
-    padding: 8px;
+  #currentStationInfo {
+    padding: 12px;
+    height: auto;
   }
 
-  .add-tab-btn {
-    width: 32px;
-    height: 32px;
+  #currentStationInfo .station-name {
+    font-size: 20px;
+  }
+
+  #currentStationInfo .station-genre {
+    font-size: 16px;
+  }
+
+  #currentStationInfo .station-country {
+    font-size: 16px;
+  }
+
+  .station-info-content {
+    gap: 10px;
+  }
+
+  .station-icon {
+    width: 65px;
+    height: 65px;
+    font-size: 50px;
+  }
+
+  .wave-visualizer {
+    width: 120px;
+    height: 65px;
+  }
+
+  .wave-line {
+    height: 1px;
+  }
+
+  .tab-btn, .add-tab-btn {
+    padding: 10px;
+    font-size: 12px;
+    border-width: 1px;
+  }
+
+  #searchInput {
+    padding: 8px;
+    font-size: 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  #searchQuery, #searchCountry, #searchGenre {
+    font-size: 14px;
+    padding: 6px;
+    flex: 1 1 120px;
+    min-width: 100px;
+  }
+
+  #searchInput button.search-btn {
+    padding: 6px 10px;
+    flex: 0 0 auto;
   }
 
   .modal {
-    width: 280px;
+    width: 80%;
+    padding: 15px;
+  }
+
+  .modal h2 {
+    font-size: 1.3em;
+  }
+
+  .modal-tab-btn, .modal-cancel-btn, .modal-confirm-btn {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .modal-input {
+    font-size: 14px;
+    padding: 8px;
+  }
+}
+
+@media (max-height: 1600px) {
+  .container {
+    min-height: 85vh;
+  }
+
+  .station-list {
+    max-height: 450px;
   }
 }

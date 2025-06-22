@@ -1,123 +1,137 @@
-const cacheVersion = 'v1';
-const cacheFiles = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/script.js',
-  '/manifest.json',
-  '/icon-192x192.png',
-  '/stations.json'
+const CACHE_NAME = "radio-so-cache-v3";
+const CACHE_VERSION = "2.0.0";
+const urlsToCache = [
+  "/",
+  "/index.html",
+  "/styles.css",
+  "/script.js",
+  "/stations.json",
+  "/manifest.json",
+  "/icon-192.png",
+  "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap",
+  "https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2",
+  "https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmEU9fBBc4.woff2",
+  "https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfBBc4.woff2"
 ];
 
-self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Install');
+self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(cacheVersion).then((cache) => {
-      console.log('[Service Worker] Caching files');
-      return cache.addAll(cacheFiles);
+    caches.open(CACHE_NAME).then(cache => {
+      console.log("Service Worker: Кеш відкрито");
+      return cache.addAll(urlsToCache).catch(error => {
+        console.error("Service Worker: Помилка кешування:", error);
+      });
+    }).then(() => {
+      console.log("Service Worker: Установка завершена");
+      return self.skipWaiting();
     })
   );
 });
 
-self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activate');
+self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map((name) => {
-          if (name !== cacheVersion) {
-            console.log('[Service Worker] Deleting old cache:', name);
-            return caches.delete(name);
+        cacheNames.map(cache => {
+          if (cache !== CACHE_NAME) {
+            console.log("Service Worker: Видаляємо старий кеш:", cache);
+            return caches.delete(cache);
           }
         })
       );
     }).then(() => {
-      console.log('[Service Worker] Sending CACHE_UPDATED message to clients');
-      return self.clients.matchAll().then((clients) => {
-        clients.forEach((client) => {
+      console.log("Service Worker: Активовано");
+      self.clients.claim();
+      return self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
           client.postMessage({
-            type: 'CACHE_UPDATED',
-            cacheVersion: cacheVersion
+            type: "CACHE_UPDATED",
+            cacheVersion: CACHE_VERSION
           });
         });
       });
     })
   );
-  return self.clients.claim();
 });
 
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-  console.log('[Service Worker] Fetch:', url.pathname);
-
-  if (url.pathname === '/stations.json') {
+self.addEventListener("fetch", event => {
+  const requestUrl = new URL(event.request.url);
+  if (requestUrl.pathname === "/stations.json" && event.request.method === "GET") {
     event.respondWith(
-      fetch(event.request).then((networkResponse) => {
-        if (!networkResponse.ok) {
-          console.error('[Service Worker] Network fetch failed for stations.json:', networkResponse.status);
-          return caches.match(event.request).then((cachedResponse) => {
+      fetch(event.request, { cache: "no-store" }).then(networkResponse => {
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type === "error") {
+          return caches.match(event.request).then(cachedResponse => {
             if (cachedResponse) {
-              console.log('[Service Worker] Serving stations.json from cache');
+              console.log("Service Worker: Використовуємо кеш для stations.json");
               return cachedResponse;
             }
-            return networkResponse;
+            throw new Error("Немає мережевої відповіді та кешу для stations.json");
           });
         }
-        console.log('[Service Worker] Updating cache for stations.json');
-        return caches.open(cacheVersion).then((cache) => {
+        return caches.open(CACHE_NAME).then(cache => {
           cache.put(event.request, networkResponse.clone());
+          console.log("Service Worker: Оновлено кеш для stations.json");
           return networkResponse;
         });
-      }).catch((error) => {
-        console.error('[Service Worker] Fetch error for stations.json:', error);
-        return caches.match(event.request).then((cachedResponse) => {
+      }).catch(error => {
+        console.error("Service Worker: Помилка запиту stations.json:", error);
+        return caches.match(event.request).then(cachedResponse => {
           if (cachedResponse) {
-            console.log('[Service Worker] Serving stations.json from cache due to fetch error');
+            console.log("Service Worker: Повертаємо кешовану версію stations.json");
             return cachedResponse;
           }
-          return new Response(JSON.stringify({ error: 'Offline and no cache available' }), {
+          return new Response(JSON.stringify({ error: "Офлайн, дані недоступні" }), {
             status: 503,
-            statusText: 'Service Unavailable'
+            headers: { "Content-Type": "application/json" }
           });
         });
       })
     );
   } else {
     event.respondWith(
-      caches.match(event.request).then((response) => {
-        if (response) {
-          console.log('[Service Worker] Serving from cache:', url.pathname);
-          return response;
+      caches.match(event.request).then(cachedResponse => {
+        if (cachedResponse) {
+          console.log("Service Worker: Повертаємо кеш для:", event.request.url);
+          return cachedResponse;
         }
-        return fetch(event.request).then((networkResponse) => {
-          if (!networkResponse.ok) {
-            console.error('[Service Worker] Network fetch failed:', networkResponse.status);
+        return fetch(event.request).then(networkResponse => {
+          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type === "error") {
+            console.warn("Service Worker: Не вдалося отримати мережеву відповідь для:", event.request.url);
             return networkResponse;
           }
-          return caches.open(cacheVersion).then((cache) => {
-            console.log('[Service Worker] Caching:', url.pathname);
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-        }).catch((error) => {
-          console.error('[Service Worker] Fetch error:', error);
-          return new Response('Offline and no cache available', {
-            status: 503,
-            statusText: 'Service Unavailable'
-          });
+          if (urlsToCache.includes(requestUrl.pathname) || event.request.url.startsWith("https://fonts.gstatic.com")) {
+            return caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, networkResponse.clone());
+              console.log("Service Worker: Кешовано:", event.request.url);
+              return networkResponse;
+            });
+          }
+          return networkResponse;
+        }).catch(error => {
+          console.error("Service Worker: Помилка запиту:", error, event.request.url);
+          if (event.request.mode === "navigate") {
+            return caches.match("/index.html");
+          }
+          return new Response("Офлайн, дані недоступні", { status: 503 });
         });
       })
     );
   }
 });
 
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'CHECK_NETWORK') {
-    const isOnline = navigator.onLine;
-    console.log('[Service Worker] Network status:', isOnline);
-    event.ports[0].postMessage({
-      type: 'NETWORK_STATUS',
-      online: isOnline
+let wasOnline = navigator.onLine;
+setInterval(() => {
+  const isOnline = navigator.onLine;
+  if (isOnline !== wasOnline) {
+    console.log(`Service Worker: Статус мережі змінився на ${isOnline ? "онлайн" : "офлайн"}`);
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: "NETWORK_STATUS",
+          online: isOnline
+        });
+      });
     });
+    wasOnline = isOnline;
   }
-});
+}, 1000);
