@@ -41,20 +41,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#00F0FF">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Listen to your favorite radio stations with Radio S O">
   <title>Radio S O</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192x192.png">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <button class="theme-toggle">🌙</button>
-  <button class="share-button">📤</button>
   <div class="container">
-    <h1>🎧 Radio Music</h1>
-    <audio id="audioPlayer"></audio>
+    <button class="theme-toggle">🌙</button>
+    <button class="share-button">📤</button>
+    <h1>Radio S O</h1>
     <div id="currentStationInfo">
       <div class="station-info-content">
         <div class="station-icon">🎵</div>
@@ -77,30 +79,41 @@
       </div>
     </div>
     <div class="tabs">
-      <button class="tab-btn active" data-tab="best">Best</button>
-      <button class="tab-btn" data-tab="techno">Techno</button>
-      <button class="tab-btn" data-tab="trance">Trance</button>
-      <button class="tab-btn" data-tab="ukraine">UA</button>
-      <button class="tab-btn" data-tab="pop">Pop</button>
-      <!-- Динамічні вкладки додаються тут через JS -->
+      <button class="tab-btn" data-tab="best">BEST</button>
+      <button class="tab-btn active" data-tab="techno">TECHNO</button>
+      <button class="tab-btn" data-tab="trance">TRANCE</button>
+      <button class="tab-btn" data-tab="ukraine">UKRAINE</button>
+      <button class="tab-btn" data-tab="pop">POP</button>
       <button class="tab-btn" data-tab="search">Search</button>
-      <button class="add-tab-btn">+</button>
+      <button class="tab-btn add-tab-btn">+</button>
     </div>
     <div id="searchInput">
-      <input id="searchQuery" list="pastSearches" placeholder="Назва станції">
+      <input type="text" id="searchQuery" placeholder="Search by name..." list="pastSearches">
       <datalist id="pastSearches"></datalist>
-      <input id="searchCountry" list="suggestedCountries" placeholder="Країна">
+      <input type="text" id="searchCountry" placeholder="Country..." list="suggestedCountries">
       <datalist id="suggestedCountries"></datalist>
-      <input id="searchGenre" list="suggestedGenres" placeholder="Жанр">
+      <input type="text" id="searchGenre" placeholder="Genre..." list="suggestedGenres">
       <datalist id="suggestedGenres"></datalist>
-      <button class="search-btn">🔍</button>
+      <button class="search-btn">Search</button>
     </div>
-    <div id="stationList" class="station-list"></div>
+    <div id="stationList" class="station-list">
+      <div class="station-item empty">Завантаження...</div>
+    </div>
     <div class="controls-container">
+      <audio id="audioPlayer"></audio>
       <div class="controls">
         <button class="control-btn">⏮</button>
         <button class="control-btn">▶</button>
         <button class="control-btn">⏭</button>
+      </div>
+      <div class="wave-progress">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
       </div>
     </div>
   </div>

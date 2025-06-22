@@ -1,4 +1,4 @@
-/* Updated on June 18, 2025 */
+/* Updated on June 22, 2025 */
 :root {
   --body-bg: #0A0A0A;
   --container-bg: #121212;
@@ -110,7 +110,7 @@ h1 {
   display: flex;
   flex-direction: column;
   flex: 1;
-  order: 2; /* Текст іде другим, щоб зображення було ліворуч */
+  order: 2;
 }
 
 #currentStationInfo .station-name {
@@ -140,8 +140,8 @@ h1 {
   width: 80px;
   height: 80px;
   object-fit: contain;
-  order: 1; /* Зображення перше */
-  font-size: 60px; /* Для емодзі, якщо немає іконки */
+  order: 1;
+  font-size: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,7 +152,7 @@ h1 {
   align-items: center;
   justify-content: center;
   margin-left: auto;
-  order: 3; /* Візуалізатор останній */
+  order: 3;
   width: 150px;
   height: 80px;
   position: relative;
@@ -245,7 +245,7 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
-  flex: 1; /* Назва займає доступний простір */
+  flex: 1;
 }
 
 .station-item:hover, .station-item.selected {
@@ -308,25 +308,23 @@ h1 {
 
 .tabs {
   display: flex;
-  justify-content: flex-start;
+  overflow-x: auto;
+  flex-wrap: nowrap;
   margin: 5px 0;
   background: var(--container-bg);
   padding: 5px;
-  border-radius: 10px;
-  border: 1px solid var(--accent);
+  border: none;
   position: sticky;
-  top: 100px; /* Нижче #currentStationInfo */
+  top: 100px;
   z-index: 9;
-  transition: background 0.4s ease, border-color 0.4s ease;
-  overflow-x: auto;
-  white-space: nowrap;
+  transition: background 0.4s ease;
 }
 
 .tab-btn, .add-tab-btn {
   flex: 0 0 auto;
   padding: 12px;
   background: var(--container-bg);
-  border: none;
+  border: 2px solid var(--accent);
   border-radius: 5px;
   color: var(--text);
   cursor: pointer;
@@ -338,8 +336,11 @@ h1 {
 
 .add-tab-btn {
   width: 40px;
-  padding: 8px;
-  font-size: 18px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .tab-btn:hover, .add-tab-btn:hover {
@@ -350,7 +351,7 @@ h1 {
 
 .tab-btn.active {
   background: var(--accent);
-  border: none;
+  border-color: var(--accent);
   color: #0A0A0A;
 }
 
@@ -493,7 +494,7 @@ h1 {
   transition: opacity 0.3s ease;
 }
 
-.modal, .modal-create-tab, .modal-edit-tab {
+.modal {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -509,20 +510,20 @@ h1 {
   transition: all 0.3s ease;
 }
 
-.modal h2, .modal-create-tab h2, .modal-edit-tab h2 {
+.modal h2 {
   color: var(--accent);
   font-size: 1.5em;
   margin: 0 0 15px;
   text-align: center;
 }
 
-.modal-tabs, .modal-create-tab-content, .modal-edit-tab-content {
+.modal-tabs {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.modal-tab-btn, .modal-cancel-btn, .modal-create-btn, .modal-rename-btn, .modal-delete-tab-btn {
+.modal-tab-btn, .modal-cancel-btn, .confirm-btn {
   padding: 10px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
@@ -534,40 +535,45 @@ h1 {
   transition: all 0.3s ease;
 }
 
-.modal-tab-btn:hover, .modal-cancel-btn:hover, .modal-create-btn:hover, .modal-rename-btn:hover, .modal-delete-tab-btn:hover {
+.modal-tab-btn:hover, .modal-cancel-btn:hover, .confirm-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
   transform: translateY(-2px);
 }
 
-.modal-cancel-btn, .modal-create-btn, .modal-rename-btn, .modal-delete-tab-btn {
+.modal-cancel-btn {
   background: var(--body-bg);
   border-color: var(--text);
 }
 
-.modal-cancel-btn:hover, .modal-create-btn:hover, .modal-rename-btn:hover, .modal-delete-tab-btn:hover {
+.modal-cancel-btn:hover {
   background: var(--text);
   color: var(--body-bg);
 }
 
-.modal-create-tab input {
+.create-tab-modal input {
+  width: 100%;
   padding: 10px;
-  background: var(--container-bg);
+  margin-bottom: 15px;
   border: 2px solid var(--accent);
   border-radius: 8px;
+  background: var(--container-bg);
   color: var(--text);
   font-size: 16px;
-  width: 100%;
   box-sizing: border-box;
-  transition: all 0.3s ease;
 }
 
-.modal-create-tab input:focus {
+.create-tab-modal input:focus {
+  outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
 }
 
-/* Стилі для datalist */
+.create-tab-modal input::placeholder {
+  color: var(--text);
+  opacity: 0.6;
+}
+
 input[list]::-webkit-calendar-picker-indicator {
   display: none;
 }
@@ -577,168 +583,74 @@ input[list] {
 }
 
 datalist {
-  display: none; /* datalist не відображається, але опції працюють */
+  display: none;
 }
 
 #searchQuery[list], #searchCountry[list], #searchGenre[list] {
-  background: var(--container-bg);
-  border: 1px solid var(--accent);
-  border-radius: 4px;
-  padding: 8px;
-  color: var(--text);
-  transition: all 0.3s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 }
 
-#searchQuery[list]:focus, #searchCountry[list]:focus, #searchGenre[list]:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
-}
+@media (max-width: 600px) {
+  .container {
+    padding: 10px;
+    margin: 0 5px;
+  }
 
-@media (max-width: 720px) {
   h1 {
     font-size: 2em;
   }
 
-  .container {
-    padding: 10px;
-    margin: 0 5px;
-    min-height: 90vh;
-  }
-
-  .control-btn {
-    width: 70px;
-    height: 70px;
-    font-size: 24px;
-    border-width: 2px;
-    border-radius: 10px;
-  }
-
-  .station-list {
-    max-height: 400px;
-    margin: 8px 0;
-    padding: 8px;
-  }
-
-  .station-item {
-    padding: 10px;
-    margin: 4px 0;
-  }
-
-  .station-item img {
-    width: 28px;
-    height: 28px;
-  }
-
-  .theme-toggle, .share-button {
-    top: 5px;
-    padding: 4px;
-    height: 35px;
-    width: 35px;
-  }
-
-  .theme-toggle {
-    left: 5px;
-  }
-
-  .share-button {
-    right: 5px;
-  }
-
-  .tabs {
-    top: 80px; /* Нижче #currentStationInfo на мобільних */
-  }
-
   #currentStationInfo {
-    padding: 12px;
-    height: auto;
+    padding: 15px;
   }
 
   #currentStationInfo .station-name {
     font-size: 20px;
   }
 
-  #currentStationInfo .station-genre {
-    font-size: 16px;
-  }
-
+  #currentStationInfo .station-genre,
   #currentStationInfo .station-country {
     font-size: 16px;
   }
 
-  .station-info-content {
-    gap: 10px;
-  }
-
   .station-icon {
-    width: 65px;
-    height: 65px;
-    font-size: 50px; /* Для емодзі на мобільних */
+    width: 60px;
+    height: 60px;
+    font-size: 40px;
   }
 
   .wave-visualizer {
-    width: 120px;
-    height: 65px;
+    width: 100px;
   }
 
-  .wave-line {
-    height: 1px;
+  .station-item {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .control-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+
+  .tabs {
+    top: 80px;
   }
 
   .tab-btn, .add-tab-btn {
-    padding: 10px;
     font-size: 12px;
+    padding: 8px;
   }
 
   .add-tab-btn {
-    width: 35px;
-    padding: 6px;
+    width: 32px;
+    height: 32px;
   }
 
-  #searchInput {
-    padding: 8px;
-    font-size: 14px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  #searchQuery, #searchCountry, #searchGenre {
-    font-size: 14px;
-    padding: 6px;
-    flex: 1 1 120px;
-    min-width: 100px;
-  }
-
-  #searchInput button.search-btn {
-    padding: 6px 10px;
-    flex: 0 0 auto;
-  }
-
-  .modal, .modal-create-tab, .modal-edit-tab {
-    width: 80%;
-    padding: 15px;
-  }
-
-  .modal h2, .modal-create-tab h2, .modal-edit-tab h2 {
-    font-size: 1.3em;
-  }
-
-  .modal-tab-btn, .modal-cancel-btn, .modal-create-btn, .modal-rename-btn, .modal-delete-tab-btn {
-    font-size: 14px;
-    padding: 8px;
-  }
-
-  .modal-create-tab input {
-    font-size: 14px;
-    padding: 8px;
-  }
-}
-
-@media (max-height: 1600px) {
-  .container {
-    min-height: 85vh;
-  }
-
-  .station-list {
-    max-height: 450px;
+  .modal {
+    width: 280px;
   }
 }
