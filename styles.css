@@ -1,4 +1,4 @@
-/* Updated on June 19, 2025 */
+/* Updated on June 22, 2025 */
 :root {
   --body-bg: #0A0A0A;
   --container-bg: #121212;
@@ -24,13 +24,13 @@ body {
 }
 
 .container {
-  max-width: 100%;
-  width: 100%;
+  max-width: 95vw; /* Changed to viewport width for adaptability */
+  width: min(600px, 95vw); /* Max 600px or 95% of viewport */
   background: var(--container-bg);
   padding: 15px;
   border-radius: 15px;
   border: 1px solid var(--accent);
-  margin: 0 10px;
+  margin: 0 auto; /* Center with auto margins */
   min-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -483,8 +483,7 @@ h1 {
   border-radius: 12px;
   padding: 20px;
   z-index: 21;
-  width: 300px;
-  max-width: 90%;
+  width: min(300px, 90vw); /* Ensure modal fits within viewport */
   box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
   transition: all 0.3s ease;
 }
@@ -546,6 +545,7 @@ h1 {
 .new-tab-modal input:focus, .edit-tab-modal input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
+  overflow: hidden;
   outline: none;
 }
 
@@ -582,8 +582,9 @@ datalist {
 
   .container {
     padding: 10px;
-    margin: 0 5px;
+    margin: 0 auto; /* Center with auto margins */
     min-height: 90vh;
+    width: min(95vw, 360px); /* Adjusted for smaller screens */
   }
 
   .control-btn {
@@ -696,7 +697,7 @@ datalist {
   }
 
   .modal {
-    width: 80%;
+    width: min(80vw, 320px); /* Adjusted for smaller screens */
     padding: 15px;
   }
 
@@ -712,6 +713,100 @@ datalist {
   .new-tab-modal input, .edit-tab-modal input {
     font-size: 14px;
     padding: 8px;
+  }
+}
+
+@media (max-width: 360px) { /* For iPhone 12 Mini and similar small screens */
+  .container {
+    width: min(95vw, 320px); /* Further reduced for very small screens */
+    padding: 8px;
+  }
+
+  h1 {
+    font-size: 1.8em;
+  }
+
+  .control-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 20px;
+  }
+
+  .station-list {
+    max-height: 350px;
+    padding: 6px;
+  }
+
+  .station-item {
+    padding: 8px;
+    margin: 3px 0;
+  }
+
+  .station-item img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .theme-toggle, .share-button {
+    height: 30px;
+    width: 30px;
+    padding: 3px;
+  }
+
+  #currentStationInfo {
+    padding: 10px;
+  }
+
+  #currentStationInfo .station-name {
+    font-size: 18px;
+  }
+
+  #currentStationInfo .station-genre {
+    font-size: 14px;
+  }
+
+  #currentStationInfo .station-country {
+    font-size: 14px;
+  }
+
+  .station-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 40px;
+  }
+
+  .wave-visualizer {
+    width: 100px;
+    height: 50px;
+  }
+
+  .tab-btn, .add-tab-btn {
+    min-width: 60px;
+    padding: 8px;
+    font-size: 11px;
+  }
+
+  .add-tab-btn {
+    width: 35px;
+  }
+
+  #searchInput {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  #searchQuery, #searchCountry, #searchGenre {
+    font-size: 12px;
+    min-width: 90px;
+  }
+
+  #searchInput button.search-btn {
+    padding: 5px 8px;
+  }
+
+  .modal {
+    width: min(85vw, 300px);
+    padding: 12px;
   }
 }
 
