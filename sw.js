@@ -1,27 +1,22 @@
-const CACHE_NAME = 'radio-cache-v25.2.20250625';
-const RESOURCES_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/script.js',
-  '/stations.json',
-  '/manifest.json'
-];
+const CACHE_NAME = 'radio-cache-v29.1.20250627';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(RESOURCES_TO_CACHE).then(() => {
-        // Видаляємо старі кеші під час встановлення
-        return caches.keys().then((cacheNames) => {
-          return Promise.all(
-            cacheNames.map((cacheName) => {
-              if (cacheName !== CACHE_NAME) {
-                console.log(`Видалення старого кешу: ${cacheName}`);
-                return caches.delete(cacheName);
-              }
-            })
-          );
+      return cache.addAll([
+        '/',
+        '/index.html',
+        '/styles.css',
+        '/script.js',
+        '/stations.json',
+        '/manifest.json'
+      ]).then(() => {
+        caches.keys().then((cacheNames) => {
+          return Promise.all(cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+          }));
         });
       });
     })
@@ -30,24 +25,18 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.match(event.request).then((cachedResponse) => {
-        // Завжди намагаємося отримати свіжу версію з мережі
-        const fetchPromise = fetch(event.request, { cache: 'no-store' })
-          .then((networkResponse) => {
-            // Оновлюємо кеш новою версією
+    caches.match(event.request).then((response) => {
+      if (event.request.url.endsWith('stations.json')) {
+        return fetch(event.request, { cache: 'no-store', signal: new AbortController().signal }).then((networkResponse) => {
+          caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          })
-          .catch(() => {
-            // Якщо мережа недоступна, повертаємо з кешу
-            console.warn(`Мережа недоступна для ${event.request.url}, повертаємо кеш`);
-            return cachedResponse || caches.match('/index.html');
           });
-
-        // Якщо є кешована версія, повертаємо її одразу, але оновлюємо в фоні
-        return cachedResponse || fetchPromise;
-      });
+          return networkResponse;
+        }).catch(() => caches.match('/index.html'));
+      }
+      return response || fetch(event.request).then((networkResponse) => {
+        return networkResponse;
+      }).catch(() => caches.match('/index.html'));
     })
   );
 });
@@ -58,7 +47,6 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log(`Активація: Видалення старого кешу ${cacheName}`);
             return caches.delete(cacheName);
           }
         })
@@ -97,4 +85,4 @@ setInterval(() => {
         });
       }
     });
-}, 2000);
+}, 2000); // Збільшено інтервал до 2 секунд
