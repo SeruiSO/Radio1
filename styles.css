@@ -7,31 +7,34 @@
   --accent-gradient: #003C4B;
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Roboto', sans-serif;
   background: var(--body-bg);
   color: var(--text);
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  min-height: 100vh;
   overflow-x: hidden;
-  padding-top: 10px;
-  box-sizing: border-box;
+  padding-top: 8px;
   transition: background 0.4s ease, color 0.4s ease;
 }
 
 .container {
-  max-width: 100%;
+  max-width: 400px;
   width: 100%;
   background: var(--container-bg);
-  padding: 15px;
+  padding: 8px;
   border-radius: 15px;
   border: 1px solid var(--accent);
-  margin: 0 10px;
-  min-height: 90vh;
+  margin: 0;
+  min-height: 95vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -39,7 +42,7 @@ body {
 }
 
 h1 {
-  font-size: 2.5em;
+  font-size: 2.2em;
   margin: 5px 0;
   text-align: center;
   color: var(--accent);
@@ -78,9 +81,9 @@ h1 {
 
 #currentStationInfo {
   background: linear-gradient(45deg, var(--container-bg), var(--container-bg), var(--accent-gradient));
-  padding: 20px;
+  padding: 12px;
   border-radius: 12px;
-  margin: 10px 0;
+  margin: 8px 0;
   color: var(--text);
   border: 2px solid var(--accent);
   text-align: left;
@@ -102,7 +105,7 @@ h1 {
 .station-info-content {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
   width: 100%;
 }
 
@@ -114,7 +117,7 @@ h1 {
 }
 
 #currentStationInfo .station-name {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -125,23 +128,23 @@ h1 {
 }
 
 #currentStationInfo .station-genre {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
   margin-top: 5px;
 }
 
 #currentStationInfo .station-country {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
   margin-top: 2px;
 }
 
 .station-icon {
-  width: 80px;
-  height: 80px;
+  width: 65px;
+  height: 65px;
   object-fit: contain;
   order: 1;
-  font-size: 60px;
+  font-size: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -153,15 +156,15 @@ h1 {
   justify-content: center;
   margin-left: auto;
   order: 3;
-  width: 150px;
-  height: 80px;
+  width: 120px;
+  height: 65px;
   position: relative;
   overflow: hidden;
 }
 
 .wave-line {
   position: absolute;
-  height: 2px;
+  height: 1px;
   background: var(--accent);
   animation: wavePulse 1.5s infinite;
   animation-play-state: paused;
@@ -190,13 +193,13 @@ h1 {
 }
 
 .station-list {
-  max-height: 500px;
+  max-height: 450px;
   overflow-y: auto;
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 10px;
-  margin: 10px 0;
-  padding: 10px;
+  margin: 8px 0;
+  padding: 8px;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) var(--container-bg);
   flex-grow: 1;
@@ -217,12 +220,12 @@ h1 {
 }
 
 .station-item {
-  padding: 12px;
+  padding: 10px;
   cursor: pointer;
   border-radius: 8px;
   font-weight: 500;
   border: 1px solid var(--text);
-  margin: 5px 0;
+  margin: 4px 0;
   color: var(--text);
   background: var(--container-bg);
   display: flex;
@@ -232,8 +235,8 @@ h1 {
 }
 
 .station-item img {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
   margin-right: 10px;
 }
@@ -309,12 +312,12 @@ h1 {
 .tabs {
   display: flex;
   justify-content: flex-start;
-  margin: 5px 0;
+  margin: 0;
   background: var(--container-bg);
   padding: 5px;
   border-radius: 10px;
   position: sticky;
-  top: 100px;
+  top: 80px;
   z-index: 9;
   transition: background 0.4s ease;
   overflow-x: auto;
@@ -323,7 +326,7 @@ h1 {
 
 .tab-btn, .add-tab-btn {
   flex: 0 0 auto;
-  padding: 12px;
+  padding: 10px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 5px;
@@ -331,7 +334,7 @@ h1 {
   cursor: pointer;
   margin: 0 2px;
   text-align: center;
-  font-size: 14px;
+  font-size: 12px;
   transition: all 0.3s ease;
 }
 
@@ -358,18 +361,18 @@ h1 {
 
 #searchInput {
   display: none;
-  margin: 5px 0;
-  padding: 10px;
+  margin: 8px 0;
+  padding: 8px;
   border-radius: 8px;
   border: 2px solid var(--accent);
   background: var(--container-bg);
   color: var(--text);
-  font-size: 16px;
+  font-size: 14px;
   width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
   transition: all 0.3s ease;
 }
@@ -380,17 +383,18 @@ h1 {
 }
 
 #searchQuery, #searchCountry, #searchGenre {
-  flex: 1 1 200px;
-  min-width: 120px;
+  flex: 1;
+  min-width: 8px;
   background: transparent;
   border: none;
   color: var(--text);
-  font-size: 16px;
+  font-size: 14px;
+  padding: 6px;
   outline: none;
-  padding: 8px;
 }
 
-#searchQuery::placeholder, #searchCountry::placeholder, #searchGenre::placeholder {
+#searchQuery::placeholder, #searchQuery::placeholder, #searchCountry::placeholder, #searchInput button.search-btn {
+  background: var(--container-bg);
   color: var(--text);
   opacity: 0.6;
 }
@@ -399,9 +403,10 @@ h1 {
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 8px;
-  padding: 8px 12px;
-  color: var(--text);
+  padding: var(--text);
+  color: var(--container-bg);
   cursor: pointer;
+  padding: 6px 10px;
   transition: all 0.3s ease;
 }
 
@@ -412,17 +417,15 @@ h1 {
 }
 
 .controls-container {
-  position: sticky;
-  bottom: 0;
   background: var(--container-bg);
   border-top: 2px solid var(--accent);
-  padding: 15px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 8px;
   z-index: 10;
-  transition: background 0.4s ease, border-color 0.4s ease;
+  transition: background 0 0.4s ease;
 }
 
 .controls {
@@ -431,38 +434,10 @@ h1 {
   gap: 50px;
 }
 
-.wave-progress {
-  display: flex;
-  gap: 4px;
-  height: 60px;
-  width: 84px;
-}
-
-.wave-bar {
-  width: 10px;
-  background: var(--accent);
-  border-radius: 5px;
-  animation: waveAnimation 1.2s infinite ease-in-out;
-  animation-play-state: paused;
-  transition: background 0.4s ease;
-}
-
-.wave-bar:nth-child(2) { animation-delay: 0.2s; }
-.wave-bar:nth-child(3) { animation-delay: 0.3s; }
-.wave-bar:nth-child(4) { animation-delay: 0.4s; }
-.wave-bar:nth-child(5) { animation-delay: 0.5s; }
-.wave-bar:nth-child(6) { animation-delay: 0.6s; }
-.wave-bar:nth-child(7) { animation-delay: 0.7s; }
-
-@keyframes waveAnimation {
-  0%, 100% { transform: scaleY(0.3); }
-  50% { transform: scaleY(1); }
-}
-
 .control-btn {
-  width: 80px;
-  height: 80px;
-  font-size: 32px;
+  width: 70px;
+  height: 70px;
+  font-size: 28px;
   background: var(--container-bg);
   color: var(--text);
   border: 4px solid var(--accent);
@@ -477,7 +452,7 @@ h1 {
 .control-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
-  transform: scale(1.15);
+  transform: scale(1.1);
 }
 
 .control-btn:active {
@@ -496,11 +471,11 @@ h1 {
 }
 
 .modal {
-  position: fixed;
+  position: 50fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: var(--container-bg);
+  px-background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 12px;
   padding: 20px;
@@ -525,12 +500,12 @@ h1 {
 }
 
 .modal-tab-btn, .modal-cancel-btn, .modal-confirm-btn {
-  padding: 10px;
+  padding: 8px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
-  border-radius: 8px;
+  border-radius: 5px;
   color: var(--text);
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
   text-align: center;
   transition: all 0.3s ease;
@@ -539,7 +514,7 @@ h1 {
 .modal-tab-btn:hover, .modal-cancel-btn:hover, .modal-confirm-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .modal-cancel-btn {
@@ -554,13 +529,13 @@ h1 {
 
 .modal-input {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
+  padding: 8px;
+  margin-bottom: 8px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
-  border-radius: 8px;
+  border-radius: 5px;
   color: var(--text);
-  font-size: 16px;
+  font-size: 14px;
   box-sizing: border-box;
   transition: border-color 0.3s ease;
 }
@@ -568,177 +543,169 @@ h1 {
 .modal-input:focus {
   border-color: var(--accent);
   outline: none;
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
+  box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.3);
 }
 
-/* Стилі для datalist */
+input[type="text"], input[list] {
+  background: var(--container-bg);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 6px;
+  color: var(--text);
+  transition: all 0.3s ease;
+}
+
+input[type="text"]:focus, input[list]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.5);
+}
+
 input[list]::-webkit-calendar-picker-indicator {
   display: none;
-}
-
-input[list] {
-  position: relative;
 }
 
 datalist {
   display: none;
 }
 
-#searchQuery[list], #searchCountry[list], #searchGenre[list] {
-  background: var(--container-bg);
-  border: 1px solid var(--accent);
-  border-radius: 4px;
-  padding: 8px;
-  color: var(--text);
-  transition: all 0.3s ease;
-}
-
-#searchQuery[list]:focus, #searchCountry[list]:focus, #searchGenre[list]:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
-}
-
-@media (max-width: 720px) {
-  h1 {
-    font-size: 2em;
+@media (max-width: 400px) {
+  .container {
+    padding: 6px;
   }
 
-  .container {
-    padding: 10px;
-    margin: 0 5px;
-    min-height: 90vh;
+  h1 {
+    font-size: 1.8em;
   }
 
   .control-btn {
-    width: 70px;
-    height: 70px;
-    font-size: 24px;
+    width: 60px;
+    height: 60px;
+    font-size: 12px;
     border-width: 2px;
-    border-radius: 10px;
+    border-radius: 8px;
   }
 
   .station-list {
     max-height: 400px;
-    margin: 8px 0;
-    padding: 8px;
+    margin: 6px 0;
+    padding: 6px;
   }
 
   .station-item {
-    padding: 10px;
-    margin: 4px 0;
+    padding: 8px;
+    margin: 3px 0;
   }
 
   .station-item img {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
   }
 
   .theme-toggle, .share-button {
-    top: 5px;
+    top: 4px;
     padding: 4px;
     height: 35px;
     width: 35px;
   }
 
   .theme-toggle {
-    left: 5px;
+    left: 4px;
   }
 
   .share-button {
-    right: 5px;
+    right: 4px;
   }
 
   .tabs {
-    top: 80px;
+    top: 8px;
+    padding: 4px;
+  }
+
+  .tab-btn, .add-tab-btn {
+    padding: 8px;
+    font-size: 12px;
+    border-width: 1px;
   }
 
   #currentStationInfo {
-    padding: 12px;
-    height: auto;
+    padding: 10px;
+    margin: 6px 0;
   }
 
   #currentStationInfo .station-name {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   #currentStationInfo .station-genre {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   #currentStationInfo .station-country {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .station-info-content {
-    gap: 10px;
+    gap: 8px;
   }
 
   .station-icon {
-    width: 65px;
-    height: 65px;
-    font-size: 50px;
+    width: 60px;
+    height: 60px;
+    font-size: 45px;
   }
 
   .wave-visualizer {
-    width: 120px;
-    height: 65px;
+    width: 100px;
+    height: 60px;
   }
 
   .wave-line {
     height: 1px;
   }
 
-  .tab-btn, .add-tab-btn {
-    padding: 10px;
-    font-size: 12px;
-    border-width: 1px;
-  }
-
   #searchInput {
-    padding: 8px;
-    font-size: 14px;
-    flex-wrap: wrap;
-    gap: 8px;
+    margin: 6px 0;
+    padding: 6px;
+    font-size: 12px;
+    gap: 6px;
   }
 
   #searchQuery, #searchCountry, #searchGenre {
-    font-size: 14px;
-    padding: 6px;
-    flex: 1 1 120px;
+    font-size: 12px;
+    padding: 5px;
     min-width: 100px;
   }
 
   #searchInput button.search-btn {
-    padding: 6px 10px;
-    flex: 0 0 auto;
+    padding: 5px 8px;
   }
 
   .modal {
-    width: 80%;
-    padding: 15px;
+    width: 85%;
+    padding: 12px;
   }
 
   .modal h2 {
-    font-size: 1.3em;
+    font-size: 1.2em;
   }
 
   .modal-tab-btn, .modal-cancel-btn, .modal-confirm-btn {
-    font-size: 14px;
-    padding: 8px;
+    font-size: 12px;
+    padding: 6px;
   }
 
   .modal-input {
-    font-size: 14px;
-    padding: 8px;
+    font-size: 12px;
+    padding: 6px;
   }
 }
 
 @media (max-height: 1600px) {
   .container {
-    min-height: 85vh;
+    min-height: 90vh;
   }
 
   .station-list {
-    max-height: 450px;
+    max-height: 400px;
   }
 }

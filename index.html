@@ -41,20 +41,23 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#00F0FF">
+  <meta name="description" content="Radio S O - слухайте улюблені радіостанції онлайн з підтримкою офлайн режиму">
+  <meta name="keywords" content="radio, online radio, streaming, music, techno, trance, pop, ukraine">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Radio S O</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="icon" href="icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <button class="theme-toggle">🌙</button>
-  <button class="share-button">📤</button>
   <div class="container">
     <h1>🎧 Radio Music</h1>
-    <audio id="audioPlayer"></audio>
+    <button class="theme-toggle">🌙</button>
+    <button class="share-button">📤</button>
     <div id="currentStationInfo">
       <div class="station-info-content">
         <div class="station-icon">🎵</div>
@@ -77,41 +80,33 @@
       </div>
     </div>
     <div class="tabs">
-      <button class="tab-btn active">Best</button>
-      <button class="tab-btn">Techno</button>
-      <button class="tab-btn">Trance</button>
-      <button class="tab-btn">UA</button>
-      <button class="tab-btn">Pop</button>
-      <button class="tab-btn">Search</button>
-      <button class="tab-btn add-tab-btn">+</button>
+      <button class="tab-btn active" data-tab="best">Best</button>
+      <button class="tab-btn" data-tab="techno">Techno</button>
+      <button class="tab-btn" data-tab="trance">Trance</button>
+      <button class="tab-btn" data-tab="ukraine">UA</button>
+      <button class="tab-btn" data-tab="pop">Pop</button>
+      <button class="tab-btn" data-tab="search">Search</button>
+      <button class="add-tab-btn">+</button>
     </div>
-    <div id="searchInput">
-      <input id="searchQuery" type="text" placeholder="Назва станції..." list="pastSearches">
-      <input id="searchCountry" type="text" placeholder="Країна..." list="suggestedCountries">
-      <input id="searchGenre" type="text" placeholder="Жанр..." list="suggestedGenres">
-      <button class="search-btn">🔍</button>
-      <datalist id="pastSearches"></datalist>
-      <datalist id="suggestedCountries"></datalist>
-      <datalist id="suggestedGenres"></datalist>
-    </div>
-    <div id="stationList" class="station-list"></div>
     <div class="controls-container">
       <div class="controls">
         <button class="control-btn">⏮</button>
         <button class="control-btn">▶</button>
         <button class="control-btn">⏭</button>
       </div>
-      <div class="wave-progress">
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-        <div class="wave-bar"></div>
-      </div>
     </div>
+    <div id="searchInput">
+      <input type="text" id="searchQuery" list="pastSearches" placeholder="Назва станції">
+      <datalist id="pastSearches"></datalist>
+      <input type="text" id="searchCountry" list="suggestedCountries" placeholder="Країна">
+      <datalist id="suggestedCountries"></datalist>
+      <input type="text" id="searchGenre" list="suggestedGenres" placeholder="Жанр">
+      <datalist id="suggestedGenres"></datalist>
+      <button class="search-btn">🔍</button>
+    </div>
+    <div class="station-list" id="stationList"></div>
   </div>
+  <audio id="audioPlayer" preload="auto"></audio>
   <script src="script.js"></script>
 </body>
 </html>
