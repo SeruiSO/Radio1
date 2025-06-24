@@ -826,8 +826,9 @@ datalist {
         display: flex;
         flex-direction: row;
         width: 100%;
-        height: calc(100vh - 40px); /* Adjusted for tabs height */
+        height: calc(100vh - 40px);
         gap: 0;
+        padding-bottom: 40px;
     }
 
     #currentStationInfo {
@@ -836,38 +837,44 @@ datalist {
         padding: clamp(8px, 2vw, 10px);
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         position: static;
         height: 100%;
         margin: 0;
         overflow-y: auto;
-        border-radius: 0;
-        border-right: 1px solid var(--accent);
+        border-radius: 12px 0 0 12px;
+        border: 2px solid var(--accent);
     }
 
     .station-info-content {
-        flex-direction: row;
+        flex-direction: column;
         gap: clamp(8px, 1.5vw, 10px);
         width: 100%;
+        align-items: center;
     }
 
     #currentStationInfo .station-name {
         font-size: clamp(12px, 2.5vw, 14px);
+        text-align: center;
     }
 
     #currentStationInfo .station-genre,
     #currentStationInfo .station-country {
         font-size: clamp(8px, 1.8vw, 10px);
+        text-align: center;
     }
 
     .station-icon {
-        width: clamp(30px, 5vw, 50px);
-        height: clamp(30px, 5vw, 50px);
-        font-size: clamp(20px, 4vw, 30px);
+        width: 100%;
+        height: clamp(50px, 10vw, 80px);
+        font-size: clamp(30px, 6vw, 50px);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
     }
 
     .wave-visualizer {
-        width: clamp(60px, 10vw, 80px);
+        width: 100%;
         height: clamp(30px, 5vw, 50px);
     }
 
@@ -884,9 +891,8 @@ datalist {
         height: 100%;
         max-height: none;
         overflow-y: auto;
-        border-radius: 0;
-        border-left: 1px solid var(--accent);
-        border-right: 1px solid var(--accent);
+        border-radius: 12px;
+        border: 2px solid var(--accent);
     }
 
     .station-item {
@@ -903,29 +909,29 @@ datalist {
     }
 
     .controls-container {
-        flex: 0 0 20vw;
-        min-width: 80px;
+        flex: 0 0 15vw;
+        min-width: 60px;
         padding: clamp(8px, 1.5vw, 10px);
-        border: none;
+        border: 2px solid var(--accent);
+        border-radius: 0 12px 12px 0;
         position: static;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         height: 100%;
-        border-radius: 0;
     }
 
     .controls {
         flex-direction: column;
-        gap: clamp(10px, 2vw, 15px);
+        gap: clamp(15px, 3vw, 20px);
         align-items: center;
     }
 
     .control-btn {
-        width: clamp(50px, 6vw, 60px);
-        height: clamp(50px, 6vw, 60px);
-        font-size: clamp(20px, 2.5vw, 24px);
+        width: clamp(60px, 8vw, 70px);
+        height: clamp(60px, 8vw, 70px);
+        font-size: clamp(24px, 3.5vw, 28px);
     }
 
     .control-btn:hover {
