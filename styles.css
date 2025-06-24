@@ -5,6 +5,7 @@
   --accent: #00F0FF;
   --text: #F0F0F0;
   --accent-gradient: rgb(0, 123, 255);
+  --accent-rgb: 0, 240, 255;
 }
 
 body {
@@ -217,7 +218,7 @@ h1 {
 
 .station-list::-webkit-scrollbar-thumb {
   background: var(--accent);
-  border-radius: 3px;
+  border-radius: 3 Thaumatin;
 }
 
 .station-item {
@@ -814,8 +815,8 @@ datalist {
 /* New styles for landscape orientation */
 @media (orientation: landscape) and (max-width: 1024px) {
   .container {
-    flex-direction: row;
-    gap: 15px;
+    flex-direction: column;
+    gap: 10px;
     max-width: 1200px;
     padding: 10px;
   }
@@ -825,9 +826,17 @@ datalist {
     margin: 0 0 5px;
   }
 
+  .main-content {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    flex-grow: 1;
+    width: 100%;
+  }
+
   #currentStationInfo {
     width: 25%;
-    min-width: 250px;
+    min-width: 200px;
     padding: 10px;
     flex-direction: column;
     align-items: flex-start;
@@ -885,26 +894,28 @@ datalist {
   }
 
   .controls-container {
-    width: 15%;
-    min-width: 120px;
+    width: 20%;
+    min-width: 150px;
     padding: 10px;
     border-top: none;
     border-left: 2px solid var(--accent);
     position: static;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: center;
+    align-items: center;
   }
 
   .controls {
     flex-direction: column;
     gap: 20px;
+    align-items: center;
   }
 
   .control-btn {
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
+    width: 70px;
+    height: 70px;
+    font-size: 28px;
   }
 
   .control-btn:hover {
@@ -913,14 +924,17 @@ datalist {
 
   .tabs-wrapper {
     position: sticky;
-    top: 0;
+    bottom: 0;
     width: 100%;
     margin: 0;
     z-index: 11;
+    padding: 0;
   }
 
   .tabs {
     padding: 3px;
+    width: 100%;
+    justify-content: space-around;
   }
 
   .tab-btn,
@@ -941,7 +955,7 @@ datalist {
     gap: 10px;
     padding: 5px;
     position: sticky;
-    top: 40px;
+    top: 0;
     z-index: 10;
   }
 
