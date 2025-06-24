@@ -218,7 +218,7 @@ h1 {
 
 .station-list::-webkit-scrollbar-thumb {
   background: var(--accent);
-  border-radius: 3 Thaumatin;
+  border-radius: 3px;
 }
 
 .station-item {
@@ -819,6 +819,7 @@ datalist {
     gap: 10px;
     max-width: 1200px;
     padding: 10px;
+    justify-content: space-between;
   }
 
   h1 {
@@ -830,8 +831,9 @@ datalist {
     display: flex;
     flex-direction: row;
     gap: 15px;
-    flex-grow: 1;
     width: 100%;
+    flex-grow: 1;
+    margin-bottom: 40px; /* Ensure space for tabs-wrapper */
   }
 
   #currentStationInfo {
@@ -841,6 +843,7 @@ datalist {
     flex-direction: column;
     align-items: flex-start;
     position: static;
+    height: 100%;
   }
 
   .station-info-content {
@@ -875,9 +878,10 @@ datalist {
 
   .station-list {
     width: 50%;
-    max-height: 80vh;
     padding: 6px;
     margin: 0;
+    flex-grow: 1;
+    height: calc(100% - 10px); /* Extend to bottom of main-content */
   }
 
   .station-item {
@@ -904,6 +908,7 @@ datalist {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    height: 100%;
   }
 
   .controls {
