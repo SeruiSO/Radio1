@@ -828,7 +828,7 @@ datalist {
         width: 100%;
         height: calc(100vh - 40px);
         gap: 0;
-        padding-bottom: 48px;
+        padding-bottom: 60px;
     }
 
     #currentStationInfo {
