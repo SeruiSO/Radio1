@@ -817,204 +817,256 @@ datalist {
   .container {
     flex-direction: column;
     gap: 10px;
-    max-width: 1200px;
+    max-width: 100%;
     padding: 10px;
+    min-height: 100vh;
     justify-content: space-between;
   }
 
   h1 {
-    font-size: 1.8em;
+    font-size: clamp(1.5em, 5vw, 1.8em);
     margin: 0 0 5px;
   }
 
   .main-content {
     display: flex;
     flex-direction: row;
-    gap: 15px;
+    gap: clamp(10px, 2vw, 15px);
     width: 100%;
     flex-grow: 1;
-    margin-bottom: 40px; /* Ensure space for tabs-wrapper */
+    height: calc(100% - 40px); /* Reserve space for tabs-wrapper */
   }
 
   #currentStationInfo {
-    width: 25%;
-    min-width: 200px;
-    padding: 10px;
-    flex-direction: column;
-    align-items: flex-start;
+    flex: 1;
+    min-width: 150px;
+    max-width: 30vw;
+    padding: clamp(8px, 2vw, 10px);
+    flex-direction: row;
+    align-items: wrap;
+    justify-content: wrap;
     position: static;
     height: 100%;
+    margin-top: 0;
+    overflow-y: auto;
   }
 
   .station-info-content {
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    gap: clamp(8px, 2vw, 10px);
   }
 
   #currentStationInfo .station-name {
-    font-size: 16px;
+    font-size: clamp(14px, 3vw, 16px);
   }
 
   #currentStationInfo .station-genre,
   #currentStationInfo .station-country {
-    font-size: 12px;
+    font-size: clamp(10px, 2vw, 12px);
   }
 
   .station-icon {
-    width: 60px;
-    height: 60px;
-    font-size: 40px;
+    width: clamp(40px, 6vw, 60px);
+    height: clamp(40px, 6vw, 60px);
+    font-size: clamp(30px, 5vw, 40px);
   }
 
   .wave-visualizer {
-    width: 120px;
-    height: 60px;
+    width: clamp(80px, 12vw, 120px);
+    height: clamp(40px, 8vw, 60px);
   }
 
   .wave-line {
     height: 1px;
-    animation: wavePulse 1s infinite;
+    animation: wavePulse 1s infinite linear;
   }
+}
 
   .station-list {
-    width: 50%;
-    padding: 6px;
+  {
+    flex: 2;
+    min-width: 200px;
+    max-width: 50vw;
+    padding: clamp(4px, 1vw, 6px);
     margin: 0;
     flex-grow: 1;
-    height: calc(100% - 10px); /* Extend to bottom of main-content */
+    height: 100%;
+    overflow-y: auto;
   }
+}
 
   .station-item {
-    padding: 6px;
+  {
+    padding: clamp(4px, 1vw, 6px);
   }
 
   .station-item .station-name {
-    font-size: 13px;
+  .name {
+    font-size: clamp(10px, 2.5vw, 12px);
   }
+}
 
   .station-item img {
-    width: 24px;
-    height: 24px;
+    width: clamp(18px, 4vw, 24px);
+    height: clamp(18px, 4vw, 24px);
   }
+}
 
   .controls-container {
-    width: 20%;
-    min-width: 150px;
-    padding: 10px;
+  {
+    flex: 1;
+    min-width: 100px;
+    max-width: 20vw;
+    padding: clamp(8px, 2vw, 10px);
     border-top: none;
-    border-left: 2px solid var(--accent);
+    border-left: 1px solid var(--accent);
     position: static;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-content: center;
     align-items: center;
     height: 100%;
   }
+}
 
   .controls {
     flex-direction: column;
-    gap: 20px;
+    gap: clamp(15px, 3vw, 20px);
     align-items: center;
   }
+}
 
   .control-btn {
-    width: 70px;
-    height: 70px;
-    font-size: 28px;
+    width: clamp(60px, 7vw, 70px);
+    height: clamp(60px, 7vw, 70px);
+    font-size: clamp(24px, 3vw, 28px);
   }
+}
 
   .control-btn:hover {
+  .control-btn:hover  {
     transform: scale(1.1);
   }
+}
 
   .tabs-wrapper {
-    position: sticky;
+    position: fixed;
     bottom: 0;
     width: 100%;
     margin: 0;
-    z-index: 11;
+    z-index: 100;
     padding: 0;
+    background: var(--container-bg);
   }
 
   .tabs {
-    padding: 3px;
+    padding: clamp(2px, 0px, 5px);
     width: 100%;
     justify-content: space-around;
+    border-radius: 10px;
   }
 
   .tab-btn,
+  .tab-btn,
   .add-tab-btn {
-    font-size: 10px;
-    padding: 6px;
-    min-width: 50px;
+    font-size: clamp(8px, 2vw, 10px);
+    padding: clamp(4px, 1vw, 6px);
+    min-width: clamp(40px, 8vw, 50px);
   }
+}
 
   .add-tab-btn {
-    width: 30px;
-    font-size: 14px;
+  .add-tab-btn {
+    width: clamp(25px, 5vw, 30px);
+    font-size: clamp(12px, 3vw, 14px);
   }
+}
 
+  #searchInput {
   #searchInput {
     display: none;
     flex-direction: row;
-    gap: 10px;
-    padding: 5px;
+    gap: clamp(5px, 1vw, 10px);
+    padding: clamp(3px, 1vw, 5px);
     position: sticky;
     top: 0;
     z-index: 10;
+    width: 100%;
   }
+}
 
+  #searchInput.show {
   #searchInput.show {
     display: flex;
   }
+}
 
   #searchQuery,
   #searchCountry,
   #searchGenre {
-    font-size: 12px;
-    padding: 5px;
+  #searchGenre {
+    font-size: clamp(10px, 2vw, 12px);
+    padding: clamp(3px, 1vw, 5px);
   }
+}
 
   #searchInput button.search-btn {
-    font-size: 12px;
-    padding: 5px 10px;
+  button.search-btn {
+    font-size: clamp(10px, 2vw, 12px);
+    padding: clamp(3px, 1vw, 5px) clamp(8px, 2vw, 10px);
     width: auto;
   }
+}
 
   .theme-toggle,
+  .theme-toggle,
   .share-button {
-    height: 30px;
-    width: 30px;
-    padding: 4px;
-    top: 5px;
+    height: clamp(25px, 5vw, 30px);
+    width: clamp(25px, 5vw, 30px);
+    padding: clamp(3px, 1vw, 4px);
+    top: clamp(3px, 1vw, 5px);
   }
+}
 
   .theme-toggle {
-    left: 5px;
+  .theme-toggle {
+    left: clamp(3px, 1vw, 5px);
   }
+}
 
   .share-button {
-    right: 5px;
+  .share-button {
+    right: clamp(3px, 1vw, 5px);
   }
+}
 
   .modal {
-    max-width: 400px;
+  .modal {
+    max-width: clamp(300px, 80vw, 400px);
     width: 80%;
   }
+}
 
   .modal h2 {
-    font-size: 1em;
+  .modal h2 {
+    font-size: clamp(0.9em, 3vw, 1em);
   }
+}
 
   .modal-tab-btn,
+  .modal-tab-btn,
   .modal-cancel-btn {
-    font-size: 12px;
-    padding: 5px;
+    font-size: clamp(10px, 2vw, 12px);
+    padding: clamp(3px, 1vw, 5px);
   }
+}
 
   .new-tab-modal input,
+  .new-tab-modal input,
   .edit-tab-modal input {
-    font-size: 12px;
-    padding: 5px;
+    font-size: clamp(10px, 2vw, 12px);
+    padding: clamp(3px, 1vw, 5px);
   }
+}
 }
