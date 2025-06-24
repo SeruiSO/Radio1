@@ -324,6 +324,7 @@ h1 {
     position: static;
     z-index: 9;
     background: transparent;
+    box-sizing: border-box;
 }
 
 .tabs-wrapper::-webkit-scrollbar {
@@ -826,15 +827,17 @@ datalist {
         display: flex;
         flex-direction: row;
         width: 100%;
-        height: calc(100vh - 40px);
+        height: calc(100vh - 50px - 40px);
         gap: 0;
-        padding-bottom: 60px;
+        box-sizing: border-box;
+        overflow: hidden;
     }
 
     #currentStationInfo {
         flex: 0 0 20vw;
         min-width: 120px;
         padding: clamp(8px, 2vw, 10px);
+        padding-bottom: 10px;
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
@@ -844,6 +847,7 @@ datalist {
         overflow-y: auto;
         border-radius: 12px;
         border: 2px solid var(--accent);
+        box-sizing: border-box;
     }
 
     .station-info-content {
@@ -887,12 +891,14 @@ datalist {
         flex: 1;
         min-width: 150px;
         padding: clamp(8px, 1.5vw, 10px);
+        padding-bottom: 10px;
         margin: 0;
         height: 100%;
         max-height: none;
         overflow-y: auto;
         border-radius: 12px;
         border: 2px solid var(--accent);
+        box-sizing: border-box;
     }
 
     .station-item {
@@ -912,6 +918,7 @@ datalist {
         flex: 0 0 15vw;
         min-width: 60px;
         padding: clamp(8px, 1.5vw, 10px);
+        padding-bottom: 10px;
         border: 2px solid var(--accent);
         border-radius: 12px;
         position: static;
@@ -920,6 +927,8 @@ datalist {
         justify-content: center;
         align-items: center;
         height: 100%;
+        overflow-y: auto;
+        box-sizing: border-box;
     }
 
     .controls {
@@ -949,6 +958,7 @@ datalist {
         padding: 0;
         background: var(--container-bg);
         height: 40px;
+        box-sizing: border-box;
     }
 
     .tabs {
