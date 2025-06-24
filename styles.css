@@ -833,7 +833,7 @@ datalist {
         gap: clamp(10px, 2vw, 15px);
         width: 100%;
         flex-grow: 1;
-        height: calc(100% - 40px); /* Reserve space for tabs-wrapper */
+        height: calc(100vh - 40px); /* Уточнено висоту з урахуванням .tabs-wrapper */
     }
 
     #currentStationInfo {
@@ -880,14 +880,14 @@ datalist {
     }
 
     .station-list {
-        flex: 2;
+        flex: 1.5; /* Зменшено з 2 для балансування висоти */
         min-width: 200px;
         max-width: 50vw;
         padding: clamp(4px, 1vw, 6px);
         margin: 0;
-        flex-grow: 1;
         height: 100%;
         overflow-y: auto;
+        max-height: calc(100vh - 60px); /* Обмеження висоти з урахуванням .tabs-wrapper і h1 */
     }
 
     .station-item {
