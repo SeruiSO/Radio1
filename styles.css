@@ -1,14 +1,10 @@
-/* Updated on June 23, 2025 */
+/* Updated on June 24, 2025 */
 :root {
   --body-bg: #0A0A0A;
   --container-bg: #121212;
   --accent: #00F0FF;
   --text: #F0F0F0;
-  --accent-gradient: #003C4B;
-}
-
-* {
-  box-sizing: border-box;
+  --accent-gradient: rgb(0, 123, 255);
 }
 
 body {
@@ -17,40 +13,41 @@ body {
   color: var(--text);
   margin: 0;
   padding: 0;
-  min-height: 100dvh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   overflow-x: hidden;
-  padding-top: 10px;
+  padding-top: 5px;
+  box-sizing: border-box;
   transition: background 0.4s ease, color 0.4s ease;
 }
 
 .container {
-  max-width: 100vw;
+  max-width: 95%;
   width: 100%;
   background: var(--container-bg);
   padding: 15px;
   border-radius: 15px;
   border: 1px solid var(--accent);
-  margin: 0;
-  min-height: 100dvh;
+  margin: 0 auto;
+  min-height: 80vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-bottom: env(safe-area-inset-bottom);
   transition: background 0.4s ease, border-color 0.4s ease;
 }
 
 h1 {
-  font-size: clamp(1.8rem, 5vw, 2.5rem);
-  margin: 5px 0;
+  font-size: 2.5em;
+  margin: 2px 0 5px;
   text-align: center;
   color: var(--accent);
   transition: color 0.4s ease;
 }
 
-.theme-toggle, .share-button {
+.theme-toggle,
+.share-button {
   position: absolute;
   top: 10px;
   background: var(--container-bg);
@@ -74,21 +71,23 @@ h1 {
   right: 10px;
 }
 
-.theme-toggle:hover, .share-button:hover {
+.theme-toggle:hover,
+.share-button:hover {
   background: var(--accent);
   color: #0A0A0A;
   transform: scale(1.1);
 }
 
 #currentStationInfo {
-  background: linear-gradient(45deg, var(--container-bg), var(--container-bg), var(--accent-gradient));
+  background: linear-gradient(45deg, var(--container-bg), var(--accent-gradient));
   padding: 20px;
   border-radius: 12px;
-  margin: 10px 0;
+  margin: 5px 0;
   color: var(--text);
   border: 2px solid var(--accent);
   text-align: left;
   height: auto;
+  min-height: 100px;
   display: flex;
   align-items: center;
   position: sticky;
@@ -118,10 +117,10 @@ h1 {
 }
 
 #currentStationInfo .station-name {
-  font-size: clamp(20px, 3vw, 24px);
+  font-size: 18px;
   font-weight: 700;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -129,13 +128,13 @@ h1 {
 }
 
 #currentStationInfo .station-genre {
-  font-size: clamp(16px, 2.5vw, 18px);
+  font-size: 14px;
   font-weight: 400;
-  margin-top: 5px;
+  margin-top: 2px;
 }
 
 #currentStationInfo .station-country {
-  font-size: clamp(16px, 2.5vw, 18px);
+  font-size: 14px;
   font-weight: 400;
   margin-top: 2px;
 }
@@ -194,21 +193,22 @@ h1 {
 }
 
 .station-list {
-  max-height: 500px;
+  max-height: 60vh;
   overflow-y: auto;
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 10px;
-  margin: 10px 0;
-  padding: 10px;
+  margin: 8px 0;
+  padding: 6px;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) var(--container-bg);
   flex-grow: 1;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: border-color 0.4s ease;
 }
 
 .station-list::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .station-list::-webkit-scrollbar-track {
@@ -217,27 +217,28 @@ h1 {
 
 .station-list::-webkit-scrollbar-thumb {
   background: var(--accent);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 .station-item {
-  padding: 12px;
+  padding: 8px;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 6px;
   font-weight: 500;
   border: 1px solid var(--text);
-  margin: 5px 0;
+  margin: 3px 0;
   color: var(--text);
   background: var(--container-bg);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
 }
 
 .station-item img {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
   margin-right: 10px;
 }
@@ -248,12 +249,13 @@ h1 {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: 1.3;
   flex: 1;
-  font-size: clamp(14px, 2.5vw, 16px);
+  font-size: 14px;
 }
 
-.station-item:hover, .station-item.selected {
+.station-item:hover,
+.station-item.selected {
   background: var(--accent) !important;
   border: 2px solid var(--accent) !important;
   color: #0A0A0A;
@@ -266,7 +268,9 @@ h1 {
   gap: 5px;
 }
 
-.station-item .favorite-btn, .station-item .add-btn, .station-item .delete-btn {
+.station-item .favorite-btn,
+.station-item .add-btn,
+.station-item .delete-btn {
   background: none;
   border: none;
   color: var(--text);
@@ -279,7 +283,9 @@ h1 {
   color: #FFD700;
 }
 
-.station-item .favorite-btn:hover, .station-item .add-btn:hover, .station-item .delete-btn:hover {
+.station-item .favorite-btn:hover,
+.station-item .add-btn:hover,
+.station-item .delete-btn:hover {
   color: #FFD700;
 }
 
@@ -313,13 +319,10 @@ h1 {
 
 .tabs-wrapper {
   overflow-x: auto;
-  padding: 5px 0;
-  position: sticky;
-  top: 100px;
-  z-index: 1;
-  background: var(--container-bg);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2), 2px 0 5px rgba(0, 0, 0, 0.1), -2px 0 5px rgba(0, 0, 0, 0.1);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  margin: 2px 0;
+  position: static;
+  z-index: 9;
+  background: transparent;
 }
 
 .tabs-wrapper::-webkit-scrollbar {
@@ -333,25 +336,29 @@ h1 {
   padding: 5px;
   border-radius: 10px;
   white-space: nowrap;
+  gap: 4px;
+  scroll-behavior: smooth;
   transition: background 0.4s ease;
 }
 
-.tab-btn, .add-tab-btn {
+.tab-btn,
+.add-tab-btn {
   flex: 0 0 auto;
   min-width: 60px;
-  padding: 12px;
+  padding: 8px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
-  border-radius: 5px;
+  border-radius: 12px;
   color: var(--text);
   cursor: pointer;
-  margin: 0 4px;
+  margin: 0 2px;
   text-align: center;
-  font-size: clamp(14px, 2.5vw, 16px);
+  font-size: 11px;
   transition: all 0.3s ease;
 }
 
-.tab-btn:hover, .add-tab-btn:hover {
+.tab-btn:hover,
+.add-tab-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
   transform: translateY(-2px);
@@ -364,25 +371,25 @@ h1 {
 }
 
 .add-tab-btn {
-  width: 50px;
-  font-size: 18px;
+  width: 35px;
+  font-size: 16px;
 }
 
 #searchInput {
   display: none;
   margin: 5px 0;
-  padding: 10px;
+  padding: 6px;
   border-radius: 8px;
   border: 2px solid var(--accent);
   background: var(--container-bg);
   color: var(--text);
-  font-size: clamp(14px, 2.5vw, 16px);
+  font-size: 14px;
   width: 100%;
   box-sizing: border-box;
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
   transition: all 0.3s ease;
 }
 
@@ -391,18 +398,22 @@ h1 {
   box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
 }
 
-#searchQuery, #searchCountry, #searchGenre {
-  flex: 1 1 200px;
-  min-width: 120px;
+#searchQuery,
+#searchCountry,
+#searchGenre {
+  flex: 1;
+  min-width: 100%;
   background: transparent;
   border: none;
   color: var(--text);
-  font-size: clamp(14px, 2.5vw, 16px);
+  font-size: 14px;
   outline: none;
-  padding: 8px;
+  padding: 6px;
 }
 
-#searchQuery::placeholder, #searchCountry::placeholder, #searchGenre::placeholder {
+#searchQuery::placeholder,
+#searchCountry::placeholder,
+#searchGenre::placeholder {
   color: var(--text);
   opacity: 0.6;
 }
@@ -414,6 +425,10 @@ h1 {
   padding: 8px 12px;
   color: var(--text);
   cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  align-self: stretch;
   transition: all 0.3s ease;
 }
 
@@ -449,10 +464,10 @@ h1 {
   font-size: 32px;
   background: var(--container-bg);
   color: var(--text);
-  border: 4px solid var(--accent);
+  border: 2px solid var(--accent);
   border-radius: 15px;
   cursor: pointer;
-  touch-action: manipulation;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -488,18 +503,20 @@ h1 {
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 12px;
-  padding: 20px;
+  padding: 12px;
   z-index: 21;
-  width: 300px;
+  width: 90%;
   max-width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
   box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
   transition: all 0.3s ease;
 }
 
 .modal h2 {
   color: var(--accent);
-  font-size: 1.5em;
-  margin: 0 0 15px;
+  font-size: 1.2em;
+  margin: 0 0 10px;
   text-align: center;
 }
 
@@ -509,19 +526,21 @@ h1 {
   gap: 10px;
 }
 
-.modal-tab-btn, .modal-cancel-btn {
-  padding: 10px;
+.modal-tab-btn,
+.modal-cancel-btn {
+  padding: 6px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--text);
-  font-size: clamp(14px, 2.5vw, 16px);
+  font-size: 13px;
   cursor: pointer;
   text-align: center;
   transition: all 0.3s ease;
 }
 
-.modal-tab-btn:hover, .modal-cancel-btn:hover {
+.modal-tab-btn:hover,
+.modal-cancel-btn:hover {
   background: var(--accent);
   color: #0A0A0A;
   transform: translateY(-2px);
@@ -535,22 +554,24 @@ h1 {
 .modal-cancel-btn:hover {
   background: var(--text);
   color: var(--body-bg);
-} 
+}
 
-.new-tab-modal input, .edit-tab-modal input {
+.new-tab-modal input,
+.edit-tab-modal input {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
+  padding: 6px;
+  margin-bottom: 10px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--text);
-  font-size: clamp(14px, 2.5vw, 16px);
+  font-size: 13px;
   box-sizing: border-box;
   transition: all 0.3s ease;
 }
 
-.new-tab-modal input:focus, .edit-tab-modal input:focus {
+.new-tab-modal input:focus,
+.edit-tab-modal input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
   outline: none;
@@ -568,197 +589,413 @@ datalist {
   display: none;
 }
 
-#searchQuery[list], #searchCountry[list], #searchGenre[list] {
+#searchQuery[list],
+#searchCountry[list],
+#searchGenre[list] {
   background: var(--container-bg);
   border: 1px solid var(--accent);
   border-radius: 4px;
   padding: 8px;
   color: var(--text);
-  font-size: clamp(14px, 2.5vw, 16px);
   transition: all 0.3s ease;
 }
 
-#searchQuery[list]:focus, #searchCountry[list]:focus, #searchGenre[list]:focus {
+#searchQuery[list]:focus,
+#searchCountry[list]:focus,
+#searchGenre[list]:focus {
   border-color: var(--accent);
   box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
-  outline: none;
 }
 
-#searchQuery[list]::placeholder, #searchCountry[list]::placeholder, #searchGenre[list]::placeholder {
-  color: var(--text);
-  opacity: 0.6;
-}
-
-/* Media Queries for Samsung A13, A16, and iPhone 12 Mini */
 @media (max-width: 720px) {
-  .container {
-    margin: 0;
-    padding: 10px;
-    border-radius: 0;
-    min-height: 100dvh;
+  h1 {
+    font-size: 1.8em;
+    line-height: 1.2;
+    margin: 2px 0 5px;
   }
 
-  h1 {
-    font-size: clamp(1.5rem, 4vw, 2rem);
+  .container {
+    padding: 10px;
+    margin: 0 auto;
+    min-height: 80vh;
+  }
+
+  .control-btn {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--accent);
+  }
+
+  .station-list {
+    max-height: 60vh;
+    margin: 8px 0;
+    padding: 6px;
+    border-width: 1px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .station-item {
+    padding: 8px;
+    margin: 3px 0;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .station-item .station-name {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .station-item img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .station-list::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .station-list::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+  }
+
+  .theme-toggle,
+  .share-button {
+    top: 5px;
+    padding: 4px;
+    height: 35px;
+    width: 35px;
+  }
+
+  .theme-toggle {
+    left: 5px;
+  }
+
+  .share-button {
+    right: 5px;
+  }
+
+  .tabs-wrapper {
+    overflow-x: auto;
+    margin: 2px 0;
+    padding: 0 5px;
+    background: transparent;
+    position: static;
+  }
+
+  .tab-btn,
+  .add-tab-btn {
+    min-width: 60px;
+    padding: 8px;
+    font-size: 11px;
+    border-width: 2px;
+    border-radius: 12px;
+  }
+
+  .add-tab-btn {
+    width: 35px;
+    font-size: 16px;
+  }
+
+  .tabs {
+    gap: 4px;
+    scroll-behavior: smooth;
   }
 
   #currentStationInfo {
-    padding: 15px;
-    flex-direction: column;
-    align-items: flex-start;
+    padding: 12px;
+    min-height: 100px;
+    max-height: 350px;
+    align-items: center;
     gap: 10px;
   }
 
   .station-info-content {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
+    flex-direction: row;
+    gap: 10px;
   }
 
-  .station-text {
-    order: 1;
+  #currentStationInfo .station-name {
+    font-size: 18px;
+    -webkit-line-clamp: 2;
+  }
+
+  #currentStationInfo .station-genre,
+  #currentStationInfo .station-country {
+    font-size: 14px;
+    margin-top: 2px;
+  }
+
+  .station-icon {
+    width: 65px;
+    height: 65px;
+    font-size: 50px;
+  }
+
+  .wave-visualizer {
+    width: 120px;
+    height: 65px;
+  }
+
+  .wave-line {
+    height: 1px;
+  }
+
+  #searchInput {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 6px;
+    gap: 6px;
+    max-height: none;
+  }
+
+  #searchQuery,
+  #searchCountry,
+  #searchGenre {
+    flex: 1;
+    min-width: 100%;
+    font-size: 14px;
+    padding: 6px;
+  }
+
+  #searchInput button.search-btn {
+    padding: 8px 12px;
+    font-size: 14px;
     width: 100%;
+    align-self: stretch;
+  }
+
+  .modal {
+    width: 90%;
+    padding: 12px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal h2 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+
+  .modal-tab-btn,
+  .modal-cancel-btn {
+    font-size: 13px;
+    padding: 6px;
+    border-radius: 6px;
+  }
+
+  .new-tab-modal input,
+  .edit-tab-modal input {
+    font-size: 13px;
+    padding: 6px;
+    margin-bottom: 10px;
+  }
+}
+
+@media (min-width: 721px) {
+  #searchInput {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-height: 1600px) {
+  .container {
+    min-height: 85vh;
+  }
+
+  .station-list {
+    max-height: 450px;
+  }
+}
+
+/* New styles for landscape orientation */
+@media (orientation: landscape) and (max-width: 1024px) {
+  .container {
+    flex-direction: row;
+    gap: 15px;
+    max-width: 1200px;
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 1.8em;
+    margin: 0 0 5px;
+  }
+
+  #currentStationInfo {
+    width: 25%;
+    min-width: 250px;
+    padding: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    position: static;
+  }
+
+  .station-info-content {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #currentStationInfo .station-name {
+    font-size: 16px;
+  }
+
+  #currentStationInfo .station-genre,
+  #currentStationInfo .station-country {
+    font-size: 12px;
   }
 
   .station-icon {
     width: 60px;
     height: 60px;
     font-size: 40px;
-    order: 2;
   }
 
   .wave-visualizer {
-    width: 100%;
-    height: 50px;
-    order: 3;
-    margin-left: 0;
+    width: 120px;
+    height: 60px;
   }
 
-  #currentStationInfo .station-name {
-    font-size: clamp(16px, 2.5vw, 20px);
-  }
-
-  #currentStationInfo .station-genre,
-  #currentStationInfo .station-country {
-    font-size: clamp(14px, 2vw, 16px);
+  .wave-line {
+    height: 1px;
+    animation: wavePulse 1s infinite;
   }
 
   .station-list {
-    max-height: 400px;
-    padding: 5px;
+    width: 50%;
+    max-height: 80vh;
+    padding: 6px;
+    margin: 0;
   }
 
   .station-item {
-    padding: 10px;
-    font-size: clamp(14px, 2vw, 16px);
+    padding: 6px;
   }
 
   .station-item .station-name {
-    font-size: clamp(14px, 2vw, 16px);
+    font-size: 13px;
   }
 
-  .tabs-wrapper {
-    top: 80px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1), -2px 0 5px rgba(0, 0, 0, 0.1);
-  }
-
-  .tab-btn, .add-tab-btn {
-    min-width: 50px;
-    padding: 8px;
-    font-size: clamp(14px, 2vw, 16px);
-    margin: 0 2px;
-  }
-
-  .add-tab-btn {
-    width: 40px;
-    font-size: 16px;
-  }
-
-  #searchInput {
-    padding: 5px;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  #searchQuery, #searchCountry, #searchGenre {
-    min-width: 100%;
-    padding: 6px;
-    font-size: clamp(14px, 2vw, 16px);
-  }
-
-  #searchInput button.search-btn {
-    padding: 6px 10px;
-    font-size: clamp(14px, 2vw, 16px);
+  .station-item img {
+    width: 24px;
+    height: 24px;
   }
 
   .controls-container {
+    width: 15%;
+    min-width: 120px;
     padding: 10px;
-    gap: 10px;
+    border-top: none;
+    border-left: 2px solid var(--accent);
+    position: static;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
   }
 
   .controls {
+    flex-direction: column;
     gap: 20px;
   }
 
   .control-btn {
-    width: 80px;
-    height: 80px;
-    font-size: 28px;
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
   }
 
-  .modal {
-    width: 90%;
-    padding: 15px;
+  .control-btn:hover {
+    transform: scale(1.1);
   }
 
-  .modal h2 {
-    font-size: 1.2em;
+  .tabs-wrapper {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    z-index: 11;
   }
 
-  .modal-tab-btn, .modal-cancel-btn {
-    padding: 8px;
-    font-size: clamp(14px, 2vw, 16px);
+  .tabs {
+    padding: 3px;
   }
 
-  .new-tab-modal input, .edit-tab-modal input {
-    padding: 8px;
-    font-size: clamp(14px, 2vw, 16px);
+  .tab-btn,
+  .add-tab-btn {
+    font-size: 10px;
+    padding: 6px;
+    min-width: 50px;
   }
-}
 
-/* Additional Media Query for very small screens (e.g., iPhone 12 Mini) */
-@media (max-width: 360px) {
-  .container {
+  .add-tab-btn {
+    width: 30px;
+    font-size: 14px;
+  }
+
+  #searchInput {
+    display: none;
+    flex-direction: row;
+    gap: 10px;
+    padding: 5px;
+    position: sticky;
+    top: 40px;
+    z-index: 10;
+  }
+
+  #searchInput.show {
+    display: flex;
+  }
+
+  #searchQuery,
+  #searchCountry,
+  #searchGenre {
+    font-size: 12px;
     padding: 5px;
   }
 
-  #currentStationInfo {
-    padding: 10px;
+  #searchInput button.search-btn {
+    font-size: 12px;
+    padding: 5px 10px;
+    width: auto;
   }
 
-  .station-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 30px;
+  .theme-toggle,
+  .share-button {
+    height: 30px;
+    width: 30px;
+    padding: 4px;
+    top: 5px;
   }
 
-  .wave-visualizer {
-    height: 40px;
+  .theme-toggle {
+    left: 5px;
   }
 
-  .station-item {
-    padding: 8px;
+  .share-button {
+    right: 5px;
   }
 
-  .tab-btn, .add-tab-btn {
-    min-width: 45px;
-    padding: 6px;
-    font-size: clamp(12px, 1.8vw, 14px);
+  .modal {
+    max-width: 400px;
+    width: 80%;
   }
 
-  .control-btn {
-    width: 70px;
-    height: 70px;
-    font-size: 24px;
+  .modal h2 {
+    font-size: 1em;
+  }
+
+  .modal-tab-btn,
+  .modal-cancel-btn {
+    font-size: 12px;
+    padding: 5px;
+  }
+
+  .new-tab-modal input,
+  .edit-tab-modal input {
+    font-size: 12px;
+    padding: 5px;
   }
 }
