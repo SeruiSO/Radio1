@@ -5,7 +5,7 @@
     --accent: #00F0FF;
     --text: #F0F0F0;
     --accent-gradient: rgb(0, 123, 255);
-    --accent-rgb: 0, 240, 255; /* Додано для box-shadow */
+    --accent-rgb: 0, 240, 255;
 }
 
 body {
@@ -758,8 +758,7 @@ datalist {
     #searchInput button.search-btn {
         padding: 8px 12px;
         font-size: 14px;
-        width: 100%;
-        align-self: stretch;
+        width: auto;
     }
 
     .modal {
@@ -806,68 +805,70 @@ datalist {
     }
 }
 
-/* Styles for landscape orientation */
 @media (orientation: landscape) and (max-width: 1024px) {
     .container {
-        flex-direction: column;
-        gap: 10px;
         max-width: 100%;
-        padding: 10px;
+        padding: 0;
         min-height: 100vh;
+        display: flex;
+        flex-direction: column;
         justify-content: flex-start;
+        border: none;
     }
 
     h1 {
-        font-size: clamp(1.5em, 5vw, 1.8em);
-        margin: 0 0 5px;
+        font-size: clamp(1.2em, 4vw, 1.5em);
+        margin: 5px 0;
+        padding: 0 10px;
     }
 
     .main-content {
         display: flex;
         flex-direction: row;
-        gap: clamp(10px, 2vw, 10px);
         width: 100%;
-        height: 100vh;
-        flex-grow: 1;
+        height: calc(100vh - 40px); /* Adjusted for tabs height */
+        gap: 0;
     }
 
     #currentStationInfo {
         flex: 0 0 20vw;
-        min-width: 150px;
+        min-width: 120px;
         padding: clamp(8px, 2vw, 10px);
         flex-direction: column;
         align-items: center;
+        justify-content: center;
         position: static;
         height: 100%;
         margin: 0;
         overflow-y: auto;
-        border-radius: 12px 0 0 12px;
+        border-radius: 0;
+        border-right: 1px solid var(--accent);
     }
 
     .station-info-content {
         flex-direction: row;
-        gap: clamp(10px, 2vw, 15px);
+        gap: clamp(8px, 1.5vw, 10px);
         width: 100%;
     }
 
     #currentStationInfo .station-name {
-        font-size: clamp(14px, 3vw, 16px);
+        font-size: clamp(12px, 2.5vw, 14px);
     }
 
     #currentStationInfo .station-genre,
     #currentStationInfo .station-country {
-        font-size: clamp(10px, 2vw, 12px);
+        font-size: clamp(8px, 1.8vw, 10px);
     }
 
     .station-icon {
-        width: clamp(40px, 6vw, 60px);
-        height: clamp(40px, 6vw, 60px);
-        font-size: clamp(30px, 5vw, 40px);
+        width: clamp(30px, 5vw, 50px);
+        height: clamp(30px, 5vw, 50px);
+        font-size: clamp(20px, 4vw, 30px);
     }
 
     .wave-visualizer {
-        width: clamp(80px, 12vw, 120px);
-        height: clamp(40px, 8vw, 60px);
+        width: clamp(60px, 10vw, 80px);
+        height: clamp(30px, 5vw, 50px);
     }
 
     .wave-line {
@@ -876,15 +877,16 @@ datalist {
     }
 
     .station-list {
-        flex: 0 0 60vw;
-        min-width: 200px;
-        padding: clamp(10px, 2vw, 15px);
+        flex: 1;
+        min-width: 150px;
+        padding: clamp(8px, 1.5vw, 10px);
         margin: 0;
         height: 100%;
+        max-height: none;
         overflow-y: auto;
         border-radius: 0;
-        border-left: 0;
-        border-right: 0;
+        border-left: 1px solid var(--accent);
+        border-right: 1px solid var(--accent);
     }
 
     .station-item {
@@ -892,39 +894,38 @@ datalist {
     }
 
     .station-item .station-name {
-        font-size: clamp(10px, 2.5vw, 12px);
+        font-size: clamp(10px, 2vw, 12px);
     }
 
     .station-item img {
-        width: clamp(18px, 4vw, 24px);
-        height: clamp(18px, 4vw, 24px);
+        width: clamp(16px, 3vw, 20px);
+        height: clamp(16px, 3vw, 20px);
     }
 
     .controls-container {
         flex: 0 0 20vw;
-        min-width: 100px;
-        padding: clamp(10px, 2vw, 15px);
-        border-top: none;
-        border-left: 2px solid var(--accent);
+        min-width: 80px;
+        padding: clamp(8px, 1.5vw, 10px);
+        border: none;
         position: static;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         height: 100%;
-        border-radius: 0 12px 12px 0;
+        border-radius: 0;
     }
 
     .controls {
         flex-direction: column;
-        gap: clamp(15px, 3vw, 20px);
+        gap: clamp(10px, 2vw, 15px);
         align-items: center;
     }
 
     .control-btn {
-        width: clamp(60px, 7vw, 70px);
-        height: clamp(60px, 7vw, 70px);
-        font-size: clamp(24px, 3vw, 28px);
+        width: clamp(50px, 6vw, 60px);
+        height: clamp(50px, 6vw, 60px);
+        font-size: clamp(20px, 2.5vw, 24px);
     }
 
     .control-btn:hover {
@@ -939,31 +940,34 @@ datalist {
         z-index: 11;
         padding: 0;
         background: var(--container-bg);
+        height: 40px;
     }
 
     .tabs {
         padding: clamp(2px, 0.5vw, 3px);
         width: 100%;
+        height: 100%;
         justify-content: space-around;
         border-radius: 10px 10px 0 0;
+        gap: 2px;
     }
 
     .tab-btn,
     .add-tab-btn {
-        font-size: clamp(8px, 2vw, 10px);
+        font-size: clamp(8px, 1.8vw, 10px);
         padding: clamp(4px, 1vw, 6px);
-        min-width: clamp(40px, 8vw, 50px);
+        min-width: clamp(35px, 7vw, 45px);
     }
 
     .add-tab-btn {
-        width: clamp(25px, 5vw, 30px);
-        font-size: clamp(12px, 3vw, 14px);
+        width: clamp(20px, 4vw, 25px);
+        font-size: clamp(10px, 2.5vw, 12px);
     }
 
     #searchInput {
         display: none;
         flex-direction: row;
-        gap: clamp(5px, 1vw, 10px);
+        gap: clamp(5px, 1vw, 8px);
         padding: clamp(3px, 1vw, 5px);
         position: sticky;
         top: 0;
@@ -978,13 +982,13 @@ datalist {
     #searchQuery,
     #searchCountry,
     #searchGenre {
-        font-size: clamp(10px, 2vw, 12px);
+        font-size: clamp(10px, 1.8vw, 12px);
         padding: clamp(3px, 1vw, 5px);
     }
 
     #searchInput button.search-btn {
-        font-size: clamp(10px, 2vw, 12px);
-        padding: clamp(3px, 1vw, 5px) clamp(8px, 2vw, 10px);
+        font-size: clamp(10px, 1.8vw, 12px);
+        padding: clamp(3px, 1vw, 5px) clamp(6px, 1.5vw, 8px);
         width: auto;
     }
 
@@ -1005,23 +1009,23 @@ datalist {
     }
 
     .modal {
-        max-width: clamp(300px, 80vw, 400px);
+        max-width: clamp(250px, 70vw, 350px);
         width: 80%;
     }
 
     .modal h2 {
-        font-size: clamp(0.9em, 3vw, 1em);
+        font-size: clamp(0.8em, 2.5vw, 0.9em);
     }
 
     .modal-tab-btn,
     .modal-cancel-btn {
-        font-size: clamp(10px, 2vw,);
+        font-size: clamp(10px, 1.8vw, 12px);
         padding: clamp(3px, 1vw, 5px);
     }
 
     .new-tab-modal input,
     .edit-tab-modal input {
-        font-size: clamp(10px, 2vw, 12px);
+        font-size: clamp(10px, 1.8vw, 12px);
         padding: clamp(3px, 1vw, 5px);
     }
 }
