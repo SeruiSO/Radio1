@@ -3,6 +3,7 @@ let currentIndex = 0;
 let favoriteStations = JSON.parse(localStorage.getItem("favoriteStations")) || [];
 let isPlaying = localStorage.getItem("isPlaying") === "true" || false;
 let intendedPlaying = localStorage.getItem("intendedPlaying") === "true" || false;
+let wasBluetoothConnected = localStorage.getItem("wasBluetoothConnected") === "true" || false;
 let stationLists = JSON.parse(localStorage.getItem("stationLists")) || {};
 let userAddedStations = JSON.parse(localStorage.getItem("userAddedStations")) || {};
 let stationItems = [];
@@ -797,6 +798,16 @@ document.addEventListener("DOMContentLoaded", () => {
           document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
           return;
         }
+        // Check Bluetooth availability before attempting playback
+        let isBluetoothAvailable = false;
+        if ("bluetooth" in navigator && "getAvailability" in navigator.bluetooth) {
+          isBluetoothAvailable = await navigator.bluetooth.getAvailability();
+          console.log(`tryAutoPlay: Bluetooth available: ${isBluetoothAvailable}`);
+        }
+        if (!isBluetoothAvailable && wasBluetoothConnected) {
+          console.log("tryAutoPlay: Skip, Bluetooth not available and was previously connected");
+          return;
+        }
         const currentStationUrl = stationItems[currentIndex].dataset.value;
         const normalizedCurrentUrl = normalizeUrl(currentStationUrl);
         const normalizedAudioSrc = normalizeUrl(audio.src);
@@ -840,7 +851,9 @@ document.addEventListener("DOMContentLoaded", () => {
             await audio.play();
             errorCount = 0;
             isPlaying = true;
-            console.log("Playback started successfully");
+            wasBluetoothConnected = isBluetoothAvailable;
+            localStorage.setItem("wasBluetoothConnected", wasBluetoothConnected);
+            console.log("Playback started successfully, wasBluetoothConnected:", wasBluetoothConnected);
             document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
             localStorage.setItem("isPlaying", isPlaying);
             localStorage.setItem("intendedPlaying", intendedPlaying);
@@ -1227,6 +1240,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = null;
       }
+      // Check if pause was due to Bluetooth disconnection
+      if ("bluetooth" in navigator && "getAvailability" in navigator.bluetooth && wasBluetoothConnected) {
+        navigator.bluetooth.getAvailability().then(isAvailable => {
+          if (!isAvailable) {
+            console.log("Audio paused due to Bluetooth disconnection");
+            intendedPlaying = false;
+            localStorage.setItem("intendedPlaying", intendedPlaying);
+            wasBluetoothConnected = false;
+            localStorage.setItem("wasBluetoothConnected", wasBluetoothConnected);
+          }
+        });
+      }
     });
 
     audio.addEventListener("error", () => {
@@ -1275,6 +1300,40 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    if ("bluetooth" in navigator) {
+      navigator.bluetooth.addEventListener("availabilitychanged", () => {
+        console.log("Bluetooth availability changed");
+        if ("getAvailability" in navigator.bluetooth) {
+          navigator.bluetooth.getAvailability().then(isAvailable => {
+            console.log(`Bluetooth available: ${isAvailable}`);
+            if (!isAvailable && wasBluetoothConnected) {
+              console.log("Bluetooth disconnected, stopping playback");
+              audio.pause();
+              isPlaying = false;
+              intendedPlaying = false;
+              playPauseBtn.textContent = "▶";
+              document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+              localStorage.setItem("isPlaying", isPlaying);
+              localStorage.setItem("intendedPlaying", intendedPlaying);
+              wasBluetoothConnected = false;
+              localStorage.setItem("wasBluetoothConnected", wasBluetoothConnected);
+            } else if (isAvailable && stationItems?.length && currentIndex < stationItems.length) {
+              console.log("Bluetooth connected, attempting playback");
+              wasBluetoothConnected = true;
+              localStorage.setItem("wasBluetoothConnected", wasBluetoothConnected);
+              intendedPlaying = true;
+              localStorage.setItem("intendedPlaying", intendedPlaying);
+              tryAutoPlay(3, 1000);
+            }
+          }).catch(error => {
+            console.error("Error checking Bluetooth availability:", error);
+          });
+        } else {
+          console.warn("navigator.bluetooth.getAvailability not supported, skipping Bluetooth-specific handling");
+        }
+      });
+    }
+
     addEventListeners();
 
     window.addEventListener("beforeunload", () => {
@@ -1302,15 +1361,6 @@ document.addEventListener("DOMContentLoaded", () => {
       navigator.mediaSession.setActionHandler("nexttrack", () => {
         console.log("MediaSession nexttrack action triggered");
         nextStation();
-      });
-    }
-
-    if ("bluetooth" in navigator) {
-      navigator.bluetooth.addEventListener("availabilitychanged", () => {
-        console.log("Bluetooth availability changed");
-        if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
-          tryAutoPlay(3, 1000);
-        }
       });
     }
 
