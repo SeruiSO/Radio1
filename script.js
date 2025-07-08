@@ -8,7 +8,7 @@ let userAddedStations = JSON.parse(localStorage.getItem("userAddedStations")) ||
 let stationItems = [];
 let abortController = new AbortController();
 let errorCount = 0;
-const ERROR_LIMIT = 600; // 600 attempts × 5 seconds = 300 seconds (5 minutes)
+const ERROR_LIMIT = 1500; // 1500 attempts × 2 seconds = 3000 seconds (50 minutes)
 let pastSearches = JSON.parse(localStorage.getItem("pastSearches")) || [];
 let deletedStations = JSON.parse(localStorage.getItem("deletedStations")) || [];
 let customTabs = JSON.parse(localStorage.getItem("customTabs")) || [];
@@ -775,7 +775,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         console.log("Fallback: Device offline or invalid state");
         if (!networkCheckInterval) {
-          networkCheckInterval = setInterval(checkNetworkStatusFallback, 5000);
+          networkCheckInterval = setInterval(checkNetworkStatusFallback, 2000);
         }
         // Notify service worker to start checking
         if (navigator.serviceWorker.controller) {
@@ -813,7 +813,7 @@ document.addEventListener("DOMContentLoaded", () => {
             resetStationInfo();
           } else {
             console.log("Scheduling retry after invalid URL");
-            setTimeout(() => tryAutoPlay(retryCount, delay), 5000);
+            setTimeout(() => tryAutoPlay(retryCount, delay), 2000);
           }
           return;
         }
@@ -869,7 +869,7 @@ document.addEventListener("DOMContentLoaded", () => {
               resetStationInfo();
             } else {
               console.log("Scheduling retry after error");
-              setTimeout(() => tryAutoPlay(retryCount, delay), 5000);
+              setTimeout(() => tryAutoPlay(retryCount, delay), 2000);
             }
           } finally {
             streamAbortController = null;
@@ -878,7 +878,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!navigator.onLine) {
           console.log("Device offline: scheduling retry");
-          setTimeout(() => tryAutoPlay(retryCount, delay), 5000);
+          setTimeout(() => tryAutoPlay(retryCount, delay), 2000);
           return;
         }
 
@@ -1238,7 +1238,7 @@ document.addEventListener("DOMContentLoaded", () => {
         errorTimeout = setTimeout(() => {
           tryAutoPlay(3, 1000);
           errorTimeout = null;
-        }, 5000);
+        }, 2000);
       } else if (navigator.onLine && errorCount >= ERROR_LIMIT) {
         console.error("Reached playback error limit while online");
         resetStationInfo();
