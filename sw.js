@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-so-cache-v1';
+const CACHE_NAME = 'radio-so-cache-v2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -6,14 +6,15 @@ const urlsToCache = [
   '/script.js',
   '/stations.json',
   '/favicon.ico',
-  '/manifest.json'
+  '/manifest.json',
+  '/ping.txt'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache');
+        console.log('SW: Opened cache');
         return cache.addAll(urlsToCache);
       })
       .then(() => self.skipWaiting())
@@ -78,11 +79,12 @@ self.addEventListener('fetch', event => {
 // Network status checking
 let isOnline = navigator.onLine;
 let lastStatus = isOnline;
+let networkCheckInterval = null;
 
 function checkNetworkStatus() {
-  fetch('https://www.google.com', { method: 'HEAD', cache: 'no-store' })
-    .then(() => {
-      if (!isOnline) {
+  fetch('/ping.txt', { method: 'HEAD', cache: 'no-store' })
+    .then(response => {
+      if (response.ok && !isOnline) {
         isOnline = true;
         if (lastStatus !== isOnline) {
           console.log('SW: Network restored');
@@ -94,15 +96,18 @@ function checkNetworkStatus() {
               });
             });
           });
+          // Stop checking after network is restored
+          clearInterval(networkCheckInterval);
+          networkCheckInterval = null;
         }
       }
       lastStatus = isOnline;
     })
-    .catch(() => {
+    .catch(error => {
       if (isOnline) {
         isOnline = false;
         if (lastStatus !== isOnline) {
-          console.log('SW: Network lost');
+          console.log('SW: Network lost', error);
           self.clients.matchAll().then(clients => {
             clients.forEach(client => {
               client.postMessage({
@@ -117,11 +122,55 @@ function checkNetworkStatus() {
     });
 }
 
-// Check network status every 1 second
-setInterval(checkNetworkStatus, 1000);
-
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'CHECK_NETWORK') {
-    checkNetworkStatus();
+    if (!isOnline && !networkCheckInterval) {
+      console.log('SW: Starting network check on demand');
+      checkNetworkStatus();
+      networkCheckInterval = setInterval(checkNetworkStatus, 1000);
+    }
   }
+});
+
+// Start network check on offline event
+self.addEventListener('offline', () => {
+  if (isOnline) {
+    isOnline = false;
+    console.log('SW: Offline event triggered');
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'NETWORK_STATUS',
+          online: false
+        });
+      });
+    });
+    if (!networkCheckInterval) {
+      console.log('SW: Starting network check after offline event');
+      networkCheckInterval = setInterval(checkNetworkStatus, 1000);
+    }
+  }
+  lastStatus = isOnline;
+});
+
+// Stop network check on online event
+self.addEventListener('online', () => {
+  if (!isOnline) {
+    isOnline = true;
+    console.log('SW: Online event triggered');
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'NETWORK_STATUS',
+          online: true
+        });
+      });
+    });
+    if (networkCheckInterval) {
+      console.log('SW: Stopping network check after online event');
+      clearInterval(networkCheckInterval);
+      networkCheckInterval = null;
+    }
+  }
+  lastStatus = isOnline;
 });

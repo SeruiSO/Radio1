@@ -8,13 +8,14 @@ let userAddedStations = JSON.parse(localStorage.getItem("userAddedStations")) ||
 let stationItems = [];
 let abortController = new AbortController();
 let errorCount = 0;
-const ERROR_LIMIT = 15;
+const ERROR_LIMIT = 600; // 600 attempts × 5 seconds = 300 seconds (5 minutes)
 let pastSearches = JSON.parse(localStorage.getItem("pastSearches")) || [];
 let deletedStations = JSON.parse(localStorage.getItem("deletedStations")) || [];
 let customTabs = JSON.parse(localStorage.getItem("customTabs")) || [];
 let isAutoPlayPending = false;
 let streamAbortController = null;
 let errorTimeout = null;
+let networkCheckInterval = null;
 customTabs = Array.isArray(customTabs) ? customTabs.filter(tab => typeof tab === "string" && tab.trim()) : [];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -60,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updatePastSearches();
     populateSearchSuggestions();
-    await loadStations(); // Ensure stations are loaded before attempting autoplay
+    await loadStations();
     renderTabs();
 
     shareButton.addEventListener("click", () => {
@@ -219,7 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             newStations[tab].forEach(s => {
               if (!deletedStations.includes(s.name)) {
-                uniqueStations.set(s.name, s);
+                uniqueStations.set(s.name, { ...s, favicon: isValidUrl(s.favicon) ? s.favicon : "" });
               }
             });
             mergedStationLists[tab] = Array.from(uniqueStations.values());
@@ -232,12 +233,12 @@ document.addEventListener("DOMContentLoaded", () => {
           const uniqueStations = new Map();
           (userAddedStations[tab] || []).forEach(s => {
             if (!deletedStations.includes(s.name)) {
-              uniqueStations.set(s.name, s);
+              uniqueStations.set(s.name, { ...s, favicon: isValidUrl(s.favicon) ? s.favicon : "" });
             }
           });
           (stationLists[tab] || []).forEach(s => {
             if (!deletedStations.includes(s.name)) {
-              uniqueStations.set(s.name, s);
+              uniqueStations.set(s.name, { ...s, favicon: isValidUrl(s.favicon) ? s.favicon : "" });
             }
           });
           mergedStationLists[tab] = Array.from(uniqueStations.values());
@@ -263,12 +264,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const uniqueStations = new Map();
             (userAddedStations[tab] || []).forEach(s => {
               if (!deletedStations.includes(s.name)) {
-                uniqueStations.set(s.name, s);
+                uniqueStations.set(s.name, { ...s, favicon: isValidUrl(s.favicon) ? s.favicon : "" });
               }
             });
             (stationLists[tab] || []).forEach(s => {
               if (!deletedStations.includes(s.name)) {
-                uniqueStations.set(s.name, s);
+                uniqueStations.set(s.name, { ...s, favicon: isValidUrl(s.favicon) ? s.favicon : "" });
               }
             });
             stationLists[tab] = Array.from(uniqueStations.values());
@@ -303,6 +304,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         let stations = await response.json();
         stations = stations.filter(station => station.url_resolved && isValidUrl(station.url_resolved));
+        stations = stations.map(station => ({
+          ...station,
+          favicon: isValidUrl(station.favicon) ? station.favicon : ""
+        }));
         console.log("Received stations (after HTTPS filter):", stations.length);
         renderSearchResults(stations);
       } catch (error) {
@@ -328,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
         item.dataset.genre = shortenGenre(station.tags || "Unknown");
         item.dataset.country = station.country || "Unknown";
         item.dataset.favicon = station.favicon && isValidUrl(station.favicon) ? station.favicon : "";
-        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='🎵 '">` : "🎵 ";
+        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='🎵 '; console.warn('Error loading favicon:', '${item.dataset.favicon}');">` : "🎵 ";
         item.innerHTML = `${iconHtml}<span class="station-name">${station.name}</span><button class="add-btn">ADD</button>`;
         fragment.appendChild(item);
       });
@@ -731,11 +736,52 @@ document.addEventListener("DOMContentLoaded", () => {
             loadStations();
           }
         }
-        if (event.data.type === "NETWORK_STATUS" && event.data.online && intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
-          console.log("Network restored (SW), trying to play");
-          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
+        if (event.data.type === "NETWORK_STATUS") {
+          console.log(`SW message: NETWORK_STATUS, online: ${event.data.online}`);
+          if (event.data.online && intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
+            console.log("Network restored (SW), resetting errorCount and trying to play");
+            errorCount = 0;
+            tryAutoPlay(3, 1000);
+            // Stop fallback check after network is restored
+            if (networkCheckInterval) {
+              console.log("Stopping fallback network check");
+              clearInterval(networkCheckInterval);
+              networkCheckInterval = null;
+            }
+          } else if (!event.data.online) {
+            console.log("Network lost (SW)");
+            // Start fallback check if not already running
+            if (!networkCheckInterval) {
+              console.log("Starting fallback network check");
+              checkNetworkStatusFallback();
+            }
+          }
         }
       });
+    }
+
+    // Fallback network status check
+    function checkNetworkStatusFallback() {
+      if (navigator.onLine && intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
+        console.log("Fallback: Network restored via navigator.onLine, resetting errorCount and trying to play");
+        errorCount = 0;
+        tryAutoPlay(3, 1000);
+        // Stop checking after network is restored
+        if (networkCheckInterval) {
+          console.log("Stopping fallback network check");
+          clearInterval(networkCheckInterval);
+          networkCheckInterval = null;
+        }
+      } else {
+        console.log("Fallback: Device offline or invalid state");
+        if (!networkCheckInterval) {
+          networkCheckInterval = setInterval(checkNetworkStatusFallback, 5000);
+        }
+        // Notify service worker to start checking
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ type: 'CHECK_NETWORK' });
+        }
+      }
     }
 
     async function tryAutoPlay(retryCount = 3, delay = 1000) {
@@ -746,11 +792,6 @@ document.addEventListener("DOMContentLoaded", () => {
       isAutoPlayPending = true;
 
       try {
-        if (!navigator.onLine) {
-          console.log("Device offline: skipping playback");
-          setTimeout(() => tryAutoPlay(retryCount, delay), 5000); // Retry after 5 seconds if offline
-          return;
-        }
         if (!intendedPlaying || !stationItems?.length || currentIndex >= stationItems.length) {
           console.log("Skip tryAutoPlay: invalid state", { intendedPlaying, hasStationItems: !!stationItems?.length, isIndexValid: currentIndex < stationItems.length });
           document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
@@ -766,9 +807,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!isValidUrl(currentStationUrl)) {
           console.error("Invalid URL:", currentStationUrl);
           errorCount++;
-          if (errorCount >= ERROR_LIMIT) {
-            console.error("Reached playback error limit");
+          console.log(`Playback error, attempt ${errorCount} of ${ERROR_LIMIT}`);
+          if (errorCount >= ERROR_LIMIT && navigator.onLine) {
+            console.error("Reached playback error limit while online");
             resetStationInfo();
+          } else {
+            console.log("Scheduling retry after invalid URL");
+            setTimeout(() => tryAutoPlay(retryCount, delay), 5000);
           }
           return;
         }
@@ -807,8 +852,10 @@ document.addEventListener("DOMContentLoaded", () => {
               console.log("Stream request canceled");
               return;
             }
-            console.error("Playback error:", error);
+            console.error("Playback error:", error.message || "Unknown error");
             document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+            errorCount++;
+            console.log(`Playback error, attempt ${errorCount} of ${ERROR_LIMIT}`);
             if (attemptsLeft > 1) {
               if (stationItems[currentIndex].dataset.value !== currentStationUrl) {
                 console.log("tryAutoPlay: Station changed during retry, canceling");
@@ -817,19 +864,23 @@ document.addEventListener("DOMContentLoaded", () => {
               console.log(`Retrying in ${delay}ms`);
               await new Promise(resolve => setTimeout(resolve, delay));
               await attemptPlay(attemptsLeft - 1);
+            } else if (navigator.onLine && errorCount >= ERROR_LIMIT) {
+              console.error("Reached playback error limit while online");
+              resetStationInfo();
             } else {
-              errorCount++;
-              if (errorCount >= ERROR_LIMIT) {
-                console.error("Reached playback error limit");
-                resetStationInfo();
-              } else {
-                setTimeout(() => tryAutoPlay(retryCount, delay), 5000); // Retry after 5 seconds for long-term recovery
-              }
+              console.log("Scheduling retry after error");
+              setTimeout(() => tryAutoPlay(retryCount, delay), 5000);
             }
           } finally {
             streamAbortController = null;
           }
         };
+
+        if (!navigator.onLine) {
+          console.log("Device offline: scheduling retry");
+          setTimeout(() => tryAutoPlay(retryCount, delay), 5000);
+          return;
+        }
 
         await attemptPlay(retryCount);
       } finally {
@@ -859,7 +910,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
           console.log("switchTab: Starting playback after tab change");
-          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
+          tryAutoPlay(3, 1000);
         } else {
           console.log("switchTab: Skip playback, station already playing");
         }
@@ -994,7 +1045,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
           console.log("changeStation: Starting playback after station change");
-          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
+          tryAutoPlay(3, 1000);
         } else {
           console.log("changeStation: Skip playback, station already playing");
         }
@@ -1084,7 +1135,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (audio.paused) {
         isPlaying = true;
         intendedPlaying = true;
-        tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
+        tryAutoPlay(3, 1000);
         playPauseBtn.textContent = "⏸";
         document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
       } else {
@@ -1108,7 +1159,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       },
       visibilitychange: () => {
-        if (!intendedPlaying || !navigator.onLine || !stationItems?.length || currentIndex >= stationItems.length) {
+        if (!intendedPlaying || !stationItems?.length || currentIndex >= stationItems.length) {
           console.log("visibilitychange: Skip, invalid state");
           return;
         }
@@ -1118,11 +1169,11 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("visibilitychange: Skip playback, station already playing");
         } else {
           console.log("visibilitychange: Starting playback after visibility change");
-          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
+          tryAutoPlay(3, 1000);
         }
       },
       resume: () => {
-        if (!intendedPlaying || !navigator.onLine || !stationItems?.length || currentIndex >= stationItems.length) {
+        if (!intendedPlaying || !stationItems?.length || currentIndex >= stationItems.length) {
           console.log("resume: Skip, invalid state");
           return;
         }
@@ -1132,7 +1183,7 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("resume: Skip playback, station already playing");
         } else {
           console.log("resume: Starting playback after app resume");
-          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
+          tryAutoPlay(3, 1000);
         }
       }
     };
@@ -1159,6 +1210,12 @@ document.addEventListener("DOMContentLoaded", () => {
         clearTimeout(errorTimeout);
         errorTimeout = null;
       }
+      // Stop fallback check when playback starts
+      if (networkCheckInterval) {
+        console.log("Stopping fallback network check on successful playback");
+        clearInterval(networkCheckInterval);
+        networkCheckInterval = null;
+      }
     });
 
     audio.addEventListener("pause", () => {
@@ -1177,12 +1234,13 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Audio error:", audio.error?.message || "Unknown error", "for URL:", audio.src);
       if (intendedPlaying && errorCount < ERROR_LIMIT && !errorTimeout) {
         errorCount++;
+        console.log(`Playback error, attempt ${errorCount} of ${ERROR_LIMIT}`);
         errorTimeout = setTimeout(() => {
-          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
+          tryAutoPlay(3, 1000);
           errorTimeout = null;
-        }, 1000);
-      } else if (errorCount >= ERROR_LIMIT) {
-        console.error("Reached playback error limit");
+        }, 5000);
+      } else if (navigator.onLine && errorCount >= ERROR_LIMIT) {
+        console.error("Reached playback error limit while online");
         resetStationInfo();
       }
     });
@@ -1192,16 +1250,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     window.addEventListener("online", () => {
-      console.log("Network restored");
+      console.log("Network restored (window.online)");
       if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
-        tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
+        console.log("Resetting errorCount and trying to play");
+        errorCount = 0;
+        tryAutoPlay(3, 1000);
+        // Stop fallback check
+        if (networkCheckInterval) {
+          console.log("Stopping fallback network check");
+          clearInterval(networkCheckInterval);
+          networkCheckInterval = null;
+        }
       }
     });
 
     window.addEventListener("offline", () => {
-      console.log("Network connection lost");
+      console.log("Network connection lost (window.offline)");
       document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
       errorCount = 0;
+      // Start fallback check
+      if (!networkCheckInterval) {
+        console.log("Starting fallback network check");
+        checkNetworkStatusFallback();
+      }
     });
 
     addEventListeners();
@@ -1234,12 +1305,11 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Attempt to detect Bluetooth device connection (if supported)
     if ("bluetooth" in navigator) {
       navigator.bluetooth.addEventListener("availabilitychanged", () => {
         console.log("Bluetooth availability changed");
         if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
-          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay on Bluetooth connection
+          tryAutoPlay(3, 1000);
         }
       });
     }
@@ -1250,7 +1320,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const normalizedAudioSrc = normalizeUrl(audio.src);
       if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
         console.log("initializeApp: Starting playback after initialization");
-        tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
+        tryAutoPlay(3, 1000);
       } else {
         console.log("initializeApp: Skip playback, station already playing");
       }
