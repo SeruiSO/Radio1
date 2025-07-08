@@ -13,10 +13,8 @@ let pastSearches = JSON.parse(localStorage.getItem("pastSearches")) || [];
 let deletedStations = JSON.parse(localStorage.getItem("deletedStations")) || [];
 let customTabs = JSON.parse(localStorage.getItem("customTabs")) || [];
 let isAutoPlayPending = false;
-let lastSuccessfulPlayTime = 0;
 let streamAbortController = null;
 let errorTimeout = null;
-let autoPlayRequestId = 0; // Unique ID for autoplay requests
 customTabs = Array.isArray(customTabs) ? customTabs.filter(tab => typeof tab === "string" && tab.trim()) : [];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -56,12 +54,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initializeApp();
 
-  function initializeApp() {
+  async function initializeApp() {
     audio.preload = "auto";
     audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 
     updatePastSearches();
     populateSearchSuggestions();
+    await loadStations(); // Ensure stations are loaded before attempting autoplay
     renderTabs();
 
     shareButton.addEventListener("click", () => {
@@ -402,10 +401,10 @@ document.addEventListener("DOMContentLoaded", () => {
           genre: item.dataset.genre,
           country: item.dataset.country,
           favicon: item.dataset.favicon || "",
-          isFromSearch: currentTab === "search" // Mark station as from search
+          isFromSearch: currentTab === "search"
         };
         stationLists[targetTab].unshift(newStation);
-        userAddedStations[targetTab].unshift(newStation); // Always add to userAddedStations
+        userAddedStations[targetTab].unshift(newStation);
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
         localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
         console.log(`Added station ${stationName} to ${targetTab}:`, newStation);
@@ -734,40 +733,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (event.data.type === "NETWORK_STATUS" && event.data.online && intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
           console.log("Network restored (SW), trying to play");
-          debouncedTryAutoPlay();
+          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
         }
       });
     }
 
-    let autoPlayTimeout = null;
-    function debouncedTryAutoPlay(retryCount = 2, delay = 1000) {
-      if (isAutoPlayPending) {
-        console.log("debouncedTryAutoPlay: Skip, previous tryAutoPlay still active");
-        return;
-      }
-      const now = Date.now();
-      const currentStationUrl = stationItems?.[currentIndex]?.dataset?.value;
-      const normalizedCurrentUrl = normalizeUrl(currentStationUrl);
-      const normalizedAudioSrc = normalizeUrl(audio.src);
-      if (now - lastSuccessfulPlayTime < 500 && normalizedAudioSrc === normalizedCurrentUrl) {
-        console.log("debouncedTryAutoPlay: Skip, recently played successfully for same station");
-        return;
-      }
-      if (autoPlayTimeout) {
-        clearTimeout(autoPlayTimeout);
-      }
-      autoPlayRequestId++; // Increment request ID
-      const currentRequestId = autoPlayRequestId;
-      autoPlayTimeout = setTimeout(() => tryAutoPlay(retryCount, delay, currentRequestId), 0);
-    }
-
-    async function tryAutoPlay(retryCount = 2, delay = 1000, requestId) {
+    async function tryAutoPlay(retryCount = 3, delay = 1000) {
       if (isAutoPlayPending) {
         console.log("tryAutoPlay: Skip, another tryAutoPlay active");
-        return;
-      }
-      if (requestId !== autoPlayRequestId) {
-        console.log("tryAutoPlay: Skip, outdated request ID", { requestId, current: autoPlayRequestId });
         return;
       }
       isAutoPlayPending = true;
@@ -775,6 +748,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         if (!navigator.onLine) {
           console.log("Device offline: skipping playback");
+          setTimeout(() => tryAutoPlay(retryCount, delay), 5000); // Retry after 5 seconds if offline
           return;
         }
         if (!intendedPlaying || !stationItems?.length || currentIndex >= stationItems.length) {
@@ -783,7 +757,6 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
         const currentStationUrl = stationItems[currentIndex].dataset.value;
-        const initialStationUrl = currentStationUrl;
         const normalizedCurrentUrl = normalizeUrl(currentStationUrl);
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc === normalizedCurrentUrl && !audio.paused && !audio.error && audio.readyState >= 2 && audio.currentTime > 0) {
@@ -806,12 +779,8 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("Previous audio stream canceled");
             streamAbortController = null;
           }
-          if (stationItems[currentIndex].dataset.value !== initialStationUrl) {
-            console.log("tryAutoPlay: Station changed, canceling playback for", initialStationUrl);
-            return;
-          }
-          if (requestId !== autoPlayRequestId) {
-            console.log("tryAutoPlay: Skip attempt, outdated request ID", { requestId, current: autoPlayRequestId });
+          if (stationItems[currentIndex].dataset.value !== currentStationUrl) {
+            console.log("tryAutoPlay: Station changed, canceling playback for", currentStationUrl);
             return;
           }
 
@@ -826,10 +795,10 @@ document.addEventListener("DOMContentLoaded", () => {
             await audio.play();
             errorCount = 0;
             isPlaying = true;
-            lastSuccessfulPlayTime = Date.now();
             console.log("Playback started successfully");
             document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
             localStorage.setItem("isPlaying", isPlaying);
+            localStorage.setItem("intendedPlaying", intendedPlaying);
             if (stationItems[currentIndex]) {
               updateCurrentStation(stationItems[currentIndex]);
             }
@@ -841,12 +810,8 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Playback error:", error);
             document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
             if (attemptsLeft > 1) {
-              if (stationItems[currentIndex].dataset.value !== initialStationUrl) {
+              if (stationItems[currentIndex].dataset.value !== currentStationUrl) {
                 console.log("tryAutoPlay: Station changed during retry, canceling");
-                return;
-              }
-              if (requestId !== autoPlayRequestId) {
-                console.log("tryAutoPlay: Skip retry, outdated request ID", { requestId, current: autoPlayRequestId });
                 return;
               }
               console.log(`Retrying in ${delay}ms`);
@@ -857,6 +822,8 @@ document.addEventListener("DOMContentLoaded", () => {
               if (errorCount >= ERROR_LIMIT) {
                 console.error("Reached playback error limit");
                 resetStationInfo();
+              } else {
+                setTimeout(() => tryAutoPlay(retryCount, delay), 5000); // Retry after 5 seconds for long-term recovery
               }
             }
           } finally {
@@ -867,7 +834,6 @@ document.addEventListener("DOMContentLoaded", () => {
         await attemptPlay(retryCount);
       } finally {
         isAutoPlayPending = false;
-        streamAbortController = null;
       }
     }
 
@@ -893,8 +859,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
           console.log("switchTab: Starting playback after tab change");
-          isAutoPlayPending = false;
-          debouncedTryAutoPlay();
+          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
         } else {
           console.log("switchTab: Skip playback, station already playing");
         }
@@ -1029,8 +994,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
           console.log("changeStation: Starting playback after station change");
-          isAutoPlayPending = false;
-          debouncedTryAutoPlay();
+          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
         } else {
           console.log("changeStation: Skip playback, station already playing");
         }
@@ -1120,7 +1084,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (audio.paused) {
         isPlaying = true;
         intendedPlaying = true;
-        debouncedTryAutoPlay();
+        tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
         playPauseBtn.textContent = "⏸";
         document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
       } else {
@@ -1144,8 +1108,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       },
       visibilitychange: () => {
-        if (document.hidden || !intendedPlaying || !navigator.onLine || !stationItems?.length || currentIndex >= stationItems.length) {
-          console.log("visibilitychange: Skip, tab hidden or invalid state");
+        if (!intendedPlaying || !navigator.onLine || !stationItems?.length || currentIndex >= stationItems.length) {
+          console.log("visibilitychange: Skip, invalid state");
           return;
         }
         const normalizedCurrentUrl = normalizeUrl(stationItems[currentIndex].dataset.value);
@@ -1154,8 +1118,7 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("visibilitychange: Skip playback, station already playing");
         } else {
           console.log("visibilitychange: Starting playback after visibility change");
-          isAutoPlayPending = false;
-          debouncedTryAutoPlay();
+          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
         }
       },
       resume: () => {
@@ -1169,8 +1132,7 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("resume: Skip playback, station already playing");
         } else {
           console.log("resume: Starting playback after app resume");
-          isAutoPlayPending = false;
-          debouncedTryAutoPlay();
+          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
         }
       }
     };
@@ -1192,6 +1154,7 @@ document.addEventListener("DOMContentLoaded", () => {
       playPauseBtn.textContent = "⏸";
       document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
       localStorage.setItem("isPlaying", isPlaying);
+      console.log("Audio playing event triggered");
       if (errorTimeout) {
         clearTimeout(errorTimeout);
         errorTimeout = null;
@@ -1203,6 +1166,7 @@ document.addEventListener("DOMContentLoaded", () => {
       playPauseBtn.textContent = "▶";
       document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
       localStorage.setItem("isPlaying", isPlaying);
+      console.log("Audio paused event triggered");
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = null;
       }
@@ -1214,7 +1178,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (intendedPlaying && errorCount < ERROR_LIMIT && !errorTimeout) {
         errorCount++;
         errorTimeout = setTimeout(() => {
-          debouncedTryAutoPlay();
+          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
           errorTimeout = null;
         }, 1000);
       } else if (errorCount >= ERROR_LIMIT) {
@@ -1230,8 +1194,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("online", () => {
       console.log("Network restored");
       if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
-        isAutoPlayPending = false;
-        debouncedTryAutoPlay();
+        tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
       }
     });
 
@@ -1249,26 +1212,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if ("mediaSession" in navigator) {
       navigator.mediaSession.setActionHandler("play", () => {
-        if (intendedPlaying) return;
+        console.log("MediaSession play action triggered");
+        if (intendedPlaying && !audio.paused && !audio.error && audio.readyState >= 2 && audio.currentTime > 0) {
+          console.log("MediaSession play: Skip, already playing");
+          return;
+        }
         togglePlayPause();
       });
       navigator.mediaSession.setActionHandler("pause", () => {
+        console.log("MediaSession pause action triggered");
         if (!isPlaying) return;
         togglePlayPause();
       });
-      navigator.mediaSession.setActionHandler("previoustrack", prevStation);
-      navigator.mediaSession.setActionHandler("nexttrack", nextStation);
+      navigator.mediaSession.setActionHandler("previoustrack", () => {
+        console.log("MediaSession previoustrack action triggered");
+        prevStation();
+      });
+      navigator.mediaSession.setActionHandler("nexttrack", () => {
+        console.log("MediaSession nexttrack action triggered");
+        nextStation();
+      });
+    }
+
+    // Attempt to detect Bluetooth device connection (if supported)
+    if ("bluetooth" in navigator) {
+      navigator.bluetooth.addEventListener("availabilitychanged", () => {
+        console.log("Bluetooth availability changed");
+        if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
+          tryAutoPlay(3, 1000); // Direct call to tryAutoPlay on Bluetooth connection
+        }
+      });
     }
 
     applyTheme(currentTheme);
-    loadStations();
     if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
       const normalizedCurrentUrl = normalizeUrl(stationItems[currentIndex].dataset.value);
       const normalizedAudioSrc = normalizeUrl(audio.src);
       if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
         console.log("initializeApp: Starting playback after initialization");
-        isAutoPlayPending = false;
-        debouncedTryAutoPlay();
+        tryAutoPlay(3, 1000); // Direct call to tryAutoPlay
       } else {
         console.log("initializeApp: Skip playback, station already playing");
       }
