@@ -801,6 +801,7 @@ document.addEventListener("DOMContentLoaded", () => {
       root.style.setProperty("--accent", themes[theme].accent);
       root.style.setProperty("--text", themes[theme].text);
       root.style.setProperty("--accent-gradient", themes[theme].accentGradient);
+      root.style.setProperty("--shadow", `0 4px 15px rgba(${hexToRgb(themes[theme].accent)}, 0.3)`);
       localStorage.setItem("selectedTheme", theme);
       currentTheme = theme;
       document.documentElement.setAttribute("data-theme", theme);
@@ -808,6 +809,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (themeColorMeta) {
         themeColorMeta.setAttribute("content", themes[theme].accent);
       }
+    }
+
+    function hexToRgb(hex) {
+      hex = hex.replace("#", "");
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return `${r}, ${g}, ${b}`;
     }
 
     function toggleTheme() {
@@ -997,41 +1006,47 @@ document.addEventListener("DOMContentLoaded", () => {
         tab = "techno";
       }
       currentTab = tab;
-      localStorage.setItem("currentTab", currentTab);
-      renderTabs();
-      updateStationList();
+      localStorage.setItem("currentTab", tab);
+      const savedIndex = parseInt(localStorage.getItem(`lastStation_${tab}`)) || 0;
+      const maxIndex = tab === "best" ? favoriteStations.length - 1 : tab === "search" ? 0 : stationLists[tab]?.length - 1 || 0;
+      currentIndex = savedIndex <= maxIndex && savedIndex >= 0 ? savedIndex : 0;
       searchInput.style.display = tab === "search" ? "flex" : "none";
-      currentIndex = parseInt(localStorage.getItem(`lastStation_${currentTab}`)) || 0;
-      if (stationItems.length && currentIndex < stationItems.length) {
-        changeStation(currentIndex);
+      searchQuery.value = "";
+      searchCountry.value = "";
+      searchGenre.value = "";
+      if (tab === "search") populateSearchSuggestions();
+      updateStationList();
+      renderTabs();
+      if (stationItems?.length && currentIndex < stationItems.length && intendedPlaying) {
+        const normalizedCurrentUrl = normalizeUrl(stationItems[currentIndex].dataset.value);
+        const normalizedAudioSrc = normalizeUrl(audio.src);
+        if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
+          console.log("switchTab: Starting playback after tab change");
+          isAutoPlayPending = false;
+          debouncedTryAutoPlay();
+        } else {
+          console.log("switchTab: Skip playback, station already playing");
+        }
       } else {
-        resetStationInfo();
-        audio.pause();
-        isPlaying = false;
-        intendedPlaying = false;
-        localStorage.setItem("isPlaying", isPlaying);
-        localStorage.setItem("intendedPlaying", intendedPlaying);
-        document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+        console.log("switchTab: Skip playback, invalid state");
       }
     }
 
     function updateStationList() {
-      stationList.innerHTML = "";
-      stationItems = [];
-      let stations = [];
-      if (currentTab === "best") {
-        stations = favoriteStations
-          .map(name => Object.values(stationLists).flat().find(s => s.name === name))
-          .filter(s => s);
-      } else if (currentTab === "search") {
-        stationList.innerHTML = "<div class='station-item empty'>Enter search criteria</div>";
+      if (!stationList) {
+        console.error("stationList not found");
         return;
-      } else {
-        stations = (stationLists[currentTab] || []).filter(s => !deletedStations.includes(s.name));
       }
+      let stations = currentTab === "best"
+        ? favoriteStations
+            .map(name => Object.values(stationLists).flat().find(s => s.name === name))
+            .filter(s => s)
+        : stationLists[currentTab] || [];
 
       if (!stations.length) {
-        stationList.innerHTML = "<div class='station-item empty'>No stations available</div>";
+        currentIndex = 0;
+        stationItems = [];
+        stationList.innerHTML = `<div class="station-item empty">${currentTab === "best" ? "No favorite stations" : "No stations in this category"}</div>`;
         return;
       }
 
@@ -1041,25 +1056,29 @@ document.addEventListener("DOMContentLoaded", () => {
         item.className = `station-item ${index === currentIndex ? "selected" : ""}`;
         item.dataset.value = station.value;
         item.dataset.name = station.name;
-        item.dataset.genre = station.genre || "Unknown";
-        item.dataset.country = station.country || "Unknown";
+        item.dataset.genre = shortenGenre(station.genre);
+        item.dataset.country = station.country;
         item.dataset.favicon = station.favicon && isValidUrl(station.favicon) ? station.favicon : "";
-        const isFavorite = favoriteStations.includes(station.name);
-        const iconHtml = item.dataset.favicon
-          ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='🎵 '">`
-          : "🎵 ";
+        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='🎵 '; console.warn('Error loading favicon:', '${item.dataset.favicon}');">` : "🎵 ";
+        const deleteButton = ["techno", "trance", "ukraine", "pop", ...customTabs].includes(currentTab)
+          ? `<button class="delete-btn">🗑</button>`
+          : "";
         item.innerHTML = `
           ${iconHtml}
           <span class="station-name">${station.name}</span>
           <div class="buttons-container">
-            <button class="favorite-btn ${isFavorite ? "favorited" : ""}">${isFavorite ? "★" : "☆"}</button>
-            ${station.isFromSearch ? `<button class="delete-btn">🗑</button>` : ""}
-          </div>
-        `;
+            ${deleteButton}
+            <button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button>
+          </div>`;
         fragment.appendChild(item);
       });
+      stationList.innerHTML = "";
       stationList.appendChild(fragment);
-      stationItems = document.querySelectorAll(".station-item");
+      stationItems = stationList.querySelectorAll(".station-item");
+
+      if (stationItems.length && stationItems[currentIndex] && !stationItems[currentIndex].classList.contains("empty")) {
+        stationItems[currentIndex].scrollIntoView({ behavior: "smooth", block: "center" });
+      }
 
       stationList.onclick = e => {
         const item = e.target.closest(".station-item");
@@ -1071,70 +1090,86 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (favoriteBtn) {
           e.stopPropagation();
-          const stationName = item.dataset.name;
-          toggleFavorite(stationName);
-          updateStationList();
+          toggleFavorite(item.dataset.name);
         }
         if (deleteBtn) {
           e.stopPropagation();
-          const stationName = item.dataset.name;
-          deleteStation(stationName);
-          updateStationList();
+          if (confirm(`Are you sure you want to delete station "${item.dataset.name}" from the list?`)) {
+            deleteStation(item.dataset.name);
+          }
         }
       };
 
-      if (stationItems.length && currentIndex < stationItems.length && intendedPlaying) {
+      if (stationItems.length && currentIndex < stationItems.length) {
         changeStation(currentIndex);
       }
     }
 
     function toggleFavorite(stationName) {
-      const index = favoriteStations.indexOf(stationName);
-      if (index === -1) {
-        favoriteStations.push(stationName);
+      if (favoriteStations.includes(stationName)) {
+        favoriteStations = favoriteStations.filter(name => name !== stationName);
       } else {
-        favoriteStations.splice(index, 1);
+        favoriteStations.unshift(stationName);
       }
       localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-      console.log("Favorite stations updated:", favoriteStations);
+      if (currentTab === "best") switchTab("best");
+      else updateStationList();
     }
 
     function deleteStation(stationName) {
-      if (confirm(`Are you sure you want to delete "${stationName}"?`)) {
-        deletedStations.push(stationName);
-        localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
-        Object.keys(userAddedStations).forEach(tab => {
-          userAddedStations[tab] = userAddedStations[tab].filter(s => s.name !== stationName);
-        });
-        Object.keys(stationLists).forEach(tab => {
-          stationLists[tab] = stationLists[tab].filter(s => s.name !== stationName);
-        });
-        localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
+      if (Array.isArray(stationLists[currentTab])) {
+        const station = stationLists[currentTab].find(s => s.name === stationName);
+        if (!station) {
+          console.warn(`Station ${stationName} not found in ${currentTab}`);
+          return;
+        }
+        stationLists[currentTab] = stationLists[currentTab].filter(s => s.name !== stationName);
+        userAddedStations[currentTab] = userAddedStations[currentTab]?.filter(s => s.name !== stationName) || [];
+        if (!station.isFromSearch && !deletedStations.includes(stationName)) {
+          if (!Array.isArray(deletedStations)) deletedStations = [];
+          deletedStations.push(stationName);
+          localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
+          console.log(`Added ${stationName} to deletedStations:`, deletedStations);
+        }
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
+        localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
         favoriteStations = favoriteStations.filter(name => name !== stationName);
         localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-        console.log(`Deleted station ${stationName}`);
-        if (currentIndex >= stationItems.length - 1) {
-          currentIndex = Math.max(0, stationItems.length - 2);
+        console.log(`Deleted station ${stationName} from ${currentTab}`);
+        if (stationLists[currentTab].length === 0) {
+          currentIndex = 0;
+        } else if (currentIndex >= stationLists[currentTab].length) {
+          currentIndex = stationLists[currentTab].length - 1;
         }
-        localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
+        updateStationList();
+        if (intendedPlaying && stationItems.length && currentIndex < stationItems.length) {
+          console.log("deleteStation: Starting playback after deletion");
+          isAutoPlayPending = false;
+          debouncedTryAutoPlay();
+        } else {
+          audio.pause();
+          resetStationInfo();
+          document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+        }
       }
     }
 
     function changeStation(index) {
-      if (index < 0 || index >= stationItems.length) {
-        console.warn("Invalid station index:", index);
+      if (!stationItems.length || index < 0 || index >= stationItems.length) {
+        console.warn("Invalid station index or no stations available");
+        resetStationInfo();
         return;
       }
       currentIndex = index;
       localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
-      stationItems.forEach((item, i) => {
-        item.classList.toggle("selected", i === currentIndex);
-      });
+      stationItems.forEach(item => item.classList.remove("selected"));
+      stationItems[currentIndex].classList.add("selected");
+      stationItems[currentIndex].scrollIntoView({ behavior: "smooth", block: "center" });
       updateCurrentStation(stationItems[currentIndex]);
-      intendedPlaying = true;
-      localStorage.setItem("intendedPlaying", intendedPlaying);
-      debouncedTryAutoPlay();
+      if (intendedPlaying) {
+        isAutoPlayPending = false;
+        debouncedTryAutoPlay();
+      }
     }
 
     function updateCurrentStation(item) {
@@ -1150,97 +1185,101 @@ document.addEventListener("DOMContentLoaded", () => {
       if (stationCountryElement) stationCountryElement.textContent = `country: ${item.dataset.country || "Unknown"}`;
       else console.error(".station-country element not found");
       if (stationIconElement) {
-        stationIconElement.innerHTML = item.dataset.favicon
-          ? `<img src="${item.dataset.favicon}" alt="${item.dataset.name} icon" style="width: 80px; height: 80px; object-fit: contain;" onerror="this.outerHTML='🎵'">`
-          : "🎵";
+        if (item.dataset.favicon) {
+          stationIconElement.innerHTML = `<img src="${item.dataset.favicon}" alt="${item.dataset.name} icon" style="width: 80px; height: 80px; object-fit: contain;" onerror="this.outerHTML='🎵 '; console.warn('Error loading favicon:', '${item.dataset.favicon}');">`;
+        } else {
+          stationIconElement.innerHTML = "🎵";
+        }
       } else console.error(".station-icon element not found");
     }
 
     function togglePlayPause() {
-      if (isPlaying) {
+      intendedPlaying = !intendedPlaying;
+      localStorage.setItem("intendedPlaying", intendedPlaying);
+      if (intendedPlaying && stationItems.length && currentIndex < stationItems.length) {
+        isAutoPlayPending = false;
+        debouncedTryAutoPlay();
+      } else {
         audio.pause();
         isPlaying = false;
-        intendedPlaying = false;
+        localStorage.setItem("isPlaying", isPlaying);
         document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
-      } else {
-        intendedPlaying = true;
-        debouncedTryAutoPlay();
       }
-      localStorage.setItem("isPlaying", isPlaying);
-      localStorage.setItem("intendedPlaying", intendedPlaying);
-      playPauseBtn.textContent = isPlaying ? "⏸" : "▶";
+      playPauseBtn.textContent = intendedPlaying ? "⏸" : "▶";
     }
 
     function prevStation() {
-      if (currentIndex > 0) {
-        currentIndex--;
-        changeStation(currentIndex);
-      }
+      if (stationItems.length === 0) return;
+      currentIndex = currentIndex === 0 ? stationItems.length - 1 : currentIndex - 1;
+      changeStation(currentIndex);
     }
 
     function nextStation() {
-      if (currentIndex < stationItems.length - 1) {
-        currentIndex++;
-        changeStation(currentIndex);
-      }
+      if (stationItems.length === 0) return;
+      currentIndex = currentIndex === stationItems.length - 1 ? 0 : currentIndex + 1;
+      changeStation(currentIndex);
     }
 
     audio.addEventListener("volumechange", () => {
       localStorage.setItem("volume", audio.volume);
     });
 
+    audio.addEventListener("error", () => {
+      console.error("Audio error:", audio.error);
+      errorCount++;
+      if (errorCount >= ERROR_LIMIT) {
+        console.error("Reached playback error limit");
+        resetStationInfo();
+      }
+      document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+      if (intendedPlaying && stationItems.length && currentIndex < stationItems.length) {
+        console.log("Audio error: Retrying playback");
+        isAutoPlayPending = false;
+        debouncedTryAutoPlay();
+      }
+    });
+
+    audio.addEventListener("ended", () => {
+      console.log("Audio ended");
+      if (intendedPlaying) {
+        nextStation();
+      }
+    });
+
     audio.addEventListener("play", () => {
       isPlaying = true;
-      intendedPlaying = true;
       localStorage.setItem("isPlaying", isPlaying);
-      localStorage.setItem("intendedPlaying", intendedPlaying);
-      playPauseBtn.textContent = "⏸";
       document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
+      playPauseBtn.textContent = "⏸";
     });
 
     audio.addEventListener("pause", () => {
       isPlaying = false;
       localStorage.setItem("isPlaying", isPlaying);
-      playPauseBtn.textContent = "▶";
       document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
-    });
-
-    audio.addEventListener("error", () => {
-      console.error("Audio error:", audio.error);
-      errorCount++;
-      if (errorCount < ERROR_LIMIT) {
-        debouncedTryAutoPlay();
-      } else {
-        console.error("Reached playback error limit");
-        resetStationInfo();
-        audio.pause();
-        isPlaying = false;
-        intendedPlaying = false;
-        localStorage.setItem("isPlaying", isPlaying);
-        localStorage.setItem("intendedPlaying", intendedPlaying);
-        playPauseBtn.textContent = "▶";
-        document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
-      }
+      playPauseBtn.textContent = "▶";
     });
 
     window.addEventListener("online", () => {
-      console.log("Network restored, attempting to play");
-      if (intendedPlaying && stationItems.length && currentIndex < stationItems.length) {
+      console.log("Network online");
+      if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
+        console.log("Network restored, trying to play");
+        isAutoPlayPending = false;
         debouncedTryAutoPlay();
       }
     });
 
     window.addEventListener("offline", () => {
-      console.log("Network lost, pausing playback");
+      console.log("Network offline");
       audio.pause();
-      isPlaying = false;
-      localStorage.setItem("isPlaying", isPlaying);
-      playPauseBtn.textContent = "▶";
       document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
     });
 
     applyTheme(currentTheme);
     loadStations();
-    playPauseBtn.textContent = isPlaying ? "⏸" : "▶";
+    if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
+      isAutoPlayPending = false;
+      debouncedTryAutoPlay();
+    }
   }
 });

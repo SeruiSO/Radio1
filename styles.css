@@ -1,4 +1,4 @@
-/* Updated on July 12, 2025 */
+/* Updated on June 23, 2025 */
 :root {
   --body-bg: linear-gradient(180deg, #0A0A0A, #1A1A1A);
   --container-bg: rgba(18, 18, 18, 0.8);
@@ -6,7 +6,6 @@
   --text: #F0F0F0;
   --accent-gradient: linear-gradient(45deg, #003C4B, #00F0FF);
   --shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
-  --backdrop-filter: blur(8px);
 }
 
 body {
@@ -38,63 +37,23 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   transition: background 0.4s ease, border-color 0.4s ease;
+  backdrop-filter: blur(8px);
 }
 
-.dropdown {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 15;
-}
-
-.dropdown-toggle {
-  background: var(--container-bg);
-  border: 2px solid var(--accent);
-  border-radius: 50%;
-  padding: 8px;
-  cursor: pointer;
-  height: 40px;
-  width: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: var(--text);
-  transition: all 0.3s ease;
-}
-
-.dropdown-toggle:hover {
-  background: var(--accent);
-  color: #0A0A0A;
-  transform: scale(1.1);
-}
-
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  top: 50px;
-  left: 0;
-  background: var(--container-bg);
-  border: 2px solid var(--accent);
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: var(--shadow);
-  backdrop-filter: var(--backdrop-filter);
-  flex-direction: column;
-  gap: 10px;
-  min-width: 150px;
-  z-index: 15;
-  transition: all 0.3s ease;
-}
-
-.dropdown:hover .dropdown-menu {
-  display: flex;
+h1 {
+  font-size: 2.5em;
+  margin: 2px 0 5px;
+  text-align: center;
+  color: var(--accent);
+  transition: color 0.4s ease;
 }
 
 .theme-toggle,
 .share-button,
 .export-button,
 .import-button {
+  position: absolute;
+  top: 10px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 50%;
@@ -105,9 +64,23 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  color: var(--text);
   transition: all 0.3s ease;
+}
+
+.theme-toggle {
+  left: 10px;
+}
+
+.share-button {
+  left: 60px;
+}
+
+.export-button {
+  right: 10px;
+}
+
+.import-button {
+  right: 60px;
 }
 
 .theme-toggle:hover,
@@ -124,7 +97,7 @@ body {
 }
 
 #currentStationInfo {
-  background: linear-gradient(45deg, var(--container-bg), var(--accent-gradient));
+  background: var(--accent-gradient);
   padding: 20px;
   border-radius: 12px;
   margin: 5px 0;
@@ -144,7 +117,7 @@ body {
 
 #currentStationInfo:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.5);
+  box-shadow: var(--shadow);
 }
 
 .station-info-content {
@@ -250,6 +223,7 @@ body {
   flex-grow: 1;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: border-color 0.4s ease;
+  backdrop-filter: blur(8px);
 }
 
 .station-list::-webkit-scrollbar {
@@ -385,6 +359,7 @@ body {
   gap: 4px;
   scroll-behavior: smooth;
   transition: background 0.4s ease;
+  backdrop-filter: blur(8px);
 }
 
 .tab-btn,
@@ -437,11 +412,12 @@ body {
   gap: 6px;
   align-items: stretch;
   transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
 }
 
 #searchInput:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
+  box-shadow: var(--shadow);
 }
 
 #searchQuery,
@@ -496,6 +472,7 @@ body {
   gap: 20px;
   z-index: 10;
   transition: background 0.4s ease, border-color 0.4s ease;
+  backdrop-filter: blur(8px);
 }
 
 .controls {
@@ -557,6 +534,7 @@ body {
   overflow-y: auto;
   box-shadow: var(--shadow);
   transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
 }
 
 .modal h2 {
@@ -619,7 +597,7 @@ body {
 .new-tab-modal input:focus,
 .edit-tab-modal input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
+  box-shadow: var(--shadow);
   outline: none;
 }
 
@@ -650,7 +628,7 @@ datalist {
 #searchCountry[list]:focus,
 #searchGenre[list]:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
+  box-shadow: var(--shadow);
 }
 
 @media (max-width: 720px) {
@@ -664,31 +642,6 @@ datalist {
     padding: 10px;
     margin: 0 auto;
     min-height: 80vh;
-  }
-
-  .dropdown {
-    top: 5px;
-    left: 5px;
-  }
-
-  .dropdown-toggle {
-    height: 35px;
-    width: 35px;
-    padding: 4px;
-  }
-
-  .dropdown-menu {
-    top: 45px;
-    min-width: 120px;
-  }
-
-  .theme-toggle,
-  .share-button,
-  .export-button,
-  .import-button {
-    height: 35px;
-    width: 35px;
-    padding: 4px;
   }
 
   .control-btn {
@@ -732,6 +685,32 @@ datalist {
     border-radius: 3px;
   }
 
+  .theme-toggle,
+  .share-button,
+  .export-button,
+  .import-button {
+    top: 5px;
+    padding: 4px;
+    height: 35px;
+    width: 35px;
+  }
+
+  .theme-toggle {
+    left: 5px;
+  }
+
+  .share-button {
+    left: 50px;
+  }
+
+  .export-button {
+    right: 5px;
+  }
+
+  .import-button {
+    right: 50px;
+  }
+
   .tabs-wrapper {
     overflow-x: auto;
     margin: 2px 0;
@@ -754,6 +733,11 @@ datalist {
   .add-tab-btn {
     width: 35px;
     font-size: 16px;
+  }
+
+  .tabs {
+    gap: 4px;
+    scroll-behavior: smooth;
   }
 
   #currentStationInfo {
