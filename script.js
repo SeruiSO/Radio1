@@ -16,7 +16,7 @@ let isAutoPlayPending = false;
 let lastSuccessfulPlayTime = 0;
 let streamAbortController = null;
 let errorTimeout = null;
-let autoPlayRequestId = 0; // Unique ID for autoplay requests
+let autoPlayRequestId = 0;
 customTabs = Array.isArray(customTabs) ? customTabs.filter(tab => typeof tab === "string" && tab.trim()) : [];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -36,26 +36,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.querySelector(".search-btn");
   const pastSearchesList = document.getElementById("pastSearches");
   const tabsContainer = document.getElementById("tabs");
+  const floatingMenuBtn = document.querySelector(".floating-menu-btn");
+  const floatingMenu = document.querySelector(".floating-menu");
+  const canvas = document.getElementById("circleVisualizer");
+  const ctx = canvas?.getContext("2d");
+  const progressBar = document.querySelector(".progress");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer) {
-    console.error("One of required DOM elements not found", {
-      audio: !!audio,
-      stationList: !!stationList,
-      playPauseBtn: !!playPauseBtn,
-      currentStationInfo: !!currentStationInfo,
-      themeToggle: !!themeToggle,
-      shareButton: !!shareButton,
-      exportButton: !!exportButton,
-      importButton: !!importButton,
-      importFileInput: !!importFileInput,
-      searchInput: !!searchInput,
-      searchQuery: !!searchQuery,
-      searchCountry: !!searchCountry,
-      searchGenre: !!searchGenre,
-      searchBtn: !!searchBtn,
-      pastSearchesList: !!pastSearchesList,
-      tabsContainer: !!tabsContainer
-    });
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer || !floatingMenuBtn || !floatingMenu || !canvas || !ctx) {
+    console.error("One of required DOM elements not found");
     setTimeout(initializeApp, 100);
     return;
   }
@@ -65,6 +53,50 @@ document.addEventListener("DOMContentLoaded", () => {
   function initializeApp() {
     audio.preload = "auto";
     audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
+
+    let analyser, source;
+    function initVisualizer() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      source = audioContext.createMediaElementSource(audio);
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+      analyser.fftSize = 128;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      function drawVisualizer() {
+        requestAnimationFrame(drawVisualizer);
+        analyser.getByteFrequencyData(dataArray);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = Math.min(canvas.width, canvas.height) / 4;
+        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+        ctx.lineWidth = 2;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const angle = (i / bufferLength) * Math.PI * 2;
+          const amplitude = dataArray[i] / 255;
+          const r = radius + amplitude * radius * 0.5;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, r, angle, angle + Math.PI / bufferLength);
+          ctx.stroke();
+        }
+      }
+
+      drawVisualizer();
+    }
+
+    if (audio.paused) {
+      document.querySelectorAll(".progress").forEach(p => p.style.width = "0%");
+    } else {
+      initVisualizer();
+    }
+
+    floatingMenuBtn.addEventListener("click", () => {
+      floatingMenu.classList.toggle("active");
+    });
 
     updatePastSearches();
     populateSearchSuggestions();
@@ -78,8 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         url: window.location.href
       };
       if (navigator.share) {
-        navigator.share(shareData)
-          .catch(error => console.error("Error sharing:", error));
+        navigator.share(shareData).catch(error => console.error("Error sharing:", error));
       } else {
         alert(`Share function not supported. Copy: ${shareData.text} ${shareData.url}`);
       }
@@ -93,11 +124,32 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", togglePlayPause);
     document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", nextStation);
 
+    let touchStartX = 0;
+    let touchEndX = 0;
+    stationList.addEventListener("touchstart", e => touchStartX = e.changedTouches[0].screenX);
+    stationList.addEventListener("touchend", e => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) nextStation();
+      if (touchEndX - touchStartX > 50) prevStation();
+    });
+
+    tabsContainer.addEventListener("touchstart", e => touchStartX = e.changedTouches[0].screenX);
+    tabsContainer.addEventListener("touchend", e => {
+      touchEndX = e.changedTouches[0].screenX;
+      const tabs = Array.from(tabsContainer.querySelectorAll(".tab-btn"));
+      const currentIdx = tabs.findIndex(btn => btn.classList.contains("active"));
+      if (touchStartX - touchEndX > 50 && currentIdx < tabs.length - 1) {
+        switchTab(tabs[currentIdx + 1].dataset.tab);
+      }
+      if (touchEndX - touchStartX > 50 && currentIdx > 0) {
+        switchTab(tabs[currentIdx - 1].dataset.tab);
+      }
+    });
+
     searchBtn.addEventListener("click", () => {
       const query = searchQuery.value.trim();
       const country = normalizeCountry(searchCountry.value.trim());
       const genre = searchGenre.value.trim().toLowerCase();
-      console.log("Search:", { query, country, genre });
       if (query || country || genre) {
         if (query && !pastSearches.includes(query)) {
           pastSearches.unshift(query);
@@ -107,32 +159,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         searchStations(query, country, genre);
       } else {
-        console.warn("All search fields are empty");
         stationList.innerHTML = "<div class='station-item empty'>Enter station name, country or genre</div>";
       }
     });
 
-    searchQuery.addEventListener("keypress", (e) => {
+    searchQuery.addEventListener("keypress", e => {
       if (e.key === "Enter") searchBtn.click();
     });
 
-    searchCountry.addEventListener("keypress", (e) => {
+    searchCountry.addEventListener("keypress", e => {
       if (e.key === "Enter") searchBtn.click();
     });
 
-    searchGenre.addEventListener("keypress", (e) => {
+    searchGenre.addEventListener("keypress", e => {
       if (e.key === "Enter") searchBtn.click();
     });
 
     function exportSettings() {
       const settings = {
         selectedTheme: localStorage.getItem("selectedTheme") || "neon-pulse",
-        customTabs: JSON.parse(localStorage.getItem("customTabs")) || [],
-        userAddedStations: JSON.parse(localStorage.getItem("userAddedStations")) || {},
-        favoriteStations: JSON.parse(localStorage.getItem("favoriteStations")) || [],
-        pastSearches: JSON.parse(localStorage.getItem("pastSearches")) || [],
-        deletedStations: JSON.parse(localStorage.getItem("deletedStations")) || [],
-        currentTab: localStorage.getItem("currentTab") || "techno"
+        customTabs,
+        userAddedStations,
+        favoriteStations,
+        pastSearches,
+        deletedStations,
+        currentTab
       };
       const blob = new Blob([JSON.stringify(settings, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -143,14 +194,13 @@ document.addEventListener("DOMContentLoaded", () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      console.log("Settings exported:", settings);
     }
 
     function importSettings(event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         try {
           const settings = JSON.parse(e.target.result);
           if (!settings || typeof settings !== "object") {
@@ -178,8 +228,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (validTabs.length + customTabs.length <= 7) {
               customTabs = validTabs;
               localStorage.setItem("customTabs", JSON.stringify(customTabs));
-            } else {
-              console.warn("Imported custom tabs exceed limit of 7, skipping");
             }
           }
           if (settings.userAddedStations && typeof settings.userAddedStations === "object") {
@@ -223,7 +271,6 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           loadStations();
           switchTab(currentTab);
-          console.log("Settings imported:", settings);
           alert("Settings imported successfully!");
         } catch (error) {
           console.error("Error importing settings:", error);
@@ -303,22 +350,19 @@ document.addEventListener("DOMContentLoaded", () => {
     function resetStationInfo() {
       const stationNameElement = currentStationInfo.querySelector(".station-name");
       const stationGenreElement = currentStationInfo.querySelector(".station-genre");
-      const stationCountryElement = currentStationInfo.querySelector(".station-country");
+      const stationCountryElement = document.querySelector(".station-country");
       const stationIconElement = currentStationInfo.querySelector(".station-icon");
       if (stationNameElement) stationNameElement.textContent = "Select station";
-      else console.error(".station-name element not found");
       if (stationGenreElement) stationGenreElement.textContent = "genre: -";
-      else console.error(".station-genre element not found");
       if (stationCountryElement) stationCountryElement.textContent = "country: -";
-      else console.error(".station-country element not found");
       if (stationIconElement) {
         stationIconElement.innerHTML = "🎵";
         stationIconElement.style.backgroundImage = "none";
-      } else console.error(".station-icon element not found");
+      }
+      progressBar.style.width = "0%";
     }
 
     async function loadStations() {
-      console.time("loadStations");
       stationList.innerHTML = "<div class='station-item empty'>Loading...</div>";
       try {
         abortController.abort();
@@ -327,7 +371,6 @@ document.addEventListener("DOMContentLoaded", () => {
           cache: "no-store",
           signal: abortController.signal
         });
-        console.log(`Response status: ${response.status}`);
         const mergedStationLists = {};
         if (response.ok) {
           const newStations = await response.json();
@@ -344,10 +387,7 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             });
             mergedStationLists[tab] = Array.from(uniqueStations.values());
-            console.log(`Added to ${tab}:`, mergedStationLists[tab].map(s => s.name));
           });
-        } else {
-          console.warn("Failed to load stations.json, using cached data");
         }
         customTabs.forEach(tab => {
           const uniqueStations = new Map();
@@ -362,7 +402,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           });
           mergedStationLists[tab] = Array.from(uniqueStations.values());
-          console.log(`Saved for custom tab ${tab}:`, mergedStationLists[tab].map(s => s.name));
         });
         stationLists = mergedStationLists;
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
@@ -379,26 +418,8 @@ document.addEventListener("DOMContentLoaded", () => {
         switchTab(currentTab);
       } catch (error) {
         if (error.name !== 'AbortError') {
-          console.error("Error loading stations:", error);
-          customTabs.forEach(tab => {
-            const uniqueStations = new Map();
-            (userAddedStations[tab] || []).forEach(s => {
-              if (!deletedStations.includes(s.name)) {
-                uniqueStations.set(s.name, s);
-              }
-            });
-            (stationLists[tab] || []).forEach(s => {
-              if (!deletedStations.includes(s.name)) {
-                uniqueStations.set(s.name, s);
-              }
-            });
-            stationLists[tab] = Array.from(uniqueStations.values());
-          });
-          localStorage.setItem("stationLists", JSON.stringify(stationLists));
           stationList.innerHTML = "<div class='station-item empty'>Failed to load stations</div>";
         }
-      } finally {
-        console.timeEnd("loadStations");
       }
     }
 
@@ -414,21 +435,15 @@ document.addEventListener("DOMContentLoaded", () => {
         params.append("order", "clickcount");
         params.append("reverse", "true");
         params.append("limit", "2000");
-        const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`;
-        console.log("API request:", url);
-        const response = await fetch(url, {
+        const response = await fetch(`https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`, {
           signal: abortController.signal
         });
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         let stations = await response.json();
         stations = stations.filter(station => station.url_resolved && isValidUrl(station.url_resolved));
-        console.log("Received stations (after HTTPS filter):", stations.length);
         renderSearchResults(stations);
       } catch (error) {
         if (error.name !== 'AbortError') {
-          console.error("Error searching stations:", error);
           stationList.innerHTML = "<div class='station-item empty'>Failed to find stations</div>";
         }
       }
@@ -449,8 +464,16 @@ document.addEventListener("DOMContentLoaded", () => {
         item.dataset.genre = shortenGenre(station.tags || "Unknown");
         item.dataset.country = station.country || "Unknown";
         item.dataset.favicon = station.favicon && isValidUrl(station.favicon) ? station.favicon : "";
-        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='🎵 '">` : "🎵 ";
-        item.innerHTML = `${iconHtml}<span class="station-name">${station.name}</span><button class="add-btn">ADD</button>`;
+        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" onerror="this.outerHTML='🎵 '">` : "🎵 ";
+        item.innerHTML = `
+          ${iconHtml}
+          <div class="station-info">
+            <span class="station-name">${station.name}</span>
+            <div class="station-details">${item.dataset.genre} | ${item.dataset.country}</div>
+          </div>
+          <div class="buttons-container">
+            <button class="add-btn material-icons">add</button>
+          </div>`;
         fragment.appendChild(item);
       });
       stationList.innerHTML = "";
@@ -522,13 +545,12 @@ document.addEventListener("DOMContentLoaded", () => {
           genre: item.dataset.genre,
           country: item.dataset.country,
           favicon: item.dataset.favicon || "",
-          isFromSearch: currentTab === "search" // Mark station as from search
+          isFromSearch: currentTab === "search"
         };
         stationLists[targetTab].unshift(newStation);
-        userAddedStations[targetTab].unshift(newStation); // Always add to userAddedStations
+        userAddedStations[targetTab].unshift(newStation);
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
         localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
-        console.log(`Added station ${stationName} to ${targetTab}:`, newStation);
         if (currentTab !== "search") {
           updateStationList();
         }
@@ -618,13 +640,12 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("customTabs", JSON.stringify(customTabs));
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
         localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
-        console.log(`Created new tab ${tabName}`);
         renderTabs();
         switchTab(tabName);
         closeModal();
       };
 
-      const keypressHandler = (e) => {
+      const keypressHandler = e => {
         if (e.key === "Enter") createBtn.click();
       };
 
@@ -700,7 +721,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
 
-      const keypressHandler = (e) => {
+      const keypressHandler = e => {
         if (e.key === "Enter") renameBtn.click();
       };
 
@@ -791,7 +812,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function applyTheme(theme) {
       if (!themes[theme]) {
-        console.warn(`Theme ${theme} not found, using 'neon-pulse'`);
         theme = "neon-pulse";
         localStorage.setItem("selectedTheme", theme);
       }
@@ -801,7 +821,6 @@ document.addEventListener("DOMContentLoaded", () => {
       root.style.setProperty("--accent", themes[theme].accent);
       root.style.setProperty("--text", themes[theme].text);
       root.style.setProperty("--accent-gradient", themes[theme].accentGradient);
-      root.style.setProperty("--shadow", `0 4px 15px rgba(${hexToRgb(themes[theme].accent)}, 0.3)`);
       localStorage.setItem("selectedTheme", theme);
       currentTheme = theme;
       document.documentElement.setAttribute("data-theme", theme);
@@ -809,14 +828,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (themeColorMeta) {
         themeColorMeta.setAttribute("content", themes[theme].accent);
       }
-    }
-
-    function hexToRgb(hex) {
-      hex = hex.replace("#", "");
-      const r = parseInt(hex.substring(0, 2), 16);
-      const g = parseInt(hex.substring(2, 4), 16);
-      const b = parseInt(hex.substring(4, 6), 16);
-      return `${r}, ${g}, ${b}`;
     }
 
     function toggleTheme() {
@@ -848,13 +859,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      navigator.serviceWorker.addEventListener("message", (event) => {
+      navigator.serviceWorker.addEventListener("message", event => {
         if (event.data.type === "CACHE_UPDATED") {
-          console.log("Received cache update, updating stationLists");
           const currentCacheVersion = localStorage.getItem("cacheVersion") || "0";
           if (currentCacheVersion !== event.data.cacheVersion) {
-            favoriteStations = favoriteStations.filter((name) =>
-              Object.values(stationLists).flat().some((s) => s.name === name)
+            favoriteStations = favoriteStations.filter(name =>
+              Object.values(stationLists).flat().some(s => s.name === name)
             );
             localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
             localStorage.setItem("cacheVersion", event.data.cacheVersion);
@@ -862,7 +872,6 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
         if (event.data.type === "NETWORK_STATUS" && event.data.online && intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
-          console.log("Network restored (SW), trying to play");
           debouncedTryAutoPlay();
         }
       });
@@ -870,123 +879,71 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let autoPlayTimeout = null;
     function debouncedTryAutoPlay(retryCount = 2, delay = 1000) {
-      if (isAutoPlayPending) {
-        console.log("debouncedTryAutoPlay: Skip, previous tryAutoPlay still active");
-        return;
-      }
+      if (isAutoPlayPending) return;
       const now = Date.now();
       const currentStationUrl = stationItems?.[currentIndex]?.dataset?.value;
       const normalizedCurrentUrl = normalizeUrl(currentStationUrl);
       const normalizedAudioSrc = normalizeUrl(audio.src);
-      if (now - lastSuccessfulPlayTime < 500 && normalizedAudioSrc === normalizedCurrentUrl) {
-        console.log("debouncedTryAutoPlay: Skip, recently played successfully for same station");
-        return;
-      }
-      if (autoPlayTimeout) {
-        clearTimeout(autoPlayTimeout);
-      }
-      autoPlayRequestId++; // Increment request ID
+      if (now - lastSuccessfulPlayTime < 500 && normalizedAudioSrc === normalizedCurrentUrl) return;
+      if (autoPlayTimeout) clearTimeout(autoPlayTimeout);
+      autoPlayRequestId++;
       const currentRequestId = autoPlayRequestId;
       autoPlayTimeout = setTimeout(() => tryAutoPlay(retryCount, delay, currentRequestId), 0);
     }
 
     async function tryAutoPlay(retryCount = 2, delay = 1000, requestId) {
-      if (isAutoPlayPending) {
-        console.log("tryAutoPlay: Skip, another tryAutoPlay active");
-        return;
-      }
-      if (requestId !== autoPlayRequestId) {
-        console.log("tryAutoPlay: Skip, outdated request ID", { requestId, current: autoPlayRequestId });
-        return;
-      }
+      if (isAutoPlayPending || requestId !== autoPlayRequestId) return;
       isAutoPlayPending = true;
 
       try {
-        if (!navigator.onLine) {
-          console.log("Device offline: skipping playback");
-          return;
-        }
-        if (!intendedPlaying || !stationItems?.length || currentIndex >= stationItems.length) {
-          console.log("Skip tryAutoPlay: invalid state", { intendedPlaying, hasStationItems: !!stationItems?.length, isIndexValid: currentIndex < stationItems.length });
-          document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+        if (!navigator.onLine || !intendedPlaying || !stationItems?.length || currentIndex >= stationItems.length) {
+          progressBar.style.width = "0%";
           return;
         }
         const currentStationUrl = stationItems[currentIndex].dataset.value;
         const initialStationUrl = currentStationUrl;
         const normalizedCurrentUrl = normalizeUrl(currentStationUrl);
         const normalizedAudioSrc = normalizeUrl(audio.src);
-        if (normalizedAudioSrc === normalizedCurrentUrl && !audio.paused && !audio.error && audio.readyState >= 2 && audio.currentTime > 0) {
-          console.log("Skip tryAutoPlay: audio already playing with correct src, no errors and active stream");
-          return;
-        }
+        if (normalizedAudioSrc === normalizedCurrentUrl && !audio.paused && !audio.error && audio.readyState >= 2 && audio.currentTime > 0) return;
+
         if (!isValidUrl(currentStationUrl)) {
-          console.error("Invalid URL:", currentStationUrl);
           errorCount++;
-          if (errorCount >= ERROR_LIMIT) {
-            console.error("Reached playback error limit");
-            resetStationInfo();
-          }
+          if (errorCount >= ERROR_LIMIT) resetStationInfo();
           return;
         }
 
-        const attemptPlay = async (attemptsLeft) => {
+        const attemptPlay = async attemptsLeft => {
           if (streamAbortController) {
             streamAbortController.abort();
-            console.log("Previous audio stream canceled");
             streamAbortController = null;
           }
-          if (stationItems[currentIndex].dataset.value !== initialStationUrl) {
-            console.log("tryAutoPlay: Station changed, canceling playback for", initialStationUrl);
-            return;
-          }
-          if (requestId !== autoPlayRequestId) {
-            console.log("tryAutoPlay: Skip attempt, outdated request ID", { requestId, current: autoPlayRequestId });
-            return;
-          }
+          if (stationItems[currentIndex].dataset.value !== initialStationUrl || requestId !== autoPlayRequestId) return;
 
           streamAbortController = new AbortController();
           audio.pause();
           audio.src = null;
           audio.load();
           audio.src = currentStationUrl + "?nocache=" + Date.now();
-          console.log(`Playback attempt (${attemptsLeft} left):`, audio.src);
+          progressBar.style.width = "30%";
 
           try {
             await audio.play();
             errorCount = 0;
             isPlaying = true;
             lastSuccessfulPlayTime = Date.now();
-            console.log("Playback started successfully");
-            document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
+            progressBar.style.width = "100%";
             localStorage.setItem("isPlaying", isPlaying);
-            if (stationItems[currentIndex]) {
-              updateCurrentStation(stationItems[currentIndex]);
-            }
+            updateCurrentStation(stationItems[currentIndex]);
+            initVisualizer();
           } catch (error) {
-            if (error.name === 'AbortError') {
-              console.log("Stream request canceled");
-              return;
-            }
-            console.error("Playback error:", error);
-            document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
-            if (attemptsLeft > 1) {
-              if (stationItems[currentIndex].dataset.value !== initialStationUrl) {
-                console.log("tryAutoPlay: Station changed during retry, canceling");
-                return;
-              }
-              if (requestId !== autoPlayRequestId) {
-                console.log("tryAutoPlay: Skip retry, outdated request ID", { requestId, current: autoPlayRequestId });
-                return;
-              }
-              console.log(`Retrying in ${delay}ms`);
+            if (error.name === 'AbortError') return;
+            progressBar.style.width = "0%";
+            if (attemptsLeft > 1 && stationItems[currentIndex].dataset.value === initialStationUrl && requestId === autoPlayRequestId) {
               await new Promise(resolve => setTimeout(resolve, delay));
               await attemptPlay(attemptsLeft - 1);
             } else {
               errorCount++;
-              if (errorCount >= ERROR_LIMIT) {
-                console.error("Reached playback error limit");
-                resetStationInfo();
-              }
+              if (errorCount >= ERROR_LIMIT) resetStationInfo();
             }
           } finally {
             streamAbortController = null;
@@ -1002,9 +959,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function switchTab(tab) {
       const validTabs = ["best", "techno", "trance", "ukraine", "pop", "search", ...customTabs];
-      if (!validTabs.includes(tab)) {
-        tab = "techno";
-      }
+      if (!validTabs.includes(tab)) tab = "techno";
       currentTab = tab;
       localStorage.setItem("currentTab", tab);
       const savedIndex = parseInt(localStorage.getItem(`lastStation_${tab}`)) || 0;
@@ -1021,32 +976,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const normalizedCurrentUrl = normalizeUrl(stationItems[currentIndex].dataset.value);
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
-          console.log("switchTab: Starting playback after tab change");
           isAutoPlayPending = false;
           debouncedTryAutoPlay();
-        } else {
-          console.log("switchTab: Skip playback, station already playing");
         }
-      } else {
-        console.log("switchTab: Skip playback, invalid state");
       }
     }
 
     function updateStationList() {
-      if (!stationList) {
-        console.error("stationList not found");
-        return;
-      }
+      if (!stationList) return;
       let stations = currentTab === "best"
         ? favoriteStations
             .map(name => Object.values(stationLists).flat().find(s => s.name === name))
             .filter(s => s)
         : stationLists[currentTab] || [];
-
+      
       if (!stations.length) {
-        currentIndex = 0;
+        stationList.innerHTML = `<div class="station-item empty">${
+          currentTab === "best" ? "No favorite stations yet" : "No stations in this tab"
+        }</div>`;
         stationItems = [];
-        stationList.innerHTML = `<div class="station-item empty">${currentTab === "best" ? "No favorite stations" : "No stations in this category"}</div>`;
         return;
       }
 
@@ -1056,120 +1004,122 @@ document.addEventListener("DOMContentLoaded", () => {
         item.className = `station-item ${index === currentIndex ? "selected" : ""}`;
         item.dataset.value = station.value;
         item.dataset.name = station.name;
-        item.dataset.genre = shortenGenre(station.genre);
-        item.dataset.country = station.country;
+        item.dataset.genre = shortenGenre(station.genre || "Unknown");
+        item.dataset.country = station.country || "Unknown";
         item.dataset.favicon = station.favicon && isValidUrl(station.favicon) ? station.favicon : "";
-        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='🎵 '; console.warn('Error loading favicon:', '${item.dataset.favicon}');">` : "🎵 ";
-        const deleteButton = ["techno", "trance", "ukraine", "pop", ...customTabs].includes(currentTab)
-          ? `<button class="delete-btn">🗑</button>`
-          : "";
+        const isFavorited = favoriteStations.includes(station.name);
+        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" onerror="this.outerHTML='🎵 '">` : "🎵 ";
         item.innerHTML = `
           ${iconHtml}
-          <span class="station-name">${station.name}</span>
+          <div class="station-info">
+            <span class="station-name">${station.name}</span>
+            <div class="station-details">${item.dataset.genre} | ${item.dataset.country}</div>
+          </div>
           <div class="buttons-container">
-            ${deleteButton}
-            <button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button>
+            <button class="favorite-btn material-icons ${isFavorited ? "favorited" : ""}">${isFavorited ? "star" : "star_border"}</button>
+            ${currentTab !== "best" && !station.isFromSearch ? `<button class="delete-btn material-icons">delete</button>` : ""}
+            ${currentTab === "search" ? `<button class="add-btn material-icons">add</button>` : ""}
           </div>`;
         fragment.appendChild(item);
       });
+
       stationList.innerHTML = "";
       stationList.appendChild(fragment);
-      stationItems = stationList.querySelectorAll(".station-item");
+      stationItems = document.querySelectorAll(".station-item");
 
-      if (stationItems.length && stationItems[currentIndex] && !stationItems[currentIndex].classList.contains("empty")) {
-        stationItems[currentIndex].scrollIntoView({ behavior: "smooth", block: "center" });
+      if (stationItems.length && currentIndex < stationItems.length) {
+        updateCurrentStation(stationItems[currentIndex]);
       }
 
       stationList.onclick = e => {
         const item = e.target.closest(".station-item");
         const favoriteBtn = e.target.closest(".favorite-btn");
         const deleteBtn = e.target.closest(".delete-btn");
+        const addBtn = e.target.closest(".add-btn");
+
         if (item && !item.classList.contains("empty")) {
           currentIndex = Array.from(stationItems).indexOf(item);
           changeStation(currentIndex);
         }
+
         if (favoriteBtn) {
           e.stopPropagation();
-          toggleFavorite(item.dataset.name);
+          toggleFavorite(item);
         }
+
         if (deleteBtn) {
           e.stopPropagation();
-          if (confirm(`Are you sure you want to delete station "${item.dataset.name}" from the list?`)) {
-            deleteStation(item.dataset.name);
-          }
+          deleteStation(item);
+        }
+
+        if (addBtn) {
+          e.stopPropagation();
+          showTabModal(item);
         }
       };
 
-      if (stationItems.length && currentIndex < stationItems.length) {
-        changeStation(currentIndex);
+      if (intendedPlaying && stationItems.length && currentIndex < stationItems.length) {
+        debouncedTryAutoPlay();
       }
     }
 
-    function toggleFavorite(stationName) {
-      if (favoriteStations.includes(stationName)) {
-        favoriteStations = favoriteStations.filter(name => name !== stationName);
+    function toggleFavorite(item) {
+      const stationName = item.dataset.name;
+      const index = favoriteStations.indexOf(stationName);
+      if (index === -1) {
+        favoriteStations.push(stationName);
       } else {
-        favoriteStations.unshift(stationName);
+        favoriteStations.splice(index, 1);
       }
       localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-      if (currentTab === "best") switchTab("best");
-      else updateStationList();
+      if (currentTab === "best") {
+        updateStationList();
+      } else {
+        item.querySelector(".favorite-btn").classList.toggle("favorited");
+        item.querySelector(".favorite-btn").textContent = favoriteStations.includes(stationName) ? "star" : "star_border";
+      }
     }
 
-    function deleteStation(stationName) {
-      if (Array.isArray(stationLists[currentTab])) {
-        const station = stationLists[currentTab].find(s => s.name === stationName);
-        if (!station) {
-          console.warn(`Station ${stationName} not found in ${currentTab}`);
-          return;
-        }
+    function deleteStation(item) {
+      const stationName = item.dataset.name;
+      if (confirm(`Are you sure you want to delete "${stationName}" from "${currentTab.toUpperCase()}"?`)) {
+        deletedStations.push(stationName);
+        localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
         stationLists[currentTab] = stationLists[currentTab].filter(s => s.name !== stationName);
         userAddedStations[currentTab] = userAddedStations[currentTab]?.filter(s => s.name !== stationName) || [];
-        if (!station.isFromSearch && !deletedStations.includes(stationName)) {
-          if (!Array.isArray(deletedStations)) deletedStations = [];
-          deletedStations.push(stationName);
-          localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
-          console.log(`Added ${stationName} to deletedStations:`, deletedStations);
-        }
+        favoriteStations = favoriteStations.filter(name => name !== stationName);
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
         localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
-        favoriteStations = favoriteStations.filter(name => name !== stationName);
         localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-        console.log(`Deleted station ${stationName} from ${currentTab}`);
-        if (stationLists[currentTab].length === 0) {
-          currentIndex = 0;
-        } else if (currentIndex >= stationLists[currentTab].length) {
-          currentIndex = stationLists[currentTab].length - 1;
+        if (currentIndex >= stationLists[currentTab].length) {
+          currentIndex = Math.max(0, stationLists[currentTab].length - 1);
         }
+        localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
         updateStationList();
-        if (intendedPlaying && stationItems.length && currentIndex < stationItems.length) {
-          console.log("deleteStation: Starting playback after deletion");
-          isAutoPlayPending = false;
-          debouncedTryAutoPlay();
+        if (stationItems.length && currentIndex < stationItems.length) {
+          changeStation(currentIndex);
         } else {
           audio.pause();
+          isPlaying = false;
+          intendedPlaying = false;
+          localStorage.setItem("isPlaying", isPlaying);
+          localStorage.setItem("intendedPlaying", intendedPlaying);
           resetStationInfo();
-          document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
         }
       }
     }
 
     function changeStation(index) {
-      if (!stationItems.length || index < 0 || index >= stationItems.length) {
-        console.warn("Invalid station index or no stations available");
-        resetStationInfo();
-        return;
-      }
+      if (!stationItems.length || index < 0 || index >= stationItems.length) return;
       currentIndex = index;
       localStorage.setItem(`lastStation_${currentTab}`, currentIndex);
       stationItems.forEach(item => item.classList.remove("selected"));
       stationItems[currentIndex].classList.add("selected");
-      stationItems[currentIndex].scrollIntoView({ behavior: "smooth", block: "center" });
+      intendedPlaying = true;
+      localStorage.setItem("intendedPlaying", intendedPlaying);
+      debouncedTryAutoPlay();
       updateCurrentStation(stationItems[currentIndex]);
-      if (intendedPlaying) {
-        isAutoPlayPending = false;
-        debouncedTryAutoPlay();
-      }
+      playPauseBtn.textContent = isPlaying ? "pause" : "play_arrow";
     }
 
     function updateCurrentStation(item) {
@@ -1179,107 +1129,78 @@ document.addEventListener("DOMContentLoaded", () => {
       const stationIconElement = currentStationInfo.querySelector(".station-icon");
 
       if (stationNameElement) stationNameElement.textContent = item.dataset.name || "Unknown";
-      else console.error(".station-name element not found");
       if (stationGenreElement) stationGenreElement.textContent = `genre: ${item.dataset.genre || "Unknown"}`;
-      else console.error(".station-genre element not found");
       if (stationCountryElement) stationCountryElement.textContent = `country: ${item.dataset.country || "Unknown"}`;
-      else console.error(".station-country element not found");
       if (stationIconElement) {
         if (item.dataset.favicon) {
-          stationIconElement.innerHTML = `<img src="${item.dataset.favicon}" alt="${item.dataset.name} icon" style="width: 80px; height: 80px; object-fit: contain;" onerror="this.outerHTML='🎵 '; console.warn('Error loading favicon:', '${item.dataset.favicon}');">`;
+          stationIconElement.innerHTML = `<img src="${item.dataset.favicon}" alt="${item.dataset.name} icon" onerror="this.outerHTML='🎵 '">`;
         } else {
           stationIconElement.innerHTML = "🎵";
         }
-      } else console.error(".station-icon element not found");
+      }
     }
 
     function togglePlayPause() {
-      intendedPlaying = !intendedPlaying;
-      localStorage.setItem("intendedPlaying", intendedPlaying);
-      if (intendedPlaying && stationItems.length && currentIndex < stationItems.length) {
-        isAutoPlayPending = false;
-        debouncedTryAutoPlay();
-      } else {
+      if (!stationItems.length || currentIndex >= stationItems.length) return;
+      if (isPlaying) {
         audio.pause();
         isPlaying = false;
-        localStorage.setItem("isPlaying", isPlaying);
-        document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+        intendedPlaying = false;
+        progressBar.style.width = "0%";
+      } else {
+        intendedPlaying = true;
+        debouncedTryAutoPlay();
       }
-      playPauseBtn.textContent = intendedPlaying ? "⏸" : "▶";
+      localStorage.setItem("isPlaying", isPlaying);
+      localStorage.setItem("intendedPlaying", intendedPlaying);
+      playPauseBtn.textContent = isPlaying ? "pause" : "play_arrow";
     }
 
     function prevStation() {
-      if (stationItems.length === 0) return;
-      currentIndex = currentIndex === 0 ? stationItems.length - 1 : currentIndex - 1;
-      changeStation(currentIndex);
+      if (stationItems.length && currentIndex > 0) {
+        changeStation(currentIndex - 1);
+      }
     }
 
     function nextStation() {
-      if (stationItems.length === 0) return;
-      currentIndex = currentIndex === stationItems.length - 1 ? 0 : currentIndex + 1;
-      changeStation(currentIndex);
+      if (stationItems.length && currentIndex < stationItems.length - 1) {
+        changeStation(currentIndex + 1);
+      }
     }
 
-    audio.addEventListener("volumechange", () => {
-      localStorage.setItem("volume", audio.volume);
-    });
-
-    audio.addEventListener("error", () => {
-      console.error("Audio error:", audio.error);
-      errorCount++;
-      if (errorCount >= ERROR_LIMIT) {
-        console.error("Reached playback error limit");
-        resetStationInfo();
-      }
-      document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
-      if (intendedPlaying && stationItems.length && currentIndex < stationItems.length) {
-        console.log("Audio error: Retrying playback");
-        isAutoPlayPending = false;
-        debouncedTryAutoPlay();
-      }
-    });
-
-    audio.addEventListener("ended", () => {
-      console.log("Audio ended");
-      if (intendedPlaying) {
-        nextStation();
-      }
-    });
-
-    audio.addEventListener("play", () => {
+    audio.addEventListener("playing", () => {
       isPlaying = true;
       localStorage.setItem("isPlaying", isPlaying);
-      document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
-      playPauseBtn.textContent = "⏸";
+      playPauseBtn.textContent = "pause";
+      progressBar.style.width = "100%";
     });
 
     audio.addEventListener("pause", () => {
       isPlaying = false;
       localStorage.setItem("isPlaying", isPlaying);
-      document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
-      playPauseBtn.textContent = "▶";
+      playPauseBtn.textContent = "play_arrow";
+      progressBar.style.width = "0%";
     });
 
-    window.addEventListener("online", () => {
-      console.log("Network online");
-      if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
-        console.log("Network restored, trying to play");
-        isAutoPlayPending = false;
-        debouncedTryAutoPlay();
+    audio.addEventListener("error", () => {
+      errorCount++;
+      if (errorCount >= ERROR_LIMIT) {
+        resetStationInfo();
+        progressBar.style.width = "0%";
       }
-    });
-
-    window.addEventListener("offline", () => {
-      console.log("Network offline");
-      audio.pause();
-      document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
-    });
-
-    applyTheme(currentTheme);
-    loadStations();
-    if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
       isAutoPlayPending = false;
       debouncedTryAutoPlay();
-    }
+    });
+
+    audio.addEventListener("waiting", () => {
+      progressBar.style.width = "60%";
+    });
+
+    audio.addEventListener("canplay", () => {
+      progressBar.style.width = "80%";
+    });
+
+    loadStations();
+    applyTheme(currentTheme);
   }
 });
