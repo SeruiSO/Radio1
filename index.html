@@ -46,47 +46,43 @@
   <title>Radio S O</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-  <div class="floating-menu">
-    <button class="floating-menu-btn material-icons">more_vert</button>
-    <div class="floating-menu-content">
-      <button class="theme-toggle material-icons" title="Toggle theme">palette</button>
-      <button class="share-button material-icons" title="Share">share</button>
-      <button class="export-button material-icons" title="Export settings">file_download</button>
-      <button class="import-button material-icons" title="Import settings">file_upload</button>
-      <input type="file" id="importFileInput" accept=".json">
-    </div>
-  </div>
-
   <div class="container">
+    <div class="menu">⋮</div>
     <h1>🎧 Radio Music</h1>
-    <audio id="audioPlayer" preload="auto"></audio>
-
     <div id="currentStationInfo">
       <div class="station-info-content">
         <div class="station-icon">🎵</div>
         <div class="station-text">
-          <div class="station-name">Select station</div>
-          <div class="station-genre">genre: -</div>
-          <div class="station-country">country: -</div>
+          <div class="station-name">Обирайте станцію</div>
+          <div class="station-genre">жанр: -</div>
+          <div class="station-country">країна: -</div>
         </div>
-        <canvas id="circleVisualizer" width="120" height="80"></canvas>
-      </div>
-      <div class="progress-bar">
-        <div class="progress"></div>
+        <div class="wave-visualizer">
+          <div class="wave-line"></div>
+          <div class="wave-line"></div>
+          <div class="wave-line"></div>
+          <div class="wave-line"></div>
+          <div class="wave-line"></div>
+          <div class="wave-line"></div>
+          <div class="wave-line"></div>
+          <div class="wave-line"></div>
+          <div class="wave-line"></div>
+        </div>
       </div>
     </div>
-
-    <div id="stationList" class="station-list">
-      <div class="custom-loader"></div>
+    <audio id="audioPlayer" preload="auto" crossorigin="anonymous"></audio>
+    <div class="controls-container">
+      <div class="controls">
+        <button class="control-btn">⏮</button>
+        <button class="control-btn">▶</button>
+        <button class="control-btn">⏭</button>
+      </div>
     </div>
-
     <div class="tabs-wrapper">
       <div id="tabs" class="tabs">
-        <button class="tab-btn active" data-tab="best">Best</button>
+        <button class="tab-btn" data-tab="best">Best</button>
         <button class="tab-btn" data-tab="techno">Techno</button>
         <button class="tab-btn" data-tab="trance">Trance</button>
         <button class="tab-btn" data-tab="ukraine">UA</button>
@@ -95,49 +91,40 @@
         <button class="add-tab-btn">+</button>
       </div>
     </div>
-
-    <div id="searchInput">
+    <div id="searchInput" style="display: none;">
       <input id="searchQuery" list="pastSearches" placeholder="Station name">
       <datalist id="pastSearches"></datalist>
       <input id="searchCountry" list="suggestedCountries" placeholder="Country">
       <datalist id="suggestedCountries"></datalist>
       <input id="searchGenre" list="suggestedGenres" placeholder="Genre">
       <datalist id="suggestedGenres"></datalist>
-      <button class="search-btn material-icons">search</button>
+      <button class="search-btn">🔍</button>
     </div>
-
-    <div class="controls-container">
-      <div class="controls">
-        <button class="control-btn material-icons">skip_previous</button>
-        <button class="control-btn material-icons">play_arrow</button>
-        <button class="control-btn material-icons">skip_next</button>
+    <div id="stationList" class="station-list"></div>
+    <canvas id="analyser_render"></canvas>
+    <button class="theme-toggle">🌙</button>
+    <button class="share-button">📤</button>
+    <button class="export-button">💾</button>
+    <button class="import-button">📥</button>
+    <input type="file" id="importFileInput" style="display: none;" accept=".json">
+    <div class="new-tab-modal" style="display: none;">
+      <div class="modal">
+        <h2>Створити нову вкладку</h2>
+        <input id="newTabName" placeholder="Tab name">
+        <button id="createTabBtn">Створити</button>
+        <button class="modal-cancel-btn">Відміна</button>
       </div>
     </div>
-
-    <div class="new-tab-modal modal-overlay" style="display: none;">
+    <div class="edit-tab-modal" style="display: none;">
       <div class="modal">
-        <h2>Create new tab</h2>
-        <input id="newTabName" type="text" maxlength="10" placeholder="Tab name (max 10 chars)">
-        <div class="modal-tabs">
-          <button id="createTabBtn" class="modal-tab-btn">Create</button>
-          <button class="modal-cancel-btn">Cancel</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="edit-tab-modal modal-overlay" style="display: none;">
-      <div class="modal">
-        <h2>Tab actions</h2>
-        <input id="renameTabName" type="text" maxlength="10" placeholder="New tab name">
-        <div class="modal-tabs">
-          <button id="renameTabBtn" class="modal-tab-btn">Rename</button>
-          <button id="deleteTabBtn" class="modal-tab-btn">Delete</button>
-          <button class="modal-cancel-btn">Cancel</button>
-        </div>
+        <h2>Дії з вкладкою</h2>
+        <input id="renameTabName" placeholder="New tab name">
+        <button id="renameTabBtn">Перейменувати</button>
+        <button id="deleteTabBtn">Видалити</button>
+        <button class="modal-cancel-btn">Відміна</button>
       </div>
     </div>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
