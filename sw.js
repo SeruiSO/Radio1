@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v231.1.20250984';
+const CACHE_NAME = 'radio-cache-v246.1.20250984';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -9,7 +9,8 @@ self.addEventListener('install', (event) => {
         '/styles.css',
         '/script.js',
         '/stations.json',
-        '/manifest.json'
+        '/manifest.json',
+        '/ping.txt'
       ]).then(() => {
         caches.keys().then((cacheNames) => {
           return Promise.all(cacheNames.map((cacheName) => {
@@ -64,7 +65,7 @@ self.addEventListener('activate', (event) => {
 let wasOnline = navigator.onLine;
 
 setInterval(() => {
-  fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
+  fetch("/ping.txt", { method: "HEAD", cache: "no-store" })
     .then(() => {
       if (!wasOnline) {
         wasOnline = true;
