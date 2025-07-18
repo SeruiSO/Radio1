@@ -38,34 +38,44 @@
         return gk_fileData[filename] || "";
         }
         </script><!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#00F0FF">
-  <title>Radio Music</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#00B7EB">
+  <meta name="description" content="Radio S O - Your favorite online radio player">
+  <title>Radio S O</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
-    <button class="theme-toggle">🌙</button>
-    <button class="share-button">📢</button>
-    <button class="export-button">📤</button>
-    <button class="import-button">📥</button>
-    <input type="file" id="importFileInput" accept="application/json">
     <h1>🎧 Radio Music</h1>
-    <audio id="audioPlayer"></audio>
-
+    <button class="theme-toggle">
+      <svg viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+    </button>
+    <button class="share-button">
+      <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+    </button>
+    <button class="export-button">
+      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    </button>
+    <button class="import-button">
+      <svg viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7h4V3h6v6h4zM5 18v2h14v-2H5z"/></svg>
+    </button>
+    <input type="file" id="importFileInput" accept=".json">
     <div id="currentStationInfo">
       <div class="station-info-content">
-        <div class="station-icon">🎵</div>
+        <div class="station-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79-4-4-4z"/></svg>
+        </div>
         <div class="station-text">
           <div class="station-name">Обирайте станцію</div>
           <div class="station-genre">жанр: -</div>
           <div class="station-country">країна: -</div>
         </div>
-        <div class="wave-visualizer">
+        <div class="wave-visualizer" data-visualizer="wave-lines">
           <div class="wave-line"></div>
           <div class="wave-line"></div>
           <div class="wave-line"></div>
@@ -75,12 +85,38 @@
           <div class="wave-line"></div>
           <div class="wave-line"></div>
           <div class="wave-line"></div>
+          <div class="circle-pulse"></div>
+          <div class="circle-pulse"></div>
+          <div class="circle-pulse"></div>
+          <div class="circle-pulse"></div>
+          <div class="circle-pulse"></div>
+          <div class="circle-pulse"></div>
+          <div class="wave-dot"></div>
+          <div class="wave-dot"></div>
+          <div class="wave-dot"></div>
+          <div class="wave-dot"></div>
+          <div class="wave-dot"></div>
+          <div class="wave-dot"></div>
+          <div class="wave-dot"></div>
+          <div class="wave-dot"></div>
+          <div class="wave-dot"></div>
         </div>
       </div>
     </div>
-
-    <div class="station-list" id="stationList"></div>
-
+    <audio id="audioPlayer"></audio>
+    <div class="controls-container">
+      <div class="controls">
+        <button class="control-btn">
+          <svg viewBox="0 0 24 24"><path d="M20 12l-11 7V5z"/></svg>
+        </button>
+        <button class="control-btn">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="control-btn">
+          <svg viewBox="0 0 24 24"><path d="M4 12l11-7v14z"/></svg>
+        </button>
+      </div>
+    </div>
     <div class="tabs-wrapper">
       <div class="tabs" id="tabs">
         <button class="tab-btn" data-tab="best">Best</button>
@@ -92,48 +128,40 @@
         <button class="add-tab-btn">+</button>
       </div>
     </div>
-
     <div id="searchInput">
-      <input id="searchQuery" list="pastSearches" placeholder="Enter station name">
+      <input id="searchQuery" list="pastSearches" placeholder="Назва станції">
       <datalist id="pastSearches"></datalist>
-      <input id="searchCountry" list="suggestedCountries" placeholder="Enter country">
-      <datalist id="suggestedCountries"></datalist>
-      <input id="searchGenre" list="suggestedGenres" placeholder="Enter genre">
-      <datalist id="suggestedGenres"></datalist>
-      <button class="search-btn">🔍</button>
+      <input id="searchCountry" list="searchCountryList" placeholder="Країна">
+      <datalist id="searchCountryList"></datalist>
+      <input id="searchGenre" list="searchGenreList" placeholder="Жанр">
+      <datalist id="searchGenreList"></datalist>
+      <button class="search-btn">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      </button>
+      <button class="clear-btn">
+        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
     </div>
-
-    <div class="controls-container">
-      <div class="controls">
-        <button class="control-btn">⏮</button>
-        <button class="control-btn">▶</button>
-        <button class="control-btn">⏭</button>
-      </div>
-    </div>
-
-    <div class="new-tab-modal modal-overlay" style="display: none;">
+    <div class="station-list" id="stationList"></div>
+    <div class="new-tab-modal" style="display: none;">
+      <div class="modal-overlay"></div>
       <div class="modal">
         <h2>Створити нову вкладку</h2>
-        <input id="newTabName" type="text" placeholder="Enter tab name">
-        <div class="modal-tabs">
-          <button id="createTabBtn" class="modal-tab-btn">Створити</button>
-          <button class="modal-cancel-btn">Відміна</button>
-        </div>
+        <input id="newTabName" type="text" maxlength="10">
+        <button class="modal-tab-btn">Створити</button>
+        <button class="modal-cancel-btn">Відміна</button>
       </div>
     </div>
-
-    <div class="edit-tab-modal modal-overlay" style="display: none;">
+    <div class="edit-tab-modal" style="display: none;">
+      <div class="modal-overlay"></div>
       <div class="modal">
         <h2>Дії з вкладкою</h2>
-        <input id="renameTabName" type="text" placeholder="Enter new tab name">
-        <div class="modal-tabs">
-          <button id="renameTabBtn" class="modal-tab-btn">Перейменувати</button>
-          <button id="deleteTabBtn" class="modal-tab-btn">Видалити</button>
-          <button class="modal-cancel-btn">Відміна</button>
-        </div>
+        <input id="editTabName" type="text" maxlength="10">
+        <button id="renameTabBtn" class="modal-tab-btn">Перейменувати</button>
+        <button id="deleteTabBtn" class="modal-tab-btn">Видалити</button>
+        <button class="modal-cancel-btn">Відміна</button>
       </div>
     </div>
-
   </div>
   <script src="script.js"></script>
 </body>

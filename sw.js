@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v246.1.20250984';
+const CACHE_NAME = 'radio-cache-v289';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -63,27 +63,69 @@ self.addEventListener('activate', (event) => {
 
 // Моніторинг стану мережі
 let wasOnline = navigator.onLine;
+let checkInterval = null;
 
-setInterval(() => {
-  fetch("/ping.txt", { method: "HEAD", cache: "no-store" })
-    .then(() => {
-      if (!wasOnline) {
-        wasOnline = true;
-        self.clients.matchAll().then(clients => {
-          clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: true });
-          });
+function startNetworkCheck() {
+  if (!checkInterval) {
+    checkInterval = setInterval(() => {
+      fetch("/ping.txt", { method: "HEAD", cache: "no-store" })
+        .then(() => {
+          if (!wasOnline) {
+            wasOnline = true;
+            self.clients.matchAll().then(clients => {
+              clients.forEach(client => {
+                client.postMessage({ type: "NETWORK_STATUS", online: true });
+              });
+            });
+            stopNetworkCheck();
+          }
+        })
+        .catch(error => {
+          if (wasOnline) {
+            wasOnline = false;
+            self.clients.matchAll().then(clients => {
+              clients.forEach(client => {
+                client.postMessage({ type: "NETWORK_STATUS", online: false });
+              });
+            });
+          }
         });
-      }
-    })
-    .catch(error => {
-      if (wasOnline) {
-        wasOnline = false;
-        self.clients.matchAll().then(clients => {
-          clients.forEach(client => {
-            client.postMessage({ type: "NETWORK_STATUS", online: false });
-          });
-        });
-      }
+    }, 2000);
+  }
+}
+
+function stopNetworkCheck() {
+  if (checkInterval) {
+    clearInterval(checkInterval);
+    checkInterval = null;
+  }
+}
+
+self.addEventListener('online', () => {
+  if (!wasOnline) {
+    wasOnline = true;
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({ type: "NETWORK_STATUS", online: true });
+      });
     });
-}, 2000); // Збільшено інтервал до 2 секунд
+    stopNetworkCheck();
+  }
+});
+
+self.addEventListener('offline', () => {
+  if (wasOnline) {
+    wasOnline = false;
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({ type: "NETWORK_STATUS", online: false });
+      });
+    });
+    startNetworkCheck();
+  }
+});
+
+if (!navigator.onLine && wasOnline) {
+  wasOnline = false;
+  startNetworkCheck();
+}
