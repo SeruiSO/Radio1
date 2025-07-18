@@ -120,7 +120,7 @@ body {
   width: 100%;
   background: var(--container-bg);
   padding: 15px;
-  padding-bottom: 20px;
+  padding-bottom: 80px; /* Збільшено для врахування fixed controls */
   border-radius: 12px;
   border: 1px solid var(--accent);
   margin: 0 auto;
@@ -200,7 +200,7 @@ h1 {
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: left;
-  height: 100px;
+  height: 120px; /* Збільшено висоту */
   display: flex;
   align-items: center;
   position: sticky;
@@ -249,10 +249,10 @@ h1 {
 }
 
 .station-icon {
-  width: 60px;
-  height: 60px;
+  width: 80px; /* Збільшено розмір іконки */
+  height: 80px;
   order: 1;
-  font-size: 40px;
+  font-size: 48px; /* Збільшено розмір шрифту для іконки */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -331,11 +331,11 @@ h1 {
 }
 
 .station-item {
-  padding: 10px;
+  padding: 2px 8px; /* Зменшено відступи */
   cursor: pointer;
   border-radius: 12px;
   font-weight: 500;
-  margin: 4px 0;
+  margin: 2px 0; /* Зменшено відступи */
   color: var(--text);
   background: var(--container-bg);
   display: flex;
@@ -343,7 +343,7 @@ h1 {
   gap: 10px;
   border: 1px solid var(--accent);
   transition: all 0.2s ease;
-  min-height: 60px;
+  height: 40px; /* Висота відповідає розміру іконки */
   touch-action: manipulation;
 }
 
@@ -434,10 +434,10 @@ h1 {
 
 .tabs-wrapper {
   overflow-x: auto;
-  margin: 5px 0;
+  margin: 2px 0; /* Зменшено відступ */
   position: sticky;
-  bottom: 0;
-  z-index: 10;
+  top: 120px; /* Розташовано під #currentStationInfo */
+  z-index: 9; /* Нижче за #currentStationInfo, але вище за контент */
   background: var(--container-bg);
 }
 
@@ -449,7 +449,7 @@ h1 {
   display: flex;
   justify-content: flex-start;
   background: var(--container-bg);
-  padding: 8px;
+  padding: 4px; /* Зменшено відступ */
   border-radius: 12px;
   white-space: nowrap;
   gap: 6px;
@@ -564,15 +564,17 @@ h1 {
 }
 
 .controls-container {
-  position: sticky;
-  bottom: 0;
+  position: fixed; /* Закріплено знизу */
+  bottom: 0; /* Прикріплено до нижньої межі */
+  left: 0;
+  right: 0;
   background: var(--container-bg);
   border-top: 1px solid var(--accent);
-  padding: 15px;
+  padding: 8px; /* Зменшено відступ */
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 30px;
+  gap: 15px; /* Зменшено відстань між кнопками */
   z-index: 10;
   transition: background 0.3s ease, border-color 0.3s ease;
 }
@@ -580,13 +582,13 @@ h1 {
 .controls {
   display: flex;
   justify-content: center;
-  gap: 30px;
+  gap: 15px; /* Зменшено відстань між кнопками */
 }
 
 .control-btn {
-  width: 100px;
-  height: 100px;
-  font-size: 36px;
+  width: 60px; /* Зменшено розмір кнопок */
+  height: 60px;
+  font-size: 24px; /* Зменшено розмір шрифту */
   background: var(--container-bg);
   color: var(--text);
   border: 1px solid var(--accent);
@@ -744,14 +746,14 @@ datalist {
 
   .container {
     padding: 10px;
-    padding-bottom: 20px;
+    padding-bottom: 70px; /* Збільшено для fixed controls */
     height: 100vh;
   }
 
   .control-btn {
-    width: 100px;
-    height: 100px;
-    font-size: 32px;
+    width: 48px; /* Зменшено розмір кнопок */
+    height: 48px;
+    font-size: 20px; /* Зменшено розмір шрифту */
     border: 1px solid var(--accent);
     border-radius: 12px;
   }
@@ -765,10 +767,10 @@ datalist {
   }
 
   .station-item {
-    padding: 8px;
-    margin: 3px 0;
+    padding: 2px 6px; /* Зменшено відступи */
+    margin: 2px 0;
     border-radius: 12px;
-    min-height: 60px;
+    height: 32px; /* Висота відповідає розміру іконки */
   }
 
   .station-item .station-name {
@@ -809,8 +811,9 @@ datalist {
   }
 
   .tabs-wrapper {
-    margin: 3px 0;
+    margin: 2px 0; /* Зменшено відступ */
     padding: 0 5px;
+    top: 110px; /* Під #currentStationInfo */
   }
 
   .tab-btn,
@@ -828,11 +831,12 @@ datalist {
 
   .tabs {
     gap: 4px;
+    padding: 4px; /* Зменшено відступ */
   }
 
   #currentStationInfo {
     padding: 10px;
-    height: 90px;
+    height: 110px; /* Збільшено висоту */
     border-radius: 12px;
   }
 
@@ -845,9 +849,9 @@ datalist {
   }
 
   .station-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 36px;
+    width: 64px; /* Збільшено розмір іконки */
+    height: 64px;
+    font-size: 40px; /* Збільшено розмір шрифту */
   }
 
   .wave-visualizer {
