@@ -16,8 +16,7 @@ let isAutoPlayPending = false;
 let lastSuccessfulPlayTime = 0;
 let streamAbortController = null;
 let errorTimeout = null;
-let autoPlayRequestId = 0;
-let currentVisualizer = localStorage.getItem("currentVisualizer") || "wave-lines";
+let autoPlayRequestId = 0; // Unique ID for autoplay requests
 customTabs = Array.isArray(customTabs) ? customTabs.filter(tab => typeof tab === "string" && tab.trim()) : [];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -35,16 +34,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchCountry = document.getElementById("searchCountry");
   const searchGenre = document.getElementById("searchGenre");
   const searchBtn = document.querySelector(".search-btn");
-  const clearBtn = document.querySelector(".clear-btn");
   const pastSearchesList = document.getElementById("pastSearches");
   const tabsContainer = document.getElementById("tabs");
-  const waveVisualizer = document.querySelector(".wave-visualizer");
 
-  // Fix 1: Add retry limit for DOM element initialization
-  let initRetryCount = 0;
-  const MAX_INIT_RETRIES = 3;
-
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !clearBtn || !pastSearchesList || !tabsContainer || !waveVisualizer) {
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer) {
     console.error("One of required DOM elements not found", {
       audio: !!audio,
       stationList: !!stationList,
@@ -60,18 +53,10 @@ document.addEventListener("DOMContentLoaded", () => {
       searchCountry: !!searchCountry,
       searchGenre: !!searchGenre,
       searchBtn: !!searchBtn,
-      clearBtn: !!clearBtn,
       pastSearchesList: !!pastSearchesList,
-      tabsContainer: !!tabsContainer,
-      waveVisualizer: !!waveVisualizer
+      tabsContainer: !!tabsContainer
     });
-    if (initRetryCount < MAX_INIT_RETRIES) {
-      initRetryCount++;
-      setTimeout(initializeApp, 100 * initRetryCount);
-    } else {
-      console.error("Maximum retry attempts reached for DOM initialization");
-      alert("Помилка ініціалізації програми. Будь ласка, перевірте сторінку.");
-    }
+    setTimeout(initializeApp, 100);
     return;
   }
 
@@ -84,10 +69,9 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePastSearches();
     populateSearchSuggestions();
     renderTabs();
-    applyVisualizer();
 
     shareButton.addEventListener("click", () => {
-      const stationName = currentStationInfo.querySelector(".station-name")?.textContent || "Radio S O";
+      const stationName = currentStationInfo.querySelector(".station-name").textContent || "Radio S O";
       const shareData = {
         title: "Radio S O",
         text: `Listening to ${stationName} on Radio S O! Join my favorite radio stations!`,
@@ -124,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
         searchStations(query, country, genre);
       } else {
         console.warn("All search fields are empty");
-        stationList.innerHTML = "<div class='station-item empty'>Введіть назву станції, країну або жанр</div>";
+        stationList.innerHTML = "<div class='station-item empty'>Enter station name, country or genre</div>";
       }
     });
 
@@ -140,35 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.key === "Enter") searchBtn.click();
     });
 
-    clearBtn.addEventListener("click", () => {
-      searchQuery.value = "";
-      searchCountry.value = "";
-      searchGenre.value = "";
-      stationList.innerHTML = "<div class='station-item empty'>Введіть назву станції, країну або жанр</div>";
-      console.log("Search fields cleared");
-    });
-
-    waveVisualizer.addEventListener("click", toggleVisualizer);
-
-    function toggleVisualizer() {
-      const visualizers = ["wave-lines", "circle-pulse", "wave-dots"];
-      const currentIndex = visualizers.indexOf(currentVisualizer);
-      currentVisualizer = visualizers[(currentIndex + 1) % visualizers.length];
-      localStorage.setItem("currentVisualizer", currentVisualizer);
-      applyVisualizer();
-    }
-
-    function applyVisualizer() {
-      if (waveVisualizer.dataset.visualizer === currentVisualizer) return; // Fix 6: Avoid redundant DOM updates
-      waveVisualizer.dataset.visualizer = currentVisualizer;
-      const elements = waveVisualizer.querySelectorAll(`.${currentVisualizer === "wave-lines" ? "wave-line" : currentVisualizer === "circle-pulse" ? "circle-pulse" : "wave-dot"}`);
-      const allElements = waveVisualizer.querySelectorAll(".wave-line, .circle-pulse, .wave-dot");
-      allElements.forEach(elem => elem.classList.remove("playing"));
-      if (isPlaying) {
-        elements.forEach(elem => elem.classList.add("playing"));
-      }
-    }
-
     function exportSettings() {
       const settings = {
         selectedTheme: localStorage.getItem("selectedTheme") || "deep-obsidian",
@@ -177,8 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
         favoriteStations: JSON.parse(localStorage.getItem("favoriteStations")) || [],
         pastSearches: JSON.parse(localStorage.getItem("pastSearches")) || [],
         deletedStations: JSON.parse(localStorage.getItem("deletedStations")) || [],
-        currentTab: localStorage.getItem("currentTab") || "techno",
-        currentVisualizer: localStorage.getItem("currentVisualizer") || "wave-lines"
+        currentTab: localStorage.getItem("currentTab") || "techno"
       };
       const blob = new Blob([JSON.stringify(settings, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -200,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           const settings = JSON.parse(e.target.result);
           if (!settings || typeof settings !== "object") {
-            alert("Невірний формат файлу!");
+            alert("Invalid settings file!");
             return;
           }
           const validThemes = [
@@ -267,18 +221,13 @@ document.addEventListener("DOMContentLoaded", () => {
               localStorage.setItem("currentTab", currentTab);
             }
           }
-          if (settings.currentVisualizer && ["wave-lines", "circle-pulse", "wave-dots"].includes(settings.currentVisualizer)) {
-            currentVisualizer = settings.currentVisualizer;
-            localStorage.setItem("currentVisualizer", currentVisualizer);
-            applyVisualizer();
-          }
           loadStations();
           switchTab(currentTab);
           console.log("Settings imported:", settings);
-          alert("Налаштування успішно імпортовано!");
+          alert("Settings imported successfully!");
         } catch (error) {
           console.error("Error importing settings:", error);
-          alert("Помилка імпорту налаштувань. Перевірте формат файлу.");
+          alert("Error importing settings. Please check the file format.");
         }
         importFileInput.value = "";
       };
@@ -298,8 +247,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "Blues", "Folk", "Metal", "R&B", "Soul", "Ambient"
       ];
 
-      const countryDatalist = document.getElementById("searchCountryList");
-      const genreDatalist = document.getElementById("searchGenreList");
+      const countryDatalist = document.getElementById("suggestedCountries");
+      const genreDatalist = document.getElementById("suggestedGenres");
 
       countryDatalist.innerHTML = suggestedCountries.map(country => `<option value="${country}">`).join("");
       genreDatalist.innerHTML = suggestedGenres.map(genre => `<option value="${genre}">`).join("");
@@ -316,7 +265,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function normalizeCountry(country) {
       if (!country) return "";
-      // Fix 3: Enhanced country normalization
       const countryMap = {
         "ukraine": "Ukraine", "italy": "Italy", "german": "Germany",
         "germany": "Germany", "france": "France", "spain": "Spain",
@@ -326,11 +274,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "switzerland": "Switzerland", "belgium": "Belgium", "poland": "Poland",
         "austria": "Austria", "sweden": "Sweden", "norway": "Norway",
         "denmark": "Denmark", "japan": "Japan", "south korea": "South Korea",
-        "new zealand": "New Zealand",
-        "us": "United States", "u.s.": "United States", "u.s.a.": "United States",
-        "england": "United Kingdom", "britain": "United Kingdom"
+        "new zealand": "New Zealand"
       };
-      const normalized = country.toLowerCase().replace(/\./g, '');
+      const normalized = country.toLowerCase();
       return countryMap[normalized] || country.charAt(0).toUpperCase() + country.slice(1).toLowerCase();
     }
 
@@ -359,21 +305,21 @@ document.addEventListener("DOMContentLoaded", () => {
       const stationGenreElement = currentStationInfo.querySelector(".station-genre");
       const stationCountryElement = currentStationInfo.querySelector(".station-country");
       const stationIconElement = currentStationInfo.querySelector(".station-icon");
-      if (stationNameElement) stationNameElement.textContent = "Обирайте станцію";
+      if (stationNameElement) stationNameElement.textContent = "Select station";
       else console.error(".station-name element not found");
-      if (stationGenreElement) stationGenreElement.textContent = "жанр: -";
+      if (stationGenreElement) stationGenreElement.textContent = "genre: -";
       else console.error(".station-genre element not found");
-      if (stationCountryElement) stationCountryElement.textContent = "країна: -";
+      if (stationCountryElement) stationCountryElement.textContent = "country: -";
       else console.error(".station-country element not found");
       if (stationIconElement) {
-        stationIconElement.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79-4-4-4z"/></svg>`;
+        stationIconElement.innerHTML = "🎵";
         stationIconElement.style.backgroundImage = "none";
       } else console.error(".station-icon element not found");
     }
 
     async function loadStations() {
       console.time("loadStations");
-      stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
+      stationList.innerHTML = "<div class='station-item empty'>Loading...</div>";
       try {
         abortController.abort();
         abortController = new AbortController();
@@ -449,7 +395,7 @@ document.addEventListener("DOMContentLoaded", () => {
             stationLists[tab] = Array.from(uniqueStations.values());
           });
           localStorage.setItem("stationLists", JSON.stringify(stationLists));
-          stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції</div>";
+          stationList.innerHTML = "<div class='station-item empty'>Failed to load stations</div>";
         }
       } finally {
         console.timeEnd("loadStations");
@@ -457,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function searchStations(query, country, genre) {
-      stationList.innerHTML = "<div class='station-item empty'>Пошук...</div>";
+      stationList.innerHTML = "<div class='station-item empty'>Searching...</div>";
       try {
         abortController.abort();
         abortController = new AbortController();
@@ -483,14 +429,14 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (error) {
         if (error.name !== 'AbortError') {
           console.error("Error searching stations:", error);
-          stationList.innerHTML = "<div class='station-item empty'>Не вдалося знайти станції</div>";
+          stationList.innerHTML = "<div class='station-item empty'>Failed to find stations</div>";
         }
       }
     }
 
     function renderSearchResults(stations) {
       if (!stations.length) {
-        stationList.innerHTML = "<div class='station-item empty'>Нічого не знайдено</div>";
+        stationList.innerHTML = "<div class='station-item empty'>Nothing found</div>";
         stationItems = [];
         return;
       }
@@ -503,8 +449,8 @@ document.addEventListener("DOMContentLoaded", () => {
         item.dataset.genre = shortenGenre(station.tags || "Unknown");
         item.dataset.country = station.country || "Unknown";
         item.dataset.favicon = station.favicon && isValidUrl(station.favicon) ? station.favicon : "";
-        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='<svg viewBox=\\'0 0 24 24\\'><path d=\\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79-4-4-4z\\'/></svg> '; console.warn('Error loading favicon:', '${item.dataset.favicon}');">` : `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79-4-4-4z"/></svg>`;
-        item.innerHTML = `${iconHtml}<span class="station-name">${station.name}</span><button class="add-btn">Додати</button>`;
+        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='🎵 '">` : "🎵 ";
+        item.innerHTML = `${iconHtml}<span class="station-name">${station.name}</span><button class="add-btn">ADD</button>`;
         fragment.appendChild(item);
       });
       stationList.innerHTML = "";
@@ -538,14 +484,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const modal = document.createElement("div");
       modal.className = "modal";
       modal.innerHTML = `
-        <h2>Обрати вкладку</h2>
+        <h2>Select tab</h2>
         <div class="modal-tabs">
           <button class="modal-tab-btn" data-tab="techno">TECHNO</button>
           <button class="modal-tab-btn" data-tab="trance">TRANCE</button>
           <button class="modal-tab-btn" data-tab="ukraine">UA</button>
           <button class="modal-tab-btn" data-tab="pop">POP</button>
           ${customTabs.map(tab => `<button class="modal-tab-btn" data-tab="${tab}">${tab.toUpperCase()}</button>`).join('')}
-          <button class="modal-cancel-btn">Відміна</button>
+          <button class="modal-cancel-btn">Cancel</button>
         </div>
       `;
       document.body.appendChild(overlay);
@@ -554,15 +500,15 @@ document.addEventListener("DOMContentLoaded", () => {
         overlay.remove();
         modal.remove();
       };
-      overlay.addEventListener("click", closeModal, { once: true }); // Fix 9: Use once to prevent memory leaks
+      overlay.addEventListener("click", closeModal);
       modal.querySelectorAll(".modal-tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
           const targetTab = btn.dataset.tab;
           saveStation(item, targetTab);
           closeModal();
-        }, { once: true });
+        });
       });
-      modal.querySelector(".modal-cancel-btn").addEventListener("click", closeModal, { once: true });
+      modal.querySelector(".modal-cancel-btn").addEventListener("click", closeModal);
     }
 
     function saveStation(item, targetTab) {
@@ -576,10 +522,10 @@ document.addEventListener("DOMContentLoaded", () => {
           genre: item.dataset.genre,
           country: item.dataset.country,
           favicon: item.dataset.favicon || "",
-          isFromSearch: currentTab === "search"
+          isFromSearch: currentTab === "search" // Mark station as from search
         };
         stationLists[targetTab].unshift(newStation);
-        userAddedStations[targetTab].unshift(newStation);
+        userAddedStations[targetTab].unshift(newStation); // Always add to userAddedStations
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
         localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
         console.log(`Added station ${stationName} to ${targetTab}:`, newStation);
@@ -587,7 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
           updateStationList();
         }
       } else {
-        alert("Ця станція вже додана до обраної вкладки!");
+        alert("This station is already added to the selected tab!");
       }
     }
 
@@ -615,7 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tabsContainer.appendChild(addBtn);
 
       tabsContainer.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.addEventListener("click", () => switchTab(btn.dataset.tab), { once: true });
+        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
         if (customTabs.includes(btn.dataset.tab)) {
           let longPressTimer;
           btn.addEventListener("pointerdown", () => {
@@ -626,14 +572,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      addBtn.addEventListener("click", showNewTabModal, { once: true });
+      addBtn.addEventListener("click", showNewTabModal);
     }
 
     function showNewTabModal() {
       const overlay = document.querySelector(".new-tab-modal");
       const modal = overlay.querySelector(".modal");
       const input = document.getElementById("newTabName");
-      const createBtn = modal.querySelector(".modal-tab-btn");
+      const createBtn = document.getElementById("createTabBtn");
       const cancelBtn = modal.querySelector(".modal-cancel-btn");
 
       overlay.style.display = "block";
@@ -651,19 +597,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const createTabHandler = () => {
         const tabName = input.value.trim().toLowerCase();
         if (!tabName) {
-          alert("Введіть назву вкладки!");
+          alert("Enter tab name!");
           return;
         }
         if (["best", "techno", "trance", "ukraine", "pop", "search"].includes(tabName) || customTabs.includes(tabName)) {
-          alert("Ця назва вкладки вже існує!");
+          alert("This tab name already exists!");
           return;
         }
         if (tabName.length > 10 || !/^[a-z0-9_-]+$/.test(tabName)) {
-          alert("Назва вкладки не може перевищувати 10 символів і має містити лише латинські літери, цифри, дефіс або підкреслення.");
+          alert("Tab name cannot exceed 10 characters and must contain only Latin letters, numbers, hyphen or underscore.");
           return;
         }
         if (customTabs.length >= 7) {
-          alert("Досягнуто максимум 7 вкладок!");
+          alert("Maximum of 7 custom tabs reached!");
           return;
         }
         customTabs.push(tabName);
@@ -682,16 +628,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === "Enter") createBtn.click();
       };
 
-      createBtn.addEventListener("click", createTabHandler, { once: true });
-      cancelBtn.addEventListener("click", closeModal, { once: true });
-      overlay.addEventListener("click", closeModal, { once: true });
-      input.addEventListener("keypress", keypressHandler, { once: true });
+      createBtn.addEventListener("click", createTabHandler);
+      cancelBtn.addEventListener("click", closeModal);
+      overlay.addEventListener("click", closeModal);
+      input.addEventListener("keypress", keypressHandler);
     }
 
     function showEditTabModal(tab) {
       const overlay = document.querySelector(".edit-tab-modal");
       const modal = overlay.querySelector(".modal");
-      const input = document.getElementById("editTabName");
+      const input = document.getElementById("renameTabName");
       const renameBtn = document.getElementById("renameTabBtn");
       const deleteBtn = document.getElementById("deleteTabBtn");
       const cancelBtn = modal.querySelector(".modal-cancel-btn");
@@ -712,15 +658,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const renameTabHandler = () => {
         const newName = input.value.trim().toLowerCase();
         if (!newName) {
-          alert("Введіть нову назву вкладки!");
+          alert("Enter new tab name!");
           return;
         }
         if (["best", "techno", "trance", "ukraine", "pop", "search"].includes(newName) || customTabs.includes(newName)) {
-          alert("Ця назва вкладки вже існує!");
+          alert("This tab name already exists!");
           return;
         }
         if (newName.length > 10 || !/^[a-z0-9_-]+$/.test(newName)) {
-          alert("Назва вкладки не може перевищувати 10 символів і має містити лише латинські літери, цифри, дефіс або підкреслення!");
+          alert("Tab name cannot exceed 10 characters and must contain only Latin letters, numbers, hyphen or underscore!");
           return;
         }
         const index = customTabs.indexOf(tab);
@@ -738,7 +684,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       const deleteTabHandler = () => {
-        if (confirm(`Ви впевнені, що хочете видалити вкладку "${tab.toUpperCase()}"?`)) {
+        if (confirm(`Are you sure you want to delete the "${tab.toUpperCase()}" tab?`)) {
           customTabs = customTabs.filter(t => t !== tab);
           delete stationLists[tab];
           delete userAddedStations[tab];
@@ -758,93 +704,93 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === "Enter") renameBtn.click();
       };
 
-      renameBtn.addEventListener("click", renameTabHandler, { once: true });
-      deleteBtn.addEventListener("click", deleteTabHandler, { once: true });
-      cancelBtn.addEventListener("click", closeModal, { once: true });
-      overlay.addEventListener("click", closeModal, { once: true });
-      input.addEventListener("keypress", keypressHandler, { once: true });
+      renameBtn.addEventListener("click", renameTabHandler);
+      deleteBtn.addEventListener("click", deleteTabHandler);
+      cancelBtn.addEventListener("click", closeModal);
+      overlay.addEventListener("click", closeModal);
+      input.addEventListener("keypress", keypressHandler);
     }
 
     const themes = {
       "deep-obsidian": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#00B7EB",
-        text: "#E0E7E9",
-        accentGradient: "linear-gradient(45deg, #0077B6, #00B7EB)",
-        shadow: "rgba(0, 183, 235, 0.3)"
+        accent: "#40C4FF",
+        text: "#B0BEC5",
+        accentGradient: "linear-gradient(45deg, #0288D1, #40C4FF)",
+        shadow: "rgba(64, 196, 255, 0.2)"
       },
       "void-nexus": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#0288D1",
-        text: "#F5F6F5",
-        accentGradient: "linear-gradient(45deg, #01579B, #0288D1)",
-        shadow: "rgba(2, 136, 209, 0.3)"
+        accent: "#FF5722",
+        text: "#CFD8DC",
+        accentGradient: "linear-gradient(45deg, #D84315, #FF5722)",
+        shadow: "rgba(255, 87, 34, 0.2)"
       },
       "shadow-pulse": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#4CAF50",
-        text: "#E6E6E6",
-        accentGradient: "linear-gradient(45deg, #2E7D32, #4CAF50)",
-        shadow: "rgba(76, 175, 80, 0.3)"
+        accent: "#26A69A",
+        text: "#B2DFDB",
+        accentGradient: "linear-gradient(45deg, #00897B, #26A69A)",
+        shadow: "rgba(38, 166, 154, 0.2)"
       },
       "dark-abyss": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#7B1FA2",
-        text: "#E5E0F8",
-        accentGradient: "linear-gradient(45deg, #4A148C, #7B1FA2)",
-        shadow: "rgba(123, 31, 162, 0.3)"
+        accent: "#AB47BC",
+        text: "#CE93D8",
+        accentGradient: "linear-gradient(45deg, #7B1FA2, #AB47BC)",
+        shadow: "rgba(171, 71, 188, 0.2)"
       },
       "cosmic-dream": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#5BC0EB",
-        text: "#D9E1E8",
-        accentGradient: "linear-gradient(45deg, #3A86FF, #5BC0EB)",
-        shadow: "rgba(91, 192, 235, 0.3)"
+        accent: "#4FC3F7",
+        text: "#B3E5FC",
+        accentGradient: "linear-gradient(45deg, #0288D1, #4FC3F7)",
+        shadow: "rgba(79, 195, 247, 0.2)"
       },
       "midnight-aurora": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#6A1B9A",
-        text: "#E5E0F8",
-        accentGradient: "linear-gradient(45deg, #4527A0, #6A1B9A)",
-        shadow: "rgba(106, 27, 154, 0.3)"
+        accent: "#7E57C2",
+        text: "#D1C4E9",
+        accentGradient: "linear-gradient(45deg, #512DA8, #7E57C2)",
+        shadow: "rgba(126, 87, 194, 0.2)"
       },
       "emerald-glow": {
         bodyBg: "#000000",
         containerBg: "#000000",
         accent: "#26A69A",
-        text: "#E6F0EA",
+        text: "#B2DFDB",
         accentGradient: "linear-gradient(45deg, #00897B, #26A69A)",
-        shadow: "rgba(38, 166, 154, 0.3)"
+        shadow: "rgba(38, 166, 154, 0.2)"
       },
       "retro-wave": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#D81B60",
-        text: "#F8E1F4",
-        accentGradient: "linear-gradient(45deg, #AD1457, #D81B60)",
-        shadow: "rgba(216, 27, 96, 0.3)"
+        accent: "#F06292",
+        text: "#F8BBD0",
+        accentGradient: "linear-gradient(45deg, #C2185B, #F06292)",
+        shadow: "rgba(240, 98, 146, 0.2)"
       },
       "arctic-fusion": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#039BE5",
-        text: "#D9E1E8",
-        accentGradient: "linear-gradient(45deg, #0277BD, #039BE5)",
-        shadow: "rgba(3, 155, 229, 0.3)"
+        accent: "#29B6F6",
+        text: "#B3E5FC",
+        accentGradient: "linear-gradient(45deg, #0288D1, #29B6F6)",
+        shadow: "rgba(41, 182, 246, 0.2)"
       },
       "golden-haze": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#FBC02D",
-        text: "#FFF3D9",
-        accentGradient: "linear-gradient(45deg, #F57F17, #FBC02D)",
-        shadow: "rgba(251, 192, 45, 0.3)"
+        accent: "#FFCA28",
+        text: "#FFF8E1",
+        accentGradient: "linear-gradient(45deg, #FFB300, #FFCA28)",
+        shadow: "rgba(255, 202, 40, 0.2)"
       }
     };
     let currentTheme = localStorage.getItem("selectedTheme") || "deep-obsidian";
@@ -869,12 +815,9 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("selectedTheme", theme);
       currentTheme = theme;
       document.documentElement.setAttribute("data-theme", theme);
-      // Fix 7: Check for theme-color meta tag existence
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
       if (themeColorMeta) {
         themeColorMeta.setAttribute("content", themes[theme].accent);
-      } else {
-        console.warn("Meta tag 'theme-color' not found");
       }
     }
 
@@ -898,15 +841,13 @@ document.addEventListener("DOMContentLoaded", () => {
           if (newWorker) {
             newWorker.addEventListener("statechange", () => {
               if (newWorker.state === "activated" && navigator.serviceWorker.controller) {
-                if (window.confirm("Доступна нова версія радіо. Оновити?")) {
+                if (window.confirm("New version of radio available. Update?")) {
                   window.location.reload();
                 }
               }
             });
           }
         });
-      }).catch(error => {
-        console.error("Service Worker registration failed:", error); // Fix 2: Add error handling
       });
 
       navigator.serviceWorker.addEventListener("message", (event) => {
@@ -946,7 +887,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (autoPlayTimeout) {
         clearTimeout(autoPlayTimeout);
       }
-      autoPlayRequestId++;
+      autoPlayRequestId++; // Increment request ID
       const currentRequestId = autoPlayRequestId;
       autoPlayTimeout = setTimeout(() => tryAutoPlay(retryCount, delay, currentRequestId), 0);
     }
@@ -969,7 +910,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (!intendedPlaying || !stationItems?.length || currentIndex >= stationItems.length) {
           console.log("Skip tryAutoPlay: invalid state", { intendedPlaying, hasStationItems: !!stationItems?.length, isIndexValid: currentIndex < stationItems.length });
-          waveVisualizer.querySelectorAll(".wave-line, .circle-pulse, .wave-dot").forEach(elem => elem.classList.remove("playing"));
+          document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
           return;
         }
         const currentStationUrl = stationItems[currentIndex].dataset.value;
@@ -1018,7 +959,7 @@ document.addEventListener("DOMContentLoaded", () => {
             isPlaying = true;
             lastSuccessfulPlayTime = Date.now();
             console.log("Playback started successfully");
-            applyVisualizer();
+            document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
             localStorage.setItem("isPlaying", isPlaying);
             if (stationItems[currentIndex]) {
               updateCurrentStation(stationItems[currentIndex]);
@@ -1029,7 +970,7 @@ document.addEventListener("DOMContentLoaded", () => {
               return;
             }
             console.error("Playback error:", error);
-            waveVisualizer.querySelectorAll(".wave-line, .circle-pulse, .wave-dot").forEach(elem => elem.classList.remove("playing"));
+            document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
             if (attemptsLeft > 1) {
               if (stationItems[currentIndex].dataset.value !== initialStationUrl) {
                 console.log("tryAutoPlay: Station changed during retry, canceling");
@@ -1107,7 +1048,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!stations.length) {
         currentIndex = 0;
         stationItems = [];
-        stationList.innerHTML = `<div class="station-item empty">${currentTab === "best" ? "Немає улюблених станцій" : "Немає станцій у цій категорії"}</div>`;
+        stationList.innerHTML = `<div class="station-item empty">${currentTab === "best" ? "No favorite stations" : "No stations in this category"}</div>`;
         return;
       }
 
@@ -1120,16 +1061,16 @@ document.addEventListener("DOMContentLoaded", () => {
         item.dataset.genre = shortenGenre(station.genre);
         item.dataset.country = station.country;
         item.dataset.favicon = station.favicon && isValidUrl(station.favicon) ? station.favicon : "";
-        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='<svg viewBox=\\'0 0 24 24\\'><path d=\\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79-4-4-4z\\'/></svg> '; console.warn('Error loading favicon:', '${item.dataset.favicon}');">` : `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79-4-4-4z"/></svg>`;
+        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='🎵 '; console.warn('Error loading favicon:', '${item.dataset.favicon}');">` : "🎵 ";
         const deleteButton = ["techno", "trance", "ukraine", "pop", ...customTabs].includes(currentTab)
-          ? `<button class="delete-btn"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>`
+          ? `<button class="delete-btn">🗑</button>`
           : "";
         item.innerHTML = `
           ${iconHtml}
           <span class="station-name">${station.name}</span>
           <div class="buttons-container">
             ${deleteButton}
-            <button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
+            <button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button>
           </div>`;
         fragment.appendChild(item);
       });
@@ -1155,7 +1096,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (deleteBtn) {
           e.stopPropagation();
-          if (confirm(`Ви впевнені, що хочете видалити станцію "${item.dataset.name}" зі списку?`)) {
+          if (confirm(`Are you sure you want to delete station "${item.dataset.name}" from the list?`)) {
             deleteStation(item.dataset.name);
           }
         }
@@ -1167,7 +1108,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function toggleFavorite(stationName) {
-      if (!stationName) return; // Fix 5: Add check for invalid stationName
       if (favoriteStations.includes(stationName)) {
         favoriteStations = favoriteStations.filter(name => name !== stationName);
       } else {
@@ -1179,34 +1119,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function deleteStation(stationName) {
-      if (!stationName || !Array.isArray(stationLists[currentTab])) {
-        console.warn(`Invalid stationName or tab: ${stationName}, ${currentTab}`);
-        return; // Fix 5: Early return for invalid inputs
+      if (Array.isArray(stationLists[currentTab])) {
+        const station = stationLists[currentTab].find(s => s.name === stationName);
+        if (!station) {
+          console.warn(`Station ${stationName} not found in ${currentTab}`);
+          return;
+        }
+        stationLists[currentTab] = stationLists[currentTab].filter(s => s.name !== stationName);
+        userAddedStations[currentTab] = userAddedStations[currentTab]?.filter(s => s.name !== stationName) || [];
+        if (!station.isFromSearch && !deletedStations.includes(stationName)) {
+          if (!Array.isArray(deletedStations)) deletedStations = [];
+          deletedStations.push(stationName);
+          localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
+          console.log(`Added ${stationName} to deletedStations:`, deletedStations);
+        }
+        localStorage.setItem("stationLists", JSON.stringify(stationLists));
+        localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
+        favoriteStations = favoriteStations.filter(name => name !== stationName);
+        localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
+        console.log(`Deleted station ${stationName} from ${currentTab}`);
+        if (stationLists[currentTab].length === 0) {
+          currentIndex = 0;
+        } else if (currentIndex >= stationLists[currentTab].length) {
+          currentIndex = stationLists[currentTab].length - 1;
+        }
+        switchTab(currentTab);
       }
-      const station = stationLists[currentTab].find(s => s.name === stationName);
-      if (!station) {
-        console.warn(`Station ${stationName} not found in ${currentTab}`);
-        return;
-      }
-      stationLists[currentTab] = stationLists[currentTab].filter(s => s.name !== stationName);
-      userAddedStations[currentTab] = userAddedStations[currentTab]?.filter(s => s.name !== stationName) || [];
-      if (!station.isFromSearch && !deletedStations.includes(stationName)) {
-        if (!Array.isArray(deletedStations)) deletedStations = [];
-        deletedStations.push(stationName);
-        localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
-        console.log(`Added ${stationName} to deletedStations:`, deletedStations);
-      }
-      localStorage.setItem("stationLists", JSON.stringify(stationLists));
-      localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
-      favoriteStations = favoriteStations.filter(name => name !== stationName);
-      localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-      console.log(`Deleted station ${stationName} from ${currentTab}`);
-      if (stationLists[currentTab].length === 0) {
-        currentIndex = 0;
-      } else if (currentIndex >= stationLists[currentTab].length) {
-        currentIndex = stationLists[currentTab].length - 1;
-      }
-      switchTab(currentTab);
     }
 
     function changeStation(index) {
@@ -1251,12 +1189,12 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error(".station-name element not found");
       }
       if (stationGenreElement) {
-        stationGenreElement.textContent = `жанр: ${item.dataset.genre || ""}`;
+        stationGenreElement.textContent = `genre: ${item.dataset.genre || ""}`;
       } else {
         console.error(".station-genre element not found");
       }
       if (stationCountryElement) {
-        stationCountryElement.textContent = `країна: ${item.dataset.country || ""}`;
+        stationCountryElement.textContent = `country: ${item.dataset.country || ""}`;
       } else {
         console.error(".station-country element not found");
       }
@@ -1268,7 +1206,7 @@ document.addEventListener("DOMContentLoaded", () => {
           stationIconElement.style.backgroundRepeat = "no-repeat";
           stationIconElement.style.backgroundPosition = "center";
         } else {
-          stationIconElement.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79-4-4-4z"/></svg>`;
+          stationIconElement.innerHTML = "🎵";
           stationIconElement.style.backgroundImage = "none";
         }
       } else {
@@ -1314,14 +1252,14 @@ document.addEventListener("DOMContentLoaded", () => {
         isPlaying = true;
         intendedPlaying = true;
         debouncedTryAutoPlay();
-        playPauseBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
-        applyVisualizer();
+        playPauseBtn.textContent = "⏸";
+        document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
       } else {
         audio.pause();
         isPlaying = false;
         intendedPlaying = false;
-        playPauseBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
-        waveVisualizer.querySelectorAll(".wave-line, .circle-pulse, .wave-dot").forEach(elem => elem.classList.remove("playing"));
+        playPauseBtn.textContent = "▶";
+        document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
       }
       localStorage.setItem("isPlaying", isPlaying);
       localStorage.setItem("intendedPlaying", intendedPlaying);
@@ -1382,8 +1320,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     audio.addEventListener("playing", () => {
       isPlaying = true;
-      playPauseBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
-      applyVisualizer();
+      playPauseBtn.textContent = "⏸";
+      document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
       localStorage.setItem("isPlaying", isPlaying);
       if (errorTimeout) {
         clearTimeout(errorTimeout);
@@ -1393,8 +1331,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     audio.addEventListener("pause", () => {
       isPlaying = false;
-      playPauseBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
-      waveVisualizer.querySelectorAll(".wave-line, .circle-pulse, .wave-dot").forEach(elem => elem.classList.remove("playing"));
+      playPauseBtn.textContent = "▶";
+      document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
       localStorage.setItem("isPlaying", isPlaying);
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = null;
@@ -1402,7 +1340,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     audio.addEventListener("error", () => {
-      waveVisualizer.querySelectorAll(".wave-line, .circle-pulse, .wave-dot").forEach(elem => elem.classList.remove("playing"));
+      document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
       console.error("Audio error:", audio.error?.message || "Unknown error", "for URL:", audio.src);
       if (intendedPlaying && errorCount < ERROR_LIMIT && !errorTimeout) {
         errorCount++;
@@ -1430,7 +1368,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("offline", () => {
       console.log("Network connection lost");
-      waveVisualizer.querySelectorAll(".wave-line, .circle-pulse, .wave-dot").forEach(elem => elem.classList.remove("playing"));
+      document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
       errorCount = 0;
     });
 
@@ -1442,7 +1380,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if ("mediaSession" in navigator) {
       navigator.mediaSession.setActionHandler("play", () => {
-        if (intendedPlaying || !stationItems?.length || currentIndex >= stationItems.length) return; // Fix 4: Add state check
+        if (intendedPlaying) return;
         togglePlayPause();
       });
       navigator.mediaSession.setActionHandler("pause", () => {

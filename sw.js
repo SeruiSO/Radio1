@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v290';
+const CACHE_NAME = 'radio-cache-v286.2.20250284';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -77,7 +77,7 @@ function startNetworkCheck() {
                 client.postMessage({ type: "NETWORK_STATUS", online: true });
               });
             });
-            stopNetworkCheck();
+            stopNetworkCheck(); // Stop polling once online
           }
         })
         .catch(error => {
@@ -90,7 +90,7 @@ function startNetworkCheck() {
             });
           }
         });
-    }, 2000);
+    }, 2000); // Перевірка кожні 2 секунди
   }
 }
 
@@ -109,7 +109,7 @@ self.addEventListener('online', () => {
         client.postMessage({ type: "NETWORK_STATUS", online: true });
       });
     });
-    stopNetworkCheck();
+    stopNetworkCheck(); // Stop polling when online
   }
 });
 
@@ -121,10 +121,11 @@ self.addEventListener('offline', () => {
         client.postMessage({ type: "NETWORK_STATUS", online: false });
       });
     });
-    startNetworkCheck();
+    startNetworkCheck(); // Start polling when offline
   }
 });
 
+// Start initial check if already offline
 if (!navigator.onLine && wasOnline) {
   wasOnline = false;
   startNetworkCheck();
