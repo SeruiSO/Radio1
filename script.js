@@ -40,6 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabsContainer = document.getElementById("tabs");
   const waveVisualizer = document.querySelector(".wave-visualizer");
 
+  // Fix 1: Add retry limit for DOM element initialization
+  let initRetryCount = 0;
+  const MAX_INIT_RETRIES = 3;
+
   if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !clearBtn || !pastSearchesList || !tabsContainer || !waveVisualizer) {
     console.error("One of required DOM elements not found", {
       audio: !!audio,
@@ -61,7 +65,13 @@ document.addEventListener("DOMContentLoaded", () => {
       tabsContainer: !!tabsContainer,
       waveVisualizer: !!waveVisualizer
     });
-    setTimeout(initializeApp, 100);
+    if (initRetryCount < MAX_INIT_RETRIES) {
+      initRetryCount++;
+      setTimeout(initializeApp, 100 * initRetryCount);
+    } else {
+      console.error("Maximum retry attempts reached for DOM initialization");
+      alert("Помилка ініціалізації програми. Будь ласка, перевірте сторінку.");
+    }
     return;
   }
 
@@ -77,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     applyVisualizer();
 
     shareButton.addEventListener("click", () => {
-      const stationName = currentStationInfo.querySelector(".station-name").textContent || "Radio S O";
+      const stationName = currentStationInfo.querySelector(".station-name")?.textContent || "Radio S O";
       const shareData = {
         title: "Radio S O",
         text: `Listening to ${stationName} on Radio S O! Join my favorite radio stations!`,
@@ -149,13 +159,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function applyVisualizer() {
+      if (waveVisualizer.dataset.visualizer === currentVisualizer) return; // Fix 6: Avoid redundant DOM updates
       waveVisualizer.dataset.visualizer = currentVisualizer;
+      const elements = waveVisualizer.querySelectorAll(`.${currentVisualizer === "wave-lines" ? "wave-line" : currentVisualizer === "circle-pulse" ? "circle-pulse" : "wave-dot"}`);
+      const allElements = waveVisualizer.querySelectorAll(".wave-line, .circle-pulse, .wave-dot");
+      allElements.forEach(elem => elem.classList.remove("playing"));
       if (isPlaying) {
-        waveVisualizer.querySelectorAll(`.${currentVisualizer === "wave-lines" ? "wave-line" : currentVisualizer === "circle-pulse" ? "circle-pulse" : "wave-dot"}`)
-          .forEach(elem => elem.classList.add("playing"));
-      } else {
-        waveVisualizer.querySelectorAll(".wave-line, .circle-pulse, .wave-dot")
-          .forEach(elem => elem.classList.remove("playing"));
+        elements.forEach(elem => elem.classList.add("playing"));
       }
     }
 
@@ -306,6 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function normalizeCountry(country) {
       if (!country) return "";
+      // Fix 3: Enhanced country normalization
       const countryMap = {
         "ukraine": "Ukraine", "italy": "Italy", "german": "Germany",
         "germany": "Germany", "france": "France", "spain": "Spain",
@@ -315,9 +326,11 @@ document.addEventListener("DOMContentLoaded", () => {
         "switzerland": "Switzerland", "belgium": "Belgium", "poland": "Poland",
         "austria": "Austria", "sweden": "Sweden", "norway": "Norway",
         "denmark": "Denmark", "japan": "Japan", "south korea": "South Korea",
-        "new zealand": "New Zealand"
+        "new zealand": "New Zealand",
+        "us": "United States", "u.s.": "United States", "u.s.a.": "United States",
+        "england": "United Kingdom", "britain": "United Kingdom"
       };
-      const normalized = country.toLowerCase();
+      const normalized = country.toLowerCase().replace(/\./g, '');
       return countryMap[normalized] || country.charAt(0).toUpperCase() + country.slice(1).toLowerCase();
     }
 
@@ -541,15 +554,15 @@ document.addEventListener("DOMContentLoaded", () => {
         overlay.remove();
         modal.remove();
       };
-      overlay.addEventListener("click", closeModal);
+      overlay.addEventListener("click", closeModal, { once: true }); // Fix 9: Use once to prevent memory leaks
       modal.querySelectorAll(".modal-tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
           const targetTab = btn.dataset.tab;
           saveStation(item, targetTab);
           closeModal();
-        });
+        }, { once: true });
       });
-      modal.querySelector(".modal-cancel-btn").addEventListener("click", closeModal);
+      modal.querySelector(".modal-cancel-btn").addEventListener("click", closeModal, { once: true });
     }
 
     function saveStation(item, targetTab) {
@@ -602,7 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tabsContainer.appendChild(addBtn);
 
       tabsContainer.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+        btn.addEventListener("click", () => switchTab(btn.dataset.tab), { once: true });
         if (customTabs.includes(btn.dataset.tab)) {
           let longPressTimer;
           btn.addEventListener("pointerdown", () => {
@@ -613,7 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      addBtn.addEventListener("click", showNewTabModal);
+      addBtn.addEventListener("click", showNewTabModal, { once: true });
     }
 
     function showNewTabModal() {
@@ -669,10 +682,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === "Enter") createBtn.click();
       };
 
-      createBtn.addEventListener("click", createTabHandler);
-      cancelBtn.addEventListener("click", closeModal);
-      overlay.addEventListener("click", closeModal);
-      input.addEventListener("keypress", keypressHandler);
+      createBtn.addEventListener("click", createTabHandler, { once: true });
+      cancelBtn.addEventListener("click", closeModal, { once: true });
+      overlay.addEventListener("click", closeModal, { once: true });
+      input.addEventListener("keypress", keypressHandler, { once: true });
     }
 
     function showEditTabModal(tab) {
@@ -745,11 +758,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === "Enter") renameBtn.click();
       };
 
-      renameBtn.addEventListener("click", renameTabHandler);
-      deleteBtn.addEventListener("click", deleteTabHandler);
-      cancelBtn.addEventListener("click", closeModal);
-      overlay.addEventListener("click", closeModal);
-      input.addEventListener("keypress", keypressHandler);
+      renameBtn.addEventListener("click", renameTabHandler, { once: true });
+      deleteBtn.addEventListener("click", deleteTabHandler, { once: true });
+      cancelBtn.addEventListener("click", closeModal, { once: true });
+      overlay.addEventListener("click", closeModal, { once: true });
+      input.addEventListener("keypress", keypressHandler, { once: true });
     }
 
     const themes = {
@@ -856,9 +869,12 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("selectedTheme", theme);
       currentTheme = theme;
       document.documentElement.setAttribute("data-theme", theme);
+      // Fix 7: Check for theme-color meta tag existence
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
       if (themeColorMeta) {
         themeColorMeta.setAttribute("content", themes[theme].accent);
+      } else {
+        console.warn("Meta tag 'theme-color' not found");
       }
     }
 
@@ -889,6 +905,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
           }
         });
+      }).catch(error => {
+        console.error("Service Worker registration failed:", error); // Fix 2: Add error handling
       });
 
       navigator.serviceWorker.addEventListener("message", (event) => {
@@ -1149,6 +1167,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function toggleFavorite(stationName) {
+      if (!stationName) return; // Fix 5: Add check for invalid stationName
       if (favoriteStations.includes(stationName)) {
         favoriteStations = favoriteStations.filter(name => name !== stationName);
       } else {
@@ -1160,32 +1179,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function deleteStation(stationName) {
-      if (Array.isArray(stationLists[currentTab])) {
-        const station = stationLists[currentTab].find(s => s.name === stationName);
-        if (!station) {
-          console.warn(`Station ${stationName} not found in ${currentTab}`);
-          return;
-        }
-        stationLists[currentTab] = stationLists[currentTab].filter(s => s.name !== stationName);
-        userAddedStations[currentTab] = userAddedStations[currentTab]?.filter(s => s.name !== stationName) || [];
-        if (!station.isFromSearch && !deletedStations.includes(stationName)) {
-          if (!Array.isArray(deletedStations)) deletedStations = [];
-          deletedStations.push(stationName);
-          localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
-          console.log(`Added ${stationName} to deletedStations:`, deletedStations);
-        }
-        localStorage.setItem("stationLists", JSON.stringify(stationLists));
-        localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
-        favoriteStations = favoriteStations.filter(name => name !== stationName);
-        localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-        console.log(`Deleted station ${stationName} from ${currentTab}`);
-        if (stationLists[currentTab].length === 0) {
-          currentIndex = 0;
-        } else if (currentIndex >= stationLists[currentTab].length) {
-          currentIndex = stationLists[currentTab].length - 1;
-        }
-        switchTab(currentTab);
+      if (!stationName || !Array.isArray(stationLists[currentTab])) {
+        console.warn(`Invalid stationName or tab: ${stationName}, ${currentTab}`);
+        return; // Fix 5: Early return for invalid inputs
       }
+      const station = stationLists[currentTab].find(s => s.name === stationName);
+      if (!station) {
+        console.warn(`Station ${stationName} not found in ${currentTab}`);
+        return;
+      }
+      stationLists[currentTab] = stationLists[currentTab].filter(s => s.name !== stationName);
+      userAddedStations[currentTab] = userAddedStations[currentTab]?.filter(s => s.name !== stationName) || [];
+      if (!station.isFromSearch && !deletedStations.includes(stationName)) {
+        if (!Array.isArray(deletedStations)) deletedStations = [];
+        deletedStations.push(stationName);
+        localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
+        console.log(`Added ${stationName} to deletedStations:`, deletedStations);
+      }
+      localStorage.setItem("stationLists", JSON.stringify(stationLists));
+      localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
+      favoriteStations = favoriteStations.filter(name => name !== stationName);
+      localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
+      console.log(`Deleted station ${stationName} from ${currentTab}`);
+      if (stationLists[currentTab].length === 0) {
+        currentIndex = 0;
+      } else if (currentIndex >= stationLists[currentTab].length) {
+        currentIndex = stationLists[currentTab].length - 1;
+      }
+      switchTab(currentTab);
     }
 
     function changeStation(index) {
@@ -1421,7 +1442,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if ("mediaSession" in navigator) {
       navigator.mediaSession.setActionHandler("play", () => {
-        if (intendedPlaying) return;
+        if (intendedPlaying || !stationItems?.length || currentIndex >= stationItems.length) return; // Fix 4: Add state check
         togglePlayPause();
       });
       navigator.mediaSession.setActionHandler("pause", () => {
