@@ -105,7 +105,6 @@ body {
   color: var(--text);
   margin: 0;
   padding: 0;
-  padding-bottom: 60px;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -124,13 +123,12 @@ body {
   border-radius: 15px;
   border: 1px solid var(--accent);
   margin: 0 auto;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   box-shadow: 0 8px 32px var(--shadow);
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-  position: relative;
 }
 
 h1 {
@@ -152,7 +150,7 @@ h1 {
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 15px;
-  padding: 8px;
+  padding: 6px;
   cursor: pointer;
   height: 40px;
   width: 40px;
@@ -249,8 +247,8 @@ h1 {
 }
 
 .station-icon {
-  width: 90px;
-  height: 90px;
+  width: 80px;
+  height: 80px;
   order: 1;
   font-size: 60px;
   display: flex;
@@ -259,6 +257,7 @@ h1 {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+  margin: 5px;
 }
 
 .wave-visualizer {
@@ -304,7 +303,7 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 240px);
+  max-height: 55vh;
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
@@ -327,7 +326,7 @@ h1 {
 
 .station-list::-webkit-scrollbar-thumb {
   background: var(--accent);
-  border-radius: 15px;
+  border-radius: 2px;
 }
 
 .station-item {
@@ -432,12 +431,11 @@ h1 {
 
 .tabs-wrapper {
   overflow-x: auto;
-  margin: 0;
-  position: fixed;
-  bottom: 110px;
+  margin: 5px 0;
+  position: sticky;
+  bottom: 0;
   z-index: 10;
   background: var(--container-bg);
-  width: 100%;
 }
 
 .tabs-wrapper::-webkit-scrollbar {
@@ -454,7 +452,6 @@ h1 {
   gap: 6px;
   scroll-behavior: smooth;
   transition: background 0.3s ease;
-  width: 100%;
 }
 
 .tab-btn,
@@ -555,7 +552,7 @@ h1 {
 }
 
 .controls-container {
-  position: fixed;
+  position: sticky;
   bottom: 0;
   background: var(--container-bg);
   border-top: 1px solid var(--accent);
@@ -563,25 +560,23 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: 30px;
   z-index: 10;
-  width: 100%;
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .controls {
   display: flex;
-  justify-content: center;
-  gap: 15px;
+  justify-content: space-between;
+  gap: 30px;
   width: 100%;
-  max-width: 240px;
+  max-width: 400px;
 }
 
 .control-btn {
-  flex: 1;
-  height: 70px;
-  width: 70px;
-  font-size: 28px;
+  width: 90px;
+  height: 90px;
+  font-size: 36px;
   background: var(--container-bg);
   color: var(--text);
   border: 1px solid var(--accent);
@@ -736,23 +731,21 @@ datalist {
 
   .container {
     padding: 10px;
-    min-height: 100vh;
+    height: 100vh;
   }
 
   .control-btn {
-    flex: 1;
-    height: 60px;
-    width: 60px;
-    font-size: 24px;
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
     border: 1px solid var(--accent);
   }
 
   .station-list {
-    max-height: calc(100vh - 220px);
+    max-height: 50vh;
     margin: 4px 0;
     padding: 6px;
     border-width: 1px;
-    border-radius: 15px;
   }
 
   .station-item {
@@ -798,10 +791,8 @@ datalist {
   }
 
   .tabs-wrapper {
-    margin: 0;
+    margin: 3px 0;
     padding: 0 5px;
-    bottom: 90px;
-    width: 100%;
   }
 
   .tab-btn,
@@ -819,13 +810,11 @@ datalist {
 
   .tabs {
     gap: 4px;
-    width: 100%;
   }
 
   #currentStationInfo {
     padding: 10px;
     height: 100px;
-    border-radius: 15px;
   }
 
   .station-info-content {
@@ -837,9 +826,10 @@ datalist {
   }
 
   .station-icon {
-    width: 80px;
-    height: 80px;
-    font-size: 48px;
+    width: 70px;
+    height: 70px;
+    font-size: 50px;
+    margin: 4px;
   }
 
   .wave-visualizer {
@@ -851,20 +841,9 @@ datalist {
     width: 6px;
   }
 
-  .wave-line:nth-child(1) { left: 10%; animation-delay: 0s; }
-  .wave-line:nth-child(2) { left: 20%; animation-delay: 0.1s; }
-  .wave-line:nth-child(3) { left: 30%; animation-delay: 0.2s; }
-  .wave-line:nth-child(4) { left: 40%; animation-delay: 0.3s; }
-  .wave-line:nth-child(5) { left: 50%; animation-delay: 0.4s; }
-  .wave-line:nth-child(6) { left: 60%; animation-delay: 0.3s; }
-  .wave-line:nth-child(7) { left: 70%; animation-delay: 0.2s; }
-  .wave-line:nth-child(8) { left: 80%; animation-delay: 0.1s; }
-  .wave-line:nth-child(9) { left: 90%; animation-delay: 0s; }
-
   #searchInput {
     padding: 6px;
     gap: 6px;
-    border-radius: 15px;
   }
 
   #searchQuery,
@@ -872,18 +851,15 @@ datalist {
   #searchGenre {
     font-size: 13px;
     padding: 6px;
-    border-radius: 15px;
   }
 
   #searchInput button.search-btn {
     padding: 8px;
     font-size: 13px;
-    border-radius: 15px;
   }
 
   .modal {
     padding: 12px;
-    border-radius: 15px;
   }
 
   .modal h2 {
@@ -894,24 +870,17 @@ datalist {
   .modal-cancel-btn {
     font-size: 13px;
     padding: 8px;
-    border-radius: 15px;
   }
 
   .new-tab-modal input,
   .edit-tab-modal input {
     font-size: 13px;
     padding: 8px;
-    border-radius: 15px;
-  }
-
-  .controls-container {
-    bottom: 0;
-    width: 100%;
-    padding: 15px;
   }
 
   .controls {
-    max-width: 210px;
+    gap: 20px;
+    max-width: 360px;
   }
 }
 
@@ -924,10 +893,46 @@ datalist {
 
 @media (max-height: 1600px) {
   .container {
-    min-height: 100vh;
+    height: 100vh;
   }
 
   .station-list {
-    max-height: calc(100vh - 240px);
+    max-height: 50vh;
+  }
+}
+
+@media (max-width: 360px) {
+  .container {
+    padding: 8px;
+  }
+
+  .theme-toggle,
+  .share-button,
+  .export-button,
+  .import-button {
+    height: 32px;
+    width: 32px;
+    font-size: 14px;
+  }
+
+  .theme-toggle {
+    left: 6px;
+  }
+
+  .share-button {
+    left: 48px;
+  }
+
+  .export-button {
+    right: 6px;
+  }
+
+  .import-button {
+    right: 48px;
+  }
+
+  .controls {
+    gap: 15px;
+    max-width: 320px;
   }
 }
