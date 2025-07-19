@@ -304,7 +304,7 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 260px);
+  max-height: calc(100vh - 240px);
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
@@ -563,7 +563,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 15px;
   z-index: 10;
   width: 100%;
   transition: background 0.3s ease, border-color 0.3s ease;
@@ -571,15 +571,17 @@ h1 {
 
 .controls {
   display: flex;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: center;
+  gap: 15px;
   width: 100%;
+  max-width: 240px;
 }
 
 .control-btn {
   flex: 1;
-  height: 90px;
-  font-size: 36px;
+  height: 70px;
+  width: 70px;
+  font-size: 28px;
   background: var(--container-bg);
   color: var(--text);
   border: 1px solid var(--accent);
@@ -739,13 +741,14 @@ datalist {
 
   .control-btn {
     flex: 1;
-    height: 80px;
-    font-size: 32px;
+    height: 60px;
+    width: 60px;
+    font-size: 24px;
     border: 1px solid var(--accent);
   }
 
   .station-list {
-    max-height: calc(100vh - 240px);
+    max-height: calc(100vh - 220px);
     margin: 4px 0;
     padding: 6px;
     border-width: 1px;
@@ -797,7 +800,7 @@ datalist {
   .tabs-wrapper {
     margin: 0;
     padding: 0 5px;
-    bottom: 100px;
+    bottom: 90px;
     width: 100%;
   }
 
@@ -849,14 +852,14 @@ datalist {
   }
 
   .wave-line:nth-child(1) { left: 10%; animation-delay: 0s; }
-.wave-line:nth-child(2) { left: 20%; animation-delay: 0.1s; }
-.wave-line:nth-child(3) { left: 30%; animation-delay: 0.2s; }
-.wave-line:nth-child(4) { left: 40%; animation-delay: 0.3s; }
-.wave-line:nth-child(5) { left: 50%; animation-delay: 0.4s; }
-.wave-line:nth-child(6) { left: 60%; animation-delay: 0.3s; }
-.wave-line:nth-child(7) { left: 70%; animation-delay: 0.2s; }
-.wave-line:nth-child(8) { left: 80%; animation-delay: 0.1s; }
-.wave-line:nth-child(9) { left: 90%; animation-delay: 0s; }
+  .wave-line:nth-child(2) { left: 20%; animation-delay: 0.1s; }
+  .wave-line:nth-child(3) { left: 30%; animation-delay: 0.2s; }
+  .wave-line:nth-child(4) { left: 40%; animation-delay: 0.3s; }
+  .wave-line:nth-child(5) { left: 50%; animation-delay: 0.4s; }
+  .wave-line:nth-child(6) { left: 60%; animation-delay: 0.3s; }
+  .wave-line:nth-child(7) { left: 70%; animation-delay: 0.2s; }
+  .wave-line:nth-child(8) { left: 80%; animation-delay: 0.1s; }
+  .wave-line:nth-child(9) { left: 90%; animation-delay: 0s; }
 
   #searchInput {
     padding: 6px;
@@ -904,6 +907,11 @@ datalist {
   .controls-container {
     bottom: 0;
     width: 100%;
+    padding: 15px;
+  }
+
+  .controls {
+    max-width: 210px;
   }
 }
 
@@ -920,6 +928,6 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 260px);
+    max-height: calc(100vh - 240px);
   }
 }
