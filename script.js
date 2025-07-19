@@ -715,82 +715,82 @@ document.addEventListener("DOMContentLoaded", () => {
       "deep-obsidian": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#40C4FF",
-        text: "#B0BEC5",
-        accentGradient: "linear-gradient(45deg, #0288D1, #40C4FF)",
-        shadow: "rgba(64, 196, 255, 0.2)"
+        accent: "#00D4FF",
+        text: "#E0E7E9",
+        accentGradient: "linear-gradient(45deg, #0077B6, #00D4FF)",
+        shadow: "rgba(0, 212, 255, 0.3)"
       },
       "void-nexus": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#FF5722",
-        text: "#CFD8DC",
-        accentGradient: "linear-gradient(45deg, #D84315, #FF5722)",
-        shadow: "rgba(255, 87, 34, 0.2)"
+        accent: "#FF3D00",
+        text: "#F5F6F5",
+        accentGradient: "linear-gradient(45deg, #B71C1C, #FF3D00)",
+        shadow: "rgba(255, 61, 0, 0.3)"
       },
       "shadow-pulse": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#26A69A",
-        text: "#B2DFDB",
-        accentGradient: "linear-gradient(45deg, #00897B, #26A69A)",
-        shadow: "rgba(38, 166, 154, 0.2)"
+        accent: "#00E676",
+        text: "#E6E6E6",
+        accentGradient: "linear-gradient(45deg, #00B248, #00E676)",
+        shadow: "rgba(0, 230, 118, 0.3)"
       },
       "dark-abyss": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#AB47BC",
-        text: "#CE93D8",
-        accentGradient: "linear-gradient(45deg, #7B1FA2, #AB47BC)",
-        shadow: "rgba(171, 71, 188, 0.2)"
+        accent: "#AA00FF",
+        text: "#E5E0F8",
+        accentGradient: "linear-gradient(45deg, #6A1B9A, #AA00FF)",
+        shadow: "rgba(170, 0, 255, 0.3)"
       },
       "cosmic-dream": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#4FC3F7",
-        text: "#B3E5FC",
-        accentGradient: "linear-gradient(45deg, #0288D1, #4FC3F7)",
-        shadow: "rgba(79, 195, 247, 0.2)"
+        accent: "#5BC0EB",
+        text: "#D9E1E8",
+        accentGradient: "linear-gradient(45deg, #3A86FF, #5BC0EB)",
+        shadow: "rgba(91, 192, 235, 0.3)"
       },
       "midnight-aurora": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#7E57C2",
-        text: "#D1C4E9",
-        accentGradient: "linear-gradient(45deg, #512DA8, #7E57C2)",
-        shadow: "rgba(126, 87, 194, 0.2)"
+        accent: "#8A4AF3",
+        text: "#E5E0F8",
+        accentGradient: "linear-gradient(45deg, #5A2E99, #8A4AF3)",
+        shadow: "rgba(138, 74, 243, 0.3)"
       },
       "emerald-glow": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#26A69A",
-        text: "#B2DFDB",
-        accentGradient: "linear-gradient(45deg, #00897B, #26A69A)",
-        shadow: "rgba(38, 166, 154, 0.2)"
+        accent: "#2EC4B6",
+        text: "#E6F0EA",
+        accentGradient: "linear-gradient(45deg, #1B998B, #2EC4B6)",
+        shadow: "rgba(46, 196, 182, 0.3)"
       },
       "retro-wave": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#F06292",
-        text: "#F8BBD0",
-        accentGradient: "linear-gradient(45deg, #C2185B, #F06292)",
-        shadow: "rgba(240, 98, 146, 0.2)"
+        accent: "#FF69B4",
+        text: "#F8E1F4",
+        accentGradient: "linear-gradient(45deg, #C71585, #FF69B4)",
+        shadow: "rgba(255, 105, 180, 0.3)"
       },
       "arctic-fusion": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#29B6F6",
-        text: "#B3E5FC",
-        accentGradient: "linear-gradient(45deg, #0288D1, #29B6F6)",
-        shadow: "rgba(41, 182, 246, 0.2)"
+        accent: "#00B4D8",
+        text: "#D9E1E8",
+        accentGradient: "linear-gradient(45deg, #0077B6, #00B4D8)",
+        shadow: "rgba(0, 180, 216, 0.3)"
       },
       "golden-haze": {
         bodyBg: "#000000",
         containerBg: "#000000",
-        accent: "#FFCA28",
-        text: "#FFF8E1",
-        accentGradient: "linear-gradient(45deg, #FFB300, #FFCA28)",
-        shadow: "rgba(255, 202, 40, 0.2)"
+        accent: "#FFD60A",
+        text: "#FFF3D9",
+        accentGradient: "linear-gradient(45deg, #CC9B00, #FFD60A)",
+        shadow: "rgba(255, 214, 10, 0.3)"
       }
     };
     let currentTheme = localStorage.getItem("selectedTheme") || "deep-obsidian";
