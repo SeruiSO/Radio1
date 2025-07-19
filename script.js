@@ -713,84 +713,84 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const themes = {
       "deep-obsidian": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#00D4FF",
-        text: "#E0E7E9",
-        accentGradient: "linear-gradient(45deg, #0077B6, #00D4FF)",
-        shadow: "rgba(0, 212, 255, 0.3)"
+        bodyBg: "#0a0a1a",
+        containerBg: "#1a1a2a",
+        accent: "#ff00ff",
+        text: "#e0e0ff",
+        accentGradient: "linear-gradient(135deg, #ff00ff, #00ffff)",
+        shadow: "rgba(0, 255, 255, 0.4)"
       },
       "void-nexus": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#FF3D00",
-        text: "#F5F6F5",
-        accentGradient: "linear-gradient(45deg, #B71C1C, #FF3D00)",
-        shadow: "rgba(255, 61, 0, 0.3)"
+        bodyBg: "#0a0a1a",
+        containerBg: "#1a1a2a",
+        accent: "#ff4500",
+        text: "#ffe0e0",
+        accentGradient: "linear-gradient(135deg, #ff4500, #ff8c00)",
+        shadow: "rgba(255, 140, 0, 0.4)"
       },
       "shadow-pulse": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#00E676",
-        text: "#E6E6E6",
-        accentGradient: "linear-gradient(45deg, #00B248, #00E676)",
-        shadow: "rgba(0, 230, 118, 0.3)"
+        bodyBg: "#0a0a1a",
+        containerBg: "#1a1a2a",
+        accent: "#00ff7f",
+        text: "#e0ffe0",
+        accentGradient: "linear-gradient(135deg, #00ff7f, #00fa9a)",
+        shadow: "rgba(0, 250, 154, 0.4)"
       },
       "dark-abyss": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#AA00FF",
-        text: "#E5E0F8",
-        accentGradient: "linear-gradient(45deg, #6A1B9A, #AA00FF)",
-        shadow: "rgba(170, 0, 255, 0.3)"
+        bodyBg: "#0a0a1a",
+        containerBg: "#1a1a2a",
+        accent: "#bf00ff",
+        text: "#e0d0ff",
+        accentGradient: "linear-gradient(135deg, #bf00ff, #8a2be2)",
+        shadow: "rgba(138, 43, 226, 0.4)"
       },
       "cosmic-dream": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#5BC0EB",
-        text: "#D9E1E8",
-        accentGradient: "linear-gradient(45deg, #3A86FF, #5BC0EB)",
-        shadow: "rgba(91, 192, 235, 0.3)"
+        bodyBg: "#0a0a1a",
+        containerBg: "#1a1a2a",
+        accent: "#1e90ff",
+        text: "#d0e0ff",
+        accentGradient: "linear-gradient(135deg, #1e90ff, #87ceeb)",
+        shadow: "rgba(135, 206, 235, 0.4)"
       },
       "midnight-aurora": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#8A4AF3",
-        text: "#E5E0F8",
-        accentGradient: "linear-gradient(45deg, #5A2E99, #8A4AF3)",
-        shadow: "rgba(138, 74, 243, 0.3)"
+        bodyBg: "#0a0a1a",
+        containerBg: "#1a1a2a",
+        accent: "#9370db",
+        text: "#e0d0ff",
+        accentGradient: "linear-gradient(135deg, #9370db, #6a5acd)",
+        shadow: "rgba(106, 90, 205, 0.4)"
       },
       "emerald-glow": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#2EC4B6",
-        text: "#E6F0EA",
-        accentGradient: "linear-gradient(45deg, #1B998B, #2EC4B6)",
-        shadow: "rgba(46, 196, 182, 0.3)"
+        bodyBg: "#0a0a1a",
+        containerBg: "#1a1a2a",
+        accent: "#00ffcc",
+        text: "#e0fff0",
+        accentGradient: "linear-gradient(135deg, #00ffcc, #00cc99)",
+        shadow: "rgba(0, 204, 153, 0.4)"
       },
       "retro-wave": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#FF69B4",
-        text: "#F8E1F4",
-        accentGradient: "linear-gradient(45deg, #C71585, #FF69B4)",
-        shadow: "rgba(255, 105, 180, 0.3)"
+        bodyBg: "#0a0a1a",
+        containerBg: "#1a1a2a",
+        accent: "#ff69b4",
+        text: "#ffe0f0",
+        accentGradient: "linear-gradient(135deg, #ff69b4, #ff1493)",
+        shadow: "rgba(255, 20, 147, 0.4)"
       },
       "arctic-fusion": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#00B4D8",
-        text: "#D9E1E8",
-        accentGradient: "linear-gradient(45deg, #0077B6, #00B4D8)",
-        shadow: "rgba(0, 180, 216, 0.3)"
+        bodyBg: "#0a0a1a",
+        containerBg: "#1a1a2a",
+        accent: "#00ced1",
+        text: "#d0f0ff",
+        accentGradient: "linear-gradient(135deg, #00ced1, #20b2aa)",
+        shadow: "rgba(32, 178, 170, 0.4)"
       },
       "golden-haze": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#FFD60A",
-        text: "#FFF3D9",
-        accentGradient: "linear-gradient(45deg, #CC9B00, #FFD60A)",
-        shadow: "rgba(255, 214, 10, 0.3)"
+        bodyBg: "#0a0a1a",
+        containerBg: "#1a1a2a",
+        accent: "#ffd700",
+        text: "#fff0d0",
+        accentGradient: "linear-gradient(135deg, #ffd700, #daa520)",
+        shadow: "rgba(218, 165, 32, 0.4)"
       }
     };
     let currentTheme = localStorage.getItem("selectedTheme") || "deep-obsidian";
