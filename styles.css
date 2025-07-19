@@ -130,6 +130,7 @@ body {
   justify-content: flex-start;
   box-shadow: 0 8px 32px var(--shadow);
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
 }
 
 h1 {
@@ -199,7 +200,7 @@ h1 {
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: left;
-  height: 120px;
+  height: 100px;
   display: flex;
   align-items: center;
   position: sticky;
@@ -248,10 +249,10 @@ h1 {
 }
 
 .station-icon {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   order: 1;
-  font-size: 48px;
+  font-size: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -303,7 +304,7 @@ h1 {
 }
 
 .station-list {
-  max-height: 55vh;
+  max-height: calc(100vh - 260px);
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
@@ -432,10 +433,11 @@ h1 {
 .tabs-wrapper {
   overflow-x: auto;
   margin: 0;
-  position: sticky;
-  bottom: -15px;
+  position: fixed;
+  bottom: 110px;
   z-index: 10;
   background: var(--container-bg);
+  width: 100%;
 }
 
 .tabs-wrapper::-webkit-scrollbar {
@@ -553,8 +555,8 @@ h1 {
 }
 
 .controls-container {
-  position: sticky;
-  bottom: -15px;
+  position: fixed;
+  bottom: 0;
   background: var(--container-bg);
   border-top: 1px solid var(--accent);
   padding: 15px;
@@ -563,6 +565,7 @@ h1 {
   justify-content: center;
   gap: 10px;
   z-index: 10;
+  width: 100%;
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 
@@ -742,7 +745,7 @@ datalist {
   }
 
   .station-list {
-    max-height: 50vh;
+    max-height: calc(100vh - 240px);
     margin: 4px 0;
     padding: 6px;
     border-width: 1px;
@@ -794,7 +797,8 @@ datalist {
   .tabs-wrapper {
     margin: 0;
     padding: 0 5px;
-    bottom: -15px;
+    bottom: 100px;
+    width: 100%;
   }
 
   .tab-btn,
@@ -830,9 +834,9 @@ datalist {
   }
 
   .station-icon {
-    width: 60px;
-    height: 60px;
-    font-size: 36px;
+    width: 80px;
+    height: 80px;
+    font-size: 48px;
   }
 
   .wave-visualizer {
@@ -843,6 +847,16 @@ datalist {
   .wave-line {
     width: 6px;
   }
+
+  .wave-line:nth-child(1) { left: 10%; animation-delay: 0s; }
+.wave-line:nth-child(2) { left: 20%; animation-delay: 0.1s; }
+.wave-line:nth-child(3) { left: 30%; animation-delay: 0.2s; }
+.wave-line:nth-child(4) { left: 40%; animation-delay: 0.3s; }
+.wave-line:nth-child(5) { left: 50%; animation-delay: 0.4s; }
+.wave-line:nth-child(6) { left: 60%; animation-delay: 0.3s; }
+.wave-line:nth-child(7) { left: 70%; animation-delay: 0.2s; }
+.wave-line:nth-child(8) { left: 80%; animation-delay: 0.1s; }
+.wave-line:nth-child(9) { left: 90%; animation-delay: 0s; }
 
   #searchInput {
     padding: 6px;
@@ -886,6 +900,11 @@ datalist {
     padding: 8px;
     border-radius: 15px;
   }
+
+  .controls-container {
+    bottom: 0;
+    width: 100%;
+  }
 }
 
 @media (min-width: 721px) {
@@ -901,6 +920,6 @@ datalist {
   }
 
   .station-list {
-    max-height: 50vh;
+    max-height: calc(100vh - 260px);
   }
 }
