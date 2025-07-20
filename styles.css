@@ -197,13 +197,13 @@ h1 {
 
 #currentStationInfo {
   background: var(--container-bg);
-  padding: 15px;
+  padding: 5px;
   border-radius: 12px;
   margin: 4px 0;
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: left;
-  height: 100px;
+  height: 120px;
   display: flex;
   align-items: center;
   position: sticky;
@@ -252,14 +252,14 @@ h1 {
 }
 
 .station-icon {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   order: 1;
-  font-size: 40px;
+  font-size: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-size: contain;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
 }
@@ -307,12 +307,12 @@ h1 {
 }
 
 .station-list {
-  flex: 1;
+  max-height: calc(100vh - 120px - 54px); /* 120px for #currentStationInfo, 54px for .tabs-wrapper (36px tabs + 8px padding + 10px margin) */
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
   border-radius: 12px;
-  margin: 4px 0;
+  margin: 4px 0 10px;
   padding: 8px;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
@@ -434,9 +434,9 @@ h1 {
 
 .tabs-wrapper {
   overflow-x: auto;
-  margin: 0;
+  margin: 0 0 10px;
   position: sticky;
-  bottom: 110px; /* Above controls-container (80px buttons + 15px padding + 15px margin) */
+  bottom: 120px; /* Above controls-container (90px buttons + 15px padding + 15px margin) */
   z-index: 10;
   background: var(--container-bg);
   border-top: 1px solid var(--accent);
@@ -566,7 +566,9 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 30px;
-  width: 100%;
+  width: 95%;
+  max-width: 1200px;
+  margin: 0 auto;
   z-index: 15;
   transition: background 0.3s ease, border-color 0.3s ease;
 }
@@ -578,9 +580,9 @@ h1 {
 }
 
 .control-btn {
-  width: 80px;
-  height: 80px;
-  font-size: 32px;
+  width: 90px;
+  height: 90px;
+  font-size: 36px;
   background: var(--container-bg);
   color: var(--text);
   border: 1px solid var(--accent);
@@ -738,14 +740,15 @@ datalist {
   }
 
   .control-btn {
-    width: 70px;
-    height: 70px;
-    font-size: 28px;
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
     border: 1px solid var(--accent);
   }
 
   .station-list {
-    margin: 4px 0;
+    max-height: calc(100vh - 110px - 50px); /* 110px for #currentStationInfo, 50px for .tabs-wrapper (32px tabs + 8px padding + 10px margin) */
+    margin: 4px 0 10px;
     padding: 6px;
     border-width: 1px;
   }
@@ -793,9 +796,9 @@ datalist {
   }
 
   .tabs-wrapper {
-    margin: 0;
+    margin: 0 0 10px;
     padding: 0 5px;
-    bottom: 100px; /* Adjusted for smaller control buttons */
+    bottom: 110px; /* Adjusted for smaller control buttons (80px + 15px padding + 15px margin) */
   }
 
   .tab-btn,
@@ -816,8 +819,8 @@ datalist {
   }
 
   #currentStationInfo {
-    padding: 10px;
-    height: 90px;
+    padding: 5px;
+    height: 110px;
   }
 
   .station-info-content {
@@ -829,9 +832,9 @@ datalist {
   }
 
   .station-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 36px;
+    width: 70px;
+    height: 70px;
+    font-size: 42px;
   }
 
   .wave-visualizer {
@@ -845,6 +848,9 @@ datalist {
 
   .controls-container {
     padding: 10px;
+    width: 95%;
+    max-width: 1000px;
+    margin: 0 auto;
   }
 
   #searchInput {
@@ -898,6 +904,6 @@ datalist {
   }
 
   .station-list {
-    flex: 1;
+    max-height: calc(100vh - 120px - 54px); /* Same as default */
   }
 }
