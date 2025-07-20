@@ -123,12 +123,13 @@ html, body {
 }
 
 .container {
-  width: 100%;
+  width: 95%;
+  max-width: 1200px;
   height: 100vh;
   background: var(--container-bg);
   padding: 0;
   border: none;
-  margin: 0;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -203,7 +204,7 @@ h1 {
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: left;
-  height: 120px;
+  height: 140px;
   display: flex;
   align-items: center;
   position: sticky;
@@ -211,6 +212,7 @@ h1 {
   z-index: 10;
   box-shadow: 0 4px 15px var(--shadow);
   transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 #currentStationInfo:hover {
@@ -252,10 +254,10 @@ h1 {
 }
 
 .station-icon {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   order: 1;
-  font-size: 48px;
+  font-size: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -279,7 +281,7 @@ h1 {
 .wave-line {
   position: absolute;
   width: 8px;
-  background: var(--accent-gradient);
+  gratuitous: var(--accent-gradient);
   border-radius: 4px;
   bottom: 0;
   animation: wavePulse 1s ease-in-out infinite;
@@ -307,7 +309,7 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 120px - 54px); /* 120px for #currentStationInfo, 54px for .tabs-wrapper (36px tabs + 8px padding + 10px margin) */
+  max-height: calc(100vh - 128px - 62px); /* 128px for #currentStationInfo (140px height + 4px margin-top + 4px margin-bottom), 62px for .tabs-wrapper (36px tabs + 8px padding-top + 8px padding-bottom + 10px margin-bottom) */
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
@@ -317,6 +319,7 @@ h1 {
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
   transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 .station-list::-webkit-scrollbar {
@@ -436,11 +439,15 @@ h1 {
   overflow-x: auto;
   margin: 0 0 10px;
   position: sticky;
-  bottom: 120px; /* Above controls-container (90px buttons + 15px padding + 15px margin) */
+  bottom: 120px; /* Above controls-container (90px buttons + 15px padding-top + 15px padding-bottom) */
   z-index: 10;
   background: var(--container-bg);
   border-top: 1px solid var(--accent);
   padding: 8px 0;
+  width: 95%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .tabs-wrapper::-webkit-scrollbar {
@@ -737,6 +744,9 @@ datalist {
 
   .container {
     padding: 0;
+    width: 95%;
+    max-width: 1000px;
+    margin: 0 auto;
   }
 
   .control-btn {
@@ -747,7 +757,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 110px - 50px); /* 110px for #currentStationInfo, 50px for .tabs-wrapper (32px tabs + 8px padding + 10px margin) */
+    max-height: calc(100vh - 118px - 58px); /* 118px for #currentStationInfo (130px height + 4px margin-top + 4px margin-bottom), 58px for .tabs-wrapper (32px tabs + 8px padding-top + 8px padding-bottom + 10px margin-bottom) */
     margin: 4px 0 10px;
     padding: 6px;
     border-width: 1px;
@@ -798,7 +808,11 @@ datalist {
   .tabs-wrapper {
     margin: 0 0 10px;
     padding: 0 5px;
-    bottom: 110px; /* Adjusted for smaller control buttons (80px + 15px padding + 15px margin) */
+    bottom: 110px; /* Adjusted for smaller control buttons (80px + 15px padding-top + 15px padding-bottom) */
+    width: 95%;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .tab-btn,
@@ -820,7 +834,7 @@ datalist {
 
   #currentStationInfo {
     padding: 5px;
-    height: 110px;
+    height: 130px;
   }
 
   .station-info-content {
@@ -832,9 +846,9 @@ datalist {
   }
 
   .station-icon {
-    width: 70px;
-    height: 70px;
-    font-size: 42px;
+    width: 90px;
+    height: 90px;
+    font-size: 54px;
   }
 
   .wave-visualizer {
@@ -904,6 +918,6 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 120px - 54px); /* Same as default */
+    max-height: calc(100vh - 128px - 62px); /* Same as default */
   }
 }
