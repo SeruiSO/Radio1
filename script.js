@@ -36,9 +36,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.querySelector(".search-btn");
   const pastSearchesList = document.getElementById("pastSearches");
   const tabsContainer = document.getElementById("tabs");
-  const tabsWrapper = document.querySelector(".tabs-wrapper");
+  const tabsSidebar = document.getElementById("tabsSidebar");
+  const stationSidebar = document.getElementById("stationSidebar");
+  const sidebarToggles = document.querySelectorAll(".sidebar-toggle");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer || !tabsWrapper) {
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || 
+      !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || 
+      !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer || 
+      !tabsSidebar || !stationSidebar || sidebarToggles.length < 2) {
     console.error("One of required DOM elements not found", {
       audio: !!audio,
       stationList: !!stationList,
@@ -56,7 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
       searchBtn: !!searchBtn,
       pastSearchesList: !!pastSearchesList,
       tabsContainer: !!tabsContainer,
-      tabsWrapper: !!tabsWrapper
+      tabsSidebar: !!tabsSidebar,
+      stationSidebar: !!stationSidebar,
+      sidebarToggles: sidebarToggles.length
     });
     setTimeout(initializeApp, 100);
     return;
@@ -71,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePastSearches();
     populateSearchSuggestions();
     renderTabs();
-    setupSwipeGestures();
+    initializeSidebars();
 
     shareButton.addEventListener("click", () => {
       const stationName = currentStationInfo.querySelector(".station-name").textContent || "Radio S O";
@@ -92,9 +99,9 @@ document.addEventListener("DOMContentLoaded", () => {
     importButton.addEventListener("click", () => importFileInput.click());
     importFileInput.addEventListener("change", importSettings);
 
-    document.querySelector(".controls .control-btn:nth-child(1)").addEventListener("click", prevStation);
-    document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", togglePlayPause);
-    document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", nextStation);
+    document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", prevStation);
+    document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", togglePlayPause);
+    document.querySelector(".controls .control-btn:nth-child(4)").addEventListener("click", nextStation);
 
     searchBtn.addEventListener("click", () => {
       const query = searchQuery.value.trim();
@@ -127,62 +134,66 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.key === "Enter") searchBtn.click();
     });
 
-    function setupSwipeGestures() {
+    function initializeSidebars() {
+      // Handle sidebar toggle buttons
+      sidebarToggles.forEach(toggle => {
+        toggle.addEventListener("click", () => {
+          const targetId = toggle.dataset.target;
+          toggleSidebar(targetId);
+        });
+      });
+
+      // Handle swipe gestures for mobile devices
       let touchStartX = 0;
       let touchEndX = 0;
-      const swipeThreshold = 50; // Minimum distance for a swipe
-      const swipeArea = document.querySelector(".container");
 
-      swipeArea.addEventListener("touchstart", (e) => {
+      document.addEventListener("touchstart", (e) => {
         touchStartX = e.changedTouches[0].screenX;
-      });
+      }, { passive: true });
 
-      swipeArea.addEventListener("touchmove", (e) => {
+      document.addEventListener("touchend", (e) => {
         touchEndX = e.changedTouches[0].screenX;
-      });
+        handleSwipe();
+      }, { passive: true });
 
-      swipeArea.addEventListener("touchend", () => {
+      function handleSwipe() {
         const swipeDistance = touchEndX - touchStartX;
+        const minSwipeDistance = 100; // Minimum distance for a swipe
 
-        if (swipeDistance > swipeThreshold) {
-          // Swipe right: show tabs
-          tabsWrapper.classList.add("open");
-          stationList.classList.remove("open");
-          // Create overlay for closing tabs on tap
-          const overlay = document.createElement("div");
-          overlay.className = "modal-overlay";
-          document.body.appendChild(overlay);
-          overlay.addEventListener("click", () => {
-            tabsWrapper.classList.remove("open");
-            overlay.remove();
-          });
-        } else if (swipeDistance < -swipeThreshold) {
-          // Swipe left: show station list
-          stationList.classList.add("open");
-          tabsWrapper.classList.remove("open");
-          // Create overlay for closing station list on tap
-          const overlay = document.createElement("div");
-          overlay.className = "modal-overlay";
-          document.body.appendChild(overlay);
-          overlay.addEventListener("click", () => {
-            stationList.classList.remove("open");
-            overlay.remove();
-          });
+        // Swipe right to open tabs sidebar
+        if (swipeDistance > minSwipeDistance && touchStartX < window.innerWidth * 0.2) {
+          toggleSidebar("tabsSidebar");
+        }
+        // Swipe left to open station sidebar
+        else if (swipeDistance < -minSwipeDistance && touchStartX > window.innerWidth * 0.8) {
+          toggleSidebar("stationSidebar");
+        }
+      }
+
+      // Close sidebars when clicking outside
+      document.addEventListener("click", (e) => {
+        if (!tabsSidebar.contains(e.target) && !stationSidebar.contains(e.target) &&
+            !e.target.classList.contains("sidebar-toggle")) {
+          closeSidebars();
         }
       });
+    }
 
-      // Prevent scrolling on tabs-wrapper and station-list when open
-      tabsWrapper.addEventListener("touchmove", (e) => {
-        if (tabsWrapper.classList.contains("open")) {
-          e.stopPropagation();
-        }
-      });
+    function toggleSidebar(sidebarId) {
+      const targetSidebar = document.getElementById(sidebarId);
+      const otherSidebar = sidebarId === "tabsSidebar" ? stationSidebar : tabsSidebar;
 
-      stationList.addEventListener("touchmove", (e) => {
-        if (stationList.classList.contains("open")) {
-          e.stopPropagation();
-        }
-      });
+      if (targetSidebar.classList.contains("open")) {
+        targetSidebar.classList.remove("open");
+      } else {
+        closeSidebars();
+        targetSidebar.classList.add("open");
+      }
+    }
+
+    function closeSidebars() {
+      tabsSidebar.classList.remove("open");
+      stationSidebar.classList.remove("open");
     }
 
     function exportSettings() {
@@ -622,7 +633,10 @@ document.addEventListener("DOMContentLoaded", () => {
       tabsContainer.appendChild(addBtn);
 
       tabsContainer.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+        btn.addEventListener("click", () => {
+          switchTab(btn.dataset.tab);
+          closeSidebars(); // Close sidebar after selecting a tab
+        });
         if (customTabs.includes(btn.dataset.tab)) {
           let longPressTimer;
           btn.addEventListener("pointerdown", () => {
@@ -683,6 +697,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTabs();
         switchTab(tabName);
         closeModal();
+        closeSidebars();
       };
 
       const keypressHandler = (e) => {
@@ -742,6 +757,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (currentTab === tab) switchTab(newName);
         renderTabs();
         closeModal();
+        closeSidebars();
       };
 
       const deleteTabHandler = () => {
@@ -758,6 +774,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           renderTabs();
           closeModal();
+          closeSidebars();
         }
       };
 
@@ -1158,6 +1175,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (item && !item.classList.contains("empty")) {
           currentIndex = Array.from(stationItems).indexOf(item);
           changeStation(currentIndex);
+          closeSidebars(); // Close station sidebar after selecting a station
         }
         if (favoriteBtn) {
           e.stopPropagation();
@@ -1170,10 +1188,6 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
       };
-
-      if (stationItems.length && currentIndex < stationItems.length) {
-        changeStation(currentIndex);
-      }
     }
 
     function toggleFavorite(stationName) {
@@ -1189,16 +1203,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function deleteStation(stationName) {
       if (Array.isArray(stationLists[currentTab])) {
-        const station = stationAnswers = {
-  "station": {
-    "value": "https://example.com/stream.mp3",
-    "name": "Sample Radio",
-    "genre": "Pop",
-    "country": "United States",
-    "favicon": "https://example.com/favicon.png",
-    "isFromSearch": false
-  }
-}
+        const station = stationLists[currentTab].find(s => s.name === stationName);
         if (!station) {
           console.warn(`Station ${stationName} not found in ${currentTab}`);
           return;
