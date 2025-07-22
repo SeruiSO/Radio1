@@ -22,7 +22,7 @@ customTabs = Array.isArray(customTabs) ? customTabs.filter(tab => typeof tab ===
 document.addEventListener("DOMContentLoaded", () => {
   const audio = document.getElementById("audioPlayer");
   const stationList = document.getElementById("stationList");
-  const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
+  const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(4)");
   const currentStationInfo = document.getElementById("currentStationInfo");
   const themeToggle = document.querySelector(".theme-toggle");
   const shareButton = document.querySelector(".share-button");
@@ -99,9 +99,9 @@ document.addEventListener("DOMContentLoaded", () => {
     importButton.addEventListener("click", () => importFileInput.click());
     importFileInput.addEventListener("change", importSettings);
 
-    document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", prevStation);
-    document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", togglePlayPause);
-    document.querySelector(".controls .control-btn:nth-child(4)").addEventListener("click", nextStation);
+    document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", prevStation);
+    document.querySelector(".controls .control-btn:nth-child(4)").addEventListener("click", togglePlayPause);
+    document.querySelector(".controls .control-btn:nth-child(5)").addEventListener("click", nextStation);
 
     searchBtn.addEventListener("click", () => {
       const query = searchQuery.value.trim();
@@ -994,8 +994,8 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("Device offline: skipping playback");
           return;
         }
-        if (!intendedPlaying || !stationItems?.length || currentIndex >= stationItems.length) {
-          console.log("Skip tryAutoPlay: invalid state", { intendedPlaying, hasStationItems: !!stationItems?.length, isIndexValid: currentIndex < stationItems.length });
+        if (!stationItems?.length || currentIndex >= stationItems.length) {
+          console.log("Skip tryAutoPlay: no valid station items", { hasStationItems: !!stationItems?.length, isIndexValid: currentIndex < stationItems.length });
           document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
           return;
         }
@@ -1105,18 +1105,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (tab === "search") populateSearchSuggestions();
       updateStationList();
       renderTabs();
-      if (stationItems?.length && currentIndex < stationItems.length && intendedPlaying) {
+      if (stationItems?.length && currentIndex < stationItems.length) {
         const normalizedCurrentUrl = normalizeUrl(stationItems[currentIndex].dataset.value);
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
           console.log("switchTab: Starting playback after tab change");
           isAutoPlayPending = false;
+          intendedPlaying = true; // Ensure playback is attempted
           debouncedTryAutoPlay();
         } else {
           console.log("switchTab: Skip playback, station already playing");
         }
       } else {
-        console.log("switchTab: Skip playback, invalid state");
+        console.log("switchTab: Skip playback, no valid station items");
       }
     }
 
@@ -1238,18 +1239,19 @@ document.addEventListener("DOMContentLoaded", () => {
       currentIndex = index;
       updateCurrentStation(item);
       localStorage.setItem(`lastStation_${currentTab}`, index);
-      if (intendedPlaying) {
+      if (stationItems.length && isValidUrl(item.dataset.value)) {
         const normalizedCurrentUrl = normalizeUrl(item.dataset.value);
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
           console.log("changeStation: Starting playback after station change");
           isAutoPlayPending = false;
+          intendedPlaying = true; // Ensure playback is attempted
           debouncedTryAutoPlay();
         } else {
           console.log("changeStation: Skip playback, station already playing");
         }
       } else {
-        console.log("changeStation: Skip playback, invalid state");
+        console.log("changeStation: Skip playback, invalid URL or no station items");
       }
     }
 
@@ -1476,18 +1478,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     applyTheme(currentTheme);
     loadStations();
-    if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
+    if (stationItems?.length && currentIndex < stationItems.length) {
       const normalizedCurrentUrl = normalizeUrl(stationItems[currentIndex].dataset.value);
       const normalizedAudioSrc = normalizeUrl(audio.src);
       if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
         console.log("initializeApp: Starting playback after initialization");
         isAutoPlayPending = false;
+        intendedPlaying = true; // Ensure playback is attempted
         debouncedTryAutoPlay();
       } else {
         console.log("initializeApp: Skip playback, station already playing");
       }
     } else {
-      console.log("initializeApp: Skip playback, invalid state");
+      console.log("initializeApp: Skip playback, no valid station items");
     }
   }
 });

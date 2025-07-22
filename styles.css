@@ -7,6 +7,10 @@
   --accent-gradient: linear-gradient(45deg, #00B248, #00E676);
   --shadow: rgba(0, 230, 118, 0.3);
   --font-family: 'Inter', sans-serif;
+  --sidebar-width: 300px; /* Width for sidebars on desktop */
+  --sidebar-mobile-width: 80%; /* Width for sidebars on mobile */
+  --tabs-height: 60px; /* Approximate height of tabs */
+  --controls-height: 110px; /* Approximate height of controls-container */
 }
 
 [data-theme="shadow-pulse"] {
@@ -132,7 +136,7 @@ body {
   border-radius: 12px;
   border: 1px solid var(--accent);
   margin: 0 auto;
-  min-height: 85vh;
+  min-height: calc(100vh - 20px); /* Account for body padding */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -217,6 +221,7 @@ h1 {
   z-index: 10;
   box-shadow: 0 4px 15px var(--shadow);
   transition: all 0.3s ease;
+  min-height: calc(100vh - var(--tabs-height) - var(--controls-height) - 20px); /* Fill available height */
 }
 
 #currentStationInfo:hover {
@@ -313,25 +318,25 @@ h1 {
 
 .station-sidebar {
   position: fixed;
-  top: 0;
-  right: -80%;
-  width: 80%;
-  height: 100%;
+  top: var(--tabs-height); /* Start below tabs */
+  height: calc(100vh - var(--tabs-height) - var(--controls-height)); /* Match currentStationInfo height */
+  width: var(--sidebar-width);
   background: var(--container-bg);
   border-left: 1px solid var(--accent);
   z-index: 15;
-  transition: right 0.3s ease;
+  transition: transform 0.3s ease;
   overflow-y: auto;
   padding: 15px;
   box-shadow: -4px 0 12px var(--shadow);
+  transform: translateX(calc(100% - 3px)); /* Hidden, showing 3px */
 }
 
 .station-sidebar.open {
-  right: 0;
+  transform: translateX(0);
 }
 
 .station-list {
-  max-height: calc(100vh - 150px);
+  max-height: calc(100% - 30px); /* Account for padding */
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
@@ -457,21 +462,21 @@ h1 {
 
 .tabs-sidebar {
   position: fixed;
-  top: 0;
-  left: -80%;
-  width: 80%;
-  height: 100%;
+  top: var(--tabs-height); /* Start below tabs */
+  height: calc(100vh - var(--tabs-height) - var(--controls-height)); /* Match currentStationInfo height */
+  width: var(--sidebar-width);
   background: var(--container-bg);
   border-right: 1px solid var(--accent);
   z-index: 15;
-  transition: left 0.3s ease;
+  transition: transform 0.3s ease;
   overflow-y: auto;
   padding: 15px;
   box-shadow: 4px 0 12px var(--shadow);
+  transform: translateX(calc(-100% + 3px)); /* Hidden, showing 3px */
 }
 
 .tabs-sidebar.open {
-  left: 0;
+  transform: translateX(0);
 }
 
 .tabs-wrapper {
@@ -598,6 +603,7 @@ h1 {
   gap: 10px;
   z-index: 10;
   transition: background 0.3s ease, border-color 0.3s ease;
+  min-height: var(--controls-height); /* Ensure controls are visible */
 }
 
 .controls {
@@ -770,7 +776,7 @@ datalist {
 
   .container {
     padding: 10px;
-    min-height: 80vh;
+    min-height: calc(100vh - 20px);
   }
 
   .control-btn {
@@ -786,8 +792,21 @@ datalist {
     font-size: 20px;
   }
 
+  .station-sidebar,
+  .tabs-sidebar {
+    width: var(--sidebar-mobile-width);
+  }
+
+  .station-sidebar {
+    transform: translateX(calc(100% - 3px));
+  }
+
+  .tabs-sidebar {
+    transform: translateX(calc(-100% + 3px));
+  }
+
   .station-list {
-    max-height: calc(100vh - 140px);
+    max-height: calc(100% - 30px);
     margin: 4px 0;
     padding: 6px;
     border-width: 1px;
@@ -837,6 +856,7 @@ datalist {
 
   #currentStationInfo {
     padding: 10px;
+    min-height: calc(100vh - var(--tabs-height) - var(--controls-height) - 20px);
   }
 
   .station-info-content {
@@ -910,10 +930,10 @@ datalist {
 
 @media (max-height: 1600px) {
   .container {
-    min-height: 80vh;
+    min-height: calc(100vh - 20px);
   }
 
   .station-list {
-    max-height: calc(100vh - 140px);
+    max-height: calc(100% - 30px);
   }
 }
