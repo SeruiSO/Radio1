@@ -36,10 +36,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.querySelector(".search-btn");
   const pastSearchesList = document.getElementById("pastSearches");
   const tabsContainer = document.getElementById("tabs");
-  const tabPanel = document.getElementById("tabPanel");
-  const stationPanel = document.getElementById("stationPanel");
+  const tabsWrapper = document.querySelector(".tabs-wrapper");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer || !tabPanel || !stationPanel) {
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer || !tabsWrapper) {
     console.error("One of required DOM elements not found", {
       audio: !!audio,
       stationList: !!stationList,
@@ -57,8 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
       searchBtn: !!searchBtn,
       pastSearchesList: !!pastSearchesList,
       tabsContainer: !!tabsContainer,
-      tabPanel: !!tabPanel,
-      stationPanel: !!stationPanel
+      tabsWrapper: !!tabsWrapper
     });
     setTimeout(initializeApp, 100);
     return;
@@ -73,46 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePastSearches();
     populateSearchSuggestions();
     renderTabs();
-
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    tabPanel.addEventListener("touchstart", (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-    });
-
-    tabPanel.addEventListener("touchmove", (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-    });
-
-    tabPanel.addEventListener("touchend", () => {
-      if (touchEndX > touchStartX + 50) {
-        tabPanel.classList.add("open");
-      }
-    });
-
-    stationPanel.addEventListener("touchstart", (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-    });
-
-    stationPanel.addEventListener("touchmove", (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-    });
-
-    stationPanel.addEventListener("touchend", () => {
-      if (touchEndX < touchStartX - 50) {
-        stationPanel.classList.add("open");
-      }
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!tabPanel.contains(e.target) && tabPanel.classList.contains("open")) {
-        tabPanel.classList.remove("open");
-      }
-      if (!stationPanel.contains(e.target) && stationPanel.classList.contains("open")) {
-        stationPanel.classList.remove("open");
-      }
-    });
+    setupSwipeGestures();
 
     shareButton.addEventListener("click", () => {
       const stationName = currentStationInfo.querySelector(".station-name").textContent || "Radio S O";
@@ -167,6 +126,64 @@ document.addEventListener("DOMContentLoaded", () => {
     searchGenre.addEventListener("keypress", (e) => {
       if (e.key === "Enter") searchBtn.click();
     });
+
+    function setupSwipeGestures() {
+      let touchStartX = 0;
+      let touchEndX = 0;
+      const swipeThreshold = 50; // Minimum distance for a swipe
+      const swipeArea = document.querySelector(".container");
+
+      swipeArea.addEventListener("touchstart", (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      });
+
+      swipeArea.addEventListener("touchmove", (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+      });
+
+      swipeArea.addEventListener("touchend", () => {
+        const swipeDistance = touchEndX - touchStartX;
+
+        if (swipeDistance > swipeThreshold) {
+          // Swipe right: show tabs
+          tabsWrapper.classList.add("open");
+          stationList.classList.remove("open");
+          // Create overlay for closing tabs on tap
+          const overlay = document.createElement("div");
+          overlay.className = "modal-overlay";
+          document.body.appendChild(overlay);
+          overlay.addEventListener("click", () => {
+            tabsWrapper.classList.remove("open");
+            overlay.remove();
+          });
+        } else if (swipeDistance < -swipeThreshold) {
+          // Swipe left: show station list
+          stationList.classList.add("open");
+          tabsWrapper.classList.remove("open");
+          // Create overlay for closing station list on tap
+          const overlay = document.createElement("div");
+          overlay.className = "modal-overlay";
+          document.body.appendChild(overlay);
+          overlay.addEventListener("click", () => {
+            stationList.classList.remove("open");
+            overlay.remove();
+          });
+        }
+      });
+
+      // Prevent scrolling on tabs-wrapper and station-list when open
+      tabsWrapper.addEventListener("touchmove", (e) => {
+        if (tabsWrapper.classList.contains("open")) {
+          e.stopPropagation();
+        }
+      });
+
+      stationList.addEventListener("touchmove", (e) => {
+        if (stationList.classList.contains("open")) {
+          e.stopPropagation();
+        }
+      });
+    }
 
     function exportSettings() {
       const settings = {
@@ -1172,7 +1189,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function deleteStation(stationName) {
       if (Array.isArray(stationLists[currentTab])) {
-        const station = stationLists[currentTab].find(s => s.name === stationName);
+        const station = stationAnswers = {
+  "station": {
+    "value": "https://example.com/stream.mp3",
+    "name": "Sample Radio",
+    "genre": "Pop",
+    "country": "United States",
+    "favicon": "https://example.com/favicon.png",
+    "isFromSearch": false
+  }
+}
         if (!station) {
           console.warn(`Station ${stationName} not found in ${currentTab}`);
           return;
@@ -1254,7 +1280,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (item.dataset.favicon && isValidUrl(item.dataset.favicon)) {
           stationIconElement.innerHTML = "";
           stationIconElement.style.backgroundImage = `url(${item.dataset.favicon})`;
-          stationIconElement.style.backgroundSize = "cover";
+          stationIconElement.style.backgroundSize = "contain";
+          stationIconElement.style.backgroundRepeat = "no-repeat";
           stationIconElement.style.backgroundPosition = "center";
         } else {
           stationIconElement.innerHTML = "🎵";

@@ -1,4 +1,4 @@
-/* Updated on July 15, 2025 */
+/* Updated on July 22, 2025 */
 :root {
   --body-bg: #000000;
   --container-bg: #000000;
@@ -119,26 +119,29 @@ body {
   justify-content: center;
   align-items: flex-start;
   overflow-x: hidden;
-  padding-top: 60px;
+  padding-top: 10px;
   box-sizing: border-box;
   transition: background 0.3s ease, color 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .container {
   max-width: 95%;
   width: 100%;
   background: var(--container-bg);
+  padding: 15px;
   border-radius: 12px;
   border: 1px solid var(--accent);
   margin: 0 auto;
   min-height: 85vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   box-shadow: 0 8px 32px var(--shadow);
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   position: relative;
-  overflow: hidden;
+  z-index: 1;
 }
 
 h1 {
@@ -151,20 +154,12 @@ h1 {
   transition: color 0.3s ease;
 }
 
-.top-controls {
-  position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-  z-index: 20;
-}
-
 .theme-toggle,
 .share-button,
 .export-button,
 .import-button {
+  position: fixed;
+  top: 10px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 12px;
@@ -177,6 +172,23 @@ h1 {
   justify-content: center;
   transition: all 0.2s ease;
   font-size: 18px;
+  z-index: 15;
+}
+
+.theme-toggle {
+  left: 10px;
+}
+
+.share-button {
+  left: 60px;
+}
+
+.export-button {
+  right: 10px;
+}
+
+.import-button {
+  right: 60px;
 }
 
 .theme-toggle:hover,
@@ -196,16 +208,18 @@ h1 {
   background: var(--container-bg);
   padding: 20px;
   border-radius: 12px;
-  margin: 20px 0;
+  margin: 4px 0;
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: center;
-  height: 70vh;
+  height: calc(100vh - 200px); /* Takes most of the window height */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
+  top: 0;
+  z-index: 10;
   box-shadow: 0 4px 15px var(--shadow);
   transition: all 0.3s ease;
 }
@@ -219,61 +233,64 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 20px;
   width: 100%;
 }
 
 .station-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  order: 2;
   text-align: center;
 }
 
 #currentStationInfo .station-name {
   font-size: 24px;
   font-weight: 600;
-  margin: 10px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 #currentStationInfo .station-genre,
 #currentStationInfo .station-country {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 400;
   opacity: 0.85;
+  margin-top: 8px;
 }
 
 .station-icon {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  border: 4px solid var(--accent);
-  overflow: hidden;
+  width: 120px;
+  height: 120px;
+  order: 1;
+  font-size: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
-}
-
-.station-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .wave-visualizer {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: auto;
   order: 3;
-  width: 100px;
-  height: 60px;
+  width: 150px;
+  height: 80px;
   position: relative;
   overflow: hidden;
 }
 
 .wave-line {
   position: absolute;
-  width: 8px;
+  width: 10px;
   background: var(--accent-gradient);
   border-radius: 4px;
   bottom: 0;
@@ -302,17 +319,26 @@ h1 {
 }
 
 .station-list {
-  max-height: 55vh;
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 400px;
+  height: 100vh;
   overflow-y: auto;
   background: var(--container-bg);
-  border: 1px solid var(--accent);
-  border-radius: 12px;
-  margin: 4px 0;
+  border-left: 1px solid var(--accent);
+  border-radius: 12px 0 0 12px;
+  margin: 0;
   padding: 8px;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
-  flex-grow: 1;
-  transition: all 0.3s ease;
+  transition: right 0.3s ease;
+  z-index: 20;
+}
+
+.station-list.open {
+  right: 0;
 }
 
 .station-list::-webkit-scrollbar {
@@ -429,55 +455,52 @@ h1 {
 }
 
 .tabs-wrapper {
-  overflow-x: auto;
-  margin: 5px 0;
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
-  background: var(--container-bg);
-}
-
-.tab-panel {
   position: fixed;
   top: 0;
+  left: -100%;
+  width: 80%;
+  max-width: 300px;
+  height: 100vh;
+  background: var(--container-bg);
+  border-right: 1px solid var(--accent);
+  border-radius: 0 12px 12px 0;
+  z-index: 20;
+  transition: left 0.3s ease;
+}
+
+.tabs-wrapper.open {
   left: 0;
-  width: 250px;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.9);
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-  z-index: 30;
-  padding-top: 70px;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.tab-panel.open {
-  transform: translateX(0);
-}
-
-.tabs-wrapper {
-  overflow-y: auto;
-  height: 100%;
-  padding: 10px;
+.tabs-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
 .tabs {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  justify-content: flex-start;
+  background: var(--container-bg);
+  padding: 8px;
+  border-radius: 12px;
+  gap: 6px;
+  height: 100%;
+  transition: background 0.3s ease;
 }
 
 .tab-btn,
 .add-tab-btn {
   flex: 0 0 auto;
+  min-width: 100%;
   padding: 10px;
   background: var(--container-bg);
   border: 1px solid var(--accent);
   border-radius: 12px;
   color: var(--text);
   cursor: pointer;
+  margin: 3px 0;
   text-align: center;
-  font-size: 16px;
+  font-size: 14px;
   transition: all 0.2s ease;
 }
 
@@ -495,7 +518,6 @@ h1 {
 }
 
 .add-tab-btn {
-  width: 100%;
   font-size: 18px;
 }
 
@@ -564,9 +586,9 @@ h1 {
 
 .controls-container {
   position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: var(--container-bg);
   border-top: 1px solid var(--accent);
   padding: 15px;
@@ -574,13 +596,13 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 30px;
-  z-index: 20;
-  border-radius: 12px;
-  box-shadow: 0 -4px 15px var(--shadow);
+  z-index: 15;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .controls {
   display: flex;
+  justify-content: center;
   gap: 30px;
 }
 
@@ -608,24 +630,6 @@ h1 {
 
 .control-btn:active {
   transform: scale(0.95);
-}
-
-.station-panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 300px;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.9);
-  transform: translateX(100%);
-  transition: transform 0.3s ease;
-  z-index: 30;
-  padding-top: 70px;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
-}
-
-.station-panel.open {
-  transform: translateX(0);
 }
 
 .modal-overlay {
@@ -763,39 +767,6 @@ datalist {
     min-height: 80vh;
   }
 
-  .top-controls {
-    top: 5px;
-    gap: 5px;
-  }
-
-  .theme-toggle,
-  .share-button,
-  .export-button,
-  .import-button {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
-  }
-
-  #currentStationInfo {
-    height: 65vh;
-    padding: 15px;
-  }
-
-  .station-icon {
-    width: 120px;
-    height: 120px;
-  }
-
-  #currentStationInfo .station-name {
-    font-size: 20px;
-  }
-
-  #currentStationInfo .station-genre,
-  #currentStationInfo .station-country {
-    font-size: 14px;
-  }
-
   .control-btn {
     width: 70px;
     height: 70px;
@@ -804,10 +775,12 @@ datalist {
   }
 
   .station-list {
-    max-height: 50vh;
-    margin: 4px 0;
+    width: 90%;
     padding: 6px;
-    border-width: 1px;
+  }
+
+  .tabs-wrapper {
+    width: 90%;
   }
 
   .station-item {
@@ -826,34 +799,58 @@ datalist {
     height: 32px;
   }
 
-  .tab-panel {
-    width: 200px;
-  }
-
-  .station-panel {
-    width: 250px;
-  }
-
-  .tabs-wrapper {
-    margin: 3px 0;
-    padding: 0 5px;
-  }
-
-  .tab-btn,
-  .add-tab-btn {
-    min-width: 60px;
-    padding: 8px;
-    font-size: 12px;
-    border-radius: 12px;
-  }
-
-  .add-tab-btn {
+  .theme-toggle,
+  .share-button,
+  .export-button,
+  .import-button {
+    top: 8px;
+    height: 36px;
     width: 36px;
     font-size: 16px;
   }
 
-  .tabs {
-    gap: 4px;
+  .theme-toggle {
+    left: 8px;
+  }
+
+  .share-button {
+    left: 52px;
+  }
+
+  .export-button {
+    right: 8px;
+  }
+
+  .import-button {
+    right: 52px;
+  }
+
+  #currentStationInfo {
+    padding: 15px;
+    height: calc(100vh - 180px);
+  }
+
+  .station-info-content {
+    gap: 15px;
+  }
+
+  #currentStationInfo .station-name {
+    font-size: 20px;
+  }
+
+  .station-icon {
+    width: 100px;
+    height: 100px;
+    font-size: 70px;
+  }
+
+  .wave-visualizer {
+    width: 120px;
+    height: 70px;
+  }
+
+  .wave-line {
+    width: 8px;
   }
 
   #searchInput {
@@ -906,7 +903,7 @@ datalist {
     min-height: 80vh;
   }
 
-  .station-list {
-    max-height: 50vh;
+  #currentStationInfo {
+    height: calc(100vh - 200px);
   }
 }

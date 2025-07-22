@@ -38,88 +38,92 @@
         return gk_fileData[filename] || "";
         }
         </script><!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#00E676">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>🎧 Radio Music</title>
   <link rel="stylesheet" href="styles.css">
-  <title>Radio Music</title>
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <div class="container">
-    <div class="top-controls">
-      <button class="theme-toggle">🌙</button>
-      <button class="share-button">📢</button>
-      <button class="export-button">📤</button>
-      <button class="import-button">📥</button>
+  <div class="main-container">
+    <div class="top-buttons">
+      <button class="theme-toggle" aria-label="Перемкнути тему">🌙</button>
+      <button class="share-button" aria-label="Поділитися">📢</button>
+      <button class="export-button" aria-label="Експортувати налаштування">📤</button>
+      <button class="import-button" aria-label="Імпортувати налаштування">📥</button>
+      <input type="file" id="importFileInput" accept=".json" style="display: none;">
     </div>
-    <h1>🎧 Radio Music</h1>
-    <div id="currentStationInfo">
-      <div class="station-info-content">
-        <div class="station-icon"></div>
-        <div class="station-text">
-          <div class="station-name">Select station</div>
-          <div class="station-genre">genre: -</div>
-          <div class="station-country">country: -</div>
-        </div>
-        <div class="wave-visualizer">
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
+
+    <audio id="audioPlayer" preload="auto"></audio>
+
+    <div class="content-wrapper">
+      <div id="currentStationInfo" class="current-station" aria-live="polite">
+        <div class="station-icon">🎵</div>
+        <div class="station-details">
+          <h2 class="station-name">Обирайте станцію</h2>
+          <p class="station-genre">жанр: -</p>
+          <p class="station-country">країна: -</p>
         </div>
       </div>
-    </div>
-    <div class="station-panel" id="stationPanel">
-      <div class="station-list" id="stationList"></div>
-    </div>
-    <div class="tab-panel" id="tabPanel">
-      <div class="tabs-wrapper" id="tabsWrapper">
-        <div class="tabs" id="tabs"></div>
+
+      <div class="panels-wrapper">
+        <div class="tabs-wrapper" aria-hidden="true">
+          <div id="tabs" role="tablist">
+            <button class="tab-btn active" data-tab="best" role="tab" aria-selected="true">Best</button>
+            <button class="tab-btn" data-tab="techno" role="tab" aria-selected="false">Techno</button>
+            <button class="tab-btn" data-tab="trance" role="tab" aria-selected="false">Trance</button>
+            <button class="tab-btn" data-tab="ukraine" role="tab" aria-selected="false">UA</button>
+            <button class="tab-btn" data-tab="pop" role="tab" aria-selected="false">Pop</button>
+            <button class="tab-btn" data-tab="search" role="tab" aria-selected="false">Search</button>
+            <button class="add-tab-btn" aria-label="Додати нову вкладку">+</button>
+          </div>
+        </div>
+
+        <div id="stationList" class="station-list" aria-hidden="true" role="listbox"></div>
+      </div>
+
+      <div id="searchInput" class="search-input" style="display: none;">
+        <input type="text" id="searchQuery" placeholder="Назва станції" list="pastSearches">
+        <input type="text" id="searchCountry" placeholder="Країна" list="suggestedCountries">
+        <input type="text" id="searchGenre" placeholder="Жанр" list="suggestedGenres">
+        <datalist id="pastSearches"></datalist>
+        <datalist id="suggestedCountries"></datalist>
+        <datalist id="suggestedGenres"></datalist>
+        <button class="search-btn" aria-label="Пошук">🔍</button>
       </div>
     </div>
-    <div class="controls-container">
-      <div class="controls">
-        <button class="control-btn">⏮</button>
-        <button class="control-btn">▶</button>
-        <button class="control-btn">⏭</button>
-      </div>
+
+    <div class="controls-container" role="group" aria-label="Елементи керування відтворенням">
+      <button class="control-btn" aria-label="Попередня станція">⏮</button>
+      <button class="control-btn" aria-label="Відтворити або призупинити">▶</button>
+      <button class="control-btn" aria-label="Наступна станція">⏭</button>
     </div>
-    <div id="searchInput">
-      <input type="text" id="searchQuery" list="pastSearches" placeholder="Station name">
-      <input type="text" id="searchCountry" list="suggestedCountries" placeholder="Country">
-      <input type="text" id="searchGenre" list="suggestedGenres" placeholder="Genre">
-      <button class="search-btn">🔍</button>
-    </div>
-    <input type="file" id="importFileInput" accept=".json">
-    <div class="modal-overlay new-tab-modal" style="display: none;">
+
+    <div class="new-tab-modal" style="display: none;">
       <div class="modal">
         <h2>Створити нову вкладку</h2>
-        <input type="text" id="newTabName" placeholder="Tab name">
-        <button id="createTabBtn">Створити</button>
-        <button class="modal-cancel-btn">Відміна</button>
+        <input type="text" id="newTabName" placeholder="Назва вкладки" maxlength="10">
+        <div class="modal-buttons">
+          <button id="createTabBtn">Створити</button>
+          <button class="modal-cancel-btn">Відміна</button>
+        </div>
       </div>
     </div>
-    <div class="modal-overlay edit-tab-modal" style="display: none;">
+
+    <div class="edit-tab-modal" style="display: none;">
       <div class="modal">
         <h2>Дії з вкладкою</h2>
-        <input type="text" id="renameTabName" placeholder="New tab name">
-        <button id="renameTabBtn">Перейменувати</button>
-        <button id="deleteTabBtn">Видалити</button>
-        <button class="modal-cancel-btn">Відміна</button>
+        <input type="text" id="renameTabName" placeholder="Нова назва вкладки" maxlength="10">
+        <div class="modal-buttons">
+          <button id="renameTabBtn">Перейменувати</button>
+          <button id="deleteTabBtn">Видалити</button>
+          <button class="modal-cancel-btn">Відміна</button>
+        </div>
       </div>
     </div>
-    <audio id="audioPlayer"></audio>
-    <datalist id="pastSearches"></datalist>
-    <datalist id="suggestedCountries"></datalist>
-    <datalist id="suggestedGenres"></datalist>
   </div>
   <script src="script.js"></script>
 </body>
