@@ -36,8 +36,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.querySelector(".search-btn");
   const pastSearchesList = document.getElementById("pastSearches");
   const tabsContainer = document.getElementById("tabs");
+  const tabPanel = document.getElementById("tabPanel");
+  const stationPanel = document.getElementById("stationPanel");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer) {
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer || !tabPanel || !stationPanel) {
     console.error("One of required DOM elements not found", {
       audio: !!audio,
       stationList: !!stationList,
@@ -54,7 +56,9 @@ document.addEventListener("DOMContentLoaded", () => {
       searchGenre: !!searchGenre,
       searchBtn: !!searchBtn,
       pastSearchesList: !!pastSearchesList,
-      tabsContainer: !!tabsContainer
+      tabsContainer: !!tabsContainer,
+      tabPanel: !!tabPanel,
+      stationPanel: !!stationPanel
     });
     setTimeout(initializeApp, 100);
     return;
@@ -69,6 +73,46 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePastSearches();
     populateSearchSuggestions();
     renderTabs();
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    tabPanel.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    tabPanel.addEventListener("touchmove", (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+    });
+
+    tabPanel.addEventListener("touchend", () => {
+      if (touchEndX > touchStartX + 50) {
+        tabPanel.classList.add("open");
+      }
+    });
+
+    stationPanel.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    stationPanel.addEventListener("touchmove", (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+    });
+
+    stationPanel.addEventListener("touchend", () => {
+      if (touchEndX < touchStartX - 50) {
+        stationPanel.classList.add("open");
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!tabPanel.contains(e.target) && tabPanel.classList.contains("open")) {
+        tabPanel.classList.remove("open");
+      }
+      if (!stationPanel.contains(e.target) && stationPanel.classList.contains("open")) {
+        stationPanel.classList.remove("open");
+      }
+    });
 
     shareButton.addEventListener("click", () => {
       const stationName = currentStationInfo.querySelector(".station-name").textContent || "Radio S O";
@@ -1210,8 +1254,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (item.dataset.favicon && isValidUrl(item.dataset.favicon)) {
           stationIconElement.innerHTML = "";
           stationIconElement.style.backgroundImage = `url(${item.dataset.favicon})`;
-          stationIconElement.style.backgroundSize = "contain";
-          stationIconElement.style.backgroundRepeat = "no-repeat";
+          stationIconElement.style.backgroundSize = "cover";
           stationIconElement.style.backgroundPosition = "center";
         } else {
           stationIconElement.innerHTML = "🎵";
