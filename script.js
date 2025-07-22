@@ -22,7 +22,7 @@ customTabs = Array.isArray(customTabs) ? customTabs.filter(tab => typeof tab ===
 document.addEventListener("DOMContentLoaded", () => {
   const audio = document.getElementById("audioPlayer");
   const stationList = document.getElementById("stationList");
-  const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(4)");
+  const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
   const currentStationInfo = document.getElementById("currentStationInfo");
   const themeToggle = document.querySelector(".theme-toggle");
   const shareButton = document.querySelector(".share-button");
@@ -36,14 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.querySelector(".search-btn");
   const pastSearchesList = document.getElementById("pastSearches");
   const tabsContainer = document.getElementById("tabs");
-  const tabsSidebar = document.getElementById("tabsSidebar");
-  const stationSidebar = document.getElementById("stationSidebar");
-  const sidebarToggles = document.querySelectorAll(".sidebar-toggle");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || 
-      !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || 
-      !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer || 
-      !tabsSidebar || !stationSidebar || sidebarToggles.length < 2) {
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer) {
     console.error("One of required DOM elements not found", {
       audio: !!audio,
       stationList: !!stationList,
@@ -60,10 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
       searchGenre: !!searchGenre,
       searchBtn: !!searchBtn,
       pastSearchesList: !!pastSearchesList,
-      tabsContainer: !!tabsContainer,
-      tabsSidebar: !!tabsSidebar,
-      stationSidebar: !!stationSidebar,
-      sidebarToggles: sidebarToggles.length
+      tabsContainer: !!tabsContainer
     });
     setTimeout(initializeApp, 100);
     return;
@@ -78,7 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePastSearches();
     populateSearchSuggestions();
     renderTabs();
-    initializeSidebars();
 
     shareButton.addEventListener("click", () => {
       const stationName = currentStationInfo.querySelector(".station-name").textContent || "Radio S O";
@@ -99,9 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
     importButton.addEventListener("click", () => importFileInput.click());
     importFileInput.addEventListener("change", importSettings);
 
-    document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", prevStation);
-    document.querySelector(".controls .control-btn:nth-child(4)").addEventListener("click", togglePlayPause);
-    document.querySelector(".controls .control-btn:nth-child(5)").addEventListener("click", nextStation);
+    document.querySelector(".controls .control-btn:nth-child(1)").addEventListener("click", prevStation);
+    document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", togglePlayPause);
+    document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", nextStation);
 
     searchBtn.addEventListener("click", () => {
       const query = searchQuery.value.trim();
@@ -134,71 +124,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.key === "Enter") searchBtn.click();
     });
 
-    function initializeSidebars() {
-      // Handle sidebar toggle buttons
-      sidebarToggles.forEach(toggle => {
-        toggle.addEventListener("click", () => {
-          const targetId = toggle.dataset.target;
-          toggleSidebar(targetId);
-        });
-      });
-
-      // Handle swipe gestures for mobile devices
-      let touchStartX = 0;
-      let touchEndX = 0;
-
-      document.addEventListener("touchstart", (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-      }, { passive: true });
-
-      document.addEventListener("touchend", (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-      }, { passive: true });
-
-      function handleSwipe() {
-        const swipeDistance = touchEndX - touchStartX;
-        const minSwipeDistance = 100; // Minimum distance for a swipe
-
-        // Swipe right to open tabs sidebar
-        if (swipeDistance > minSwipeDistance && touchStartX < window.innerWidth * 0.2) {
-          toggleSidebar("tabsSidebar");
-        }
-        // Swipe left to open station sidebar
-        else if (swipeDistance < -minSwipeDistance && touchStartX > window.innerWidth * 0.8) {
-          toggleSidebar("stationSidebar");
-        }
-      }
-
-      // Close sidebars when clicking outside
-      document.addEventListener("click", (e) => {
-        if (!tabsSidebar.contains(e.target) && !stationSidebar.contains(e.target) &&
-            !e.target.classList.contains("sidebar-toggle")) {
-          closeSidebars();
-        }
-      });
-    }
-
-    function toggleSidebar(sidebarId) {
-      const targetSidebar = document.getElementById(sidebarId);
-      const otherSidebar = sidebarId === "tabsSidebar" ? stationSidebar : tabsSidebar;
-
-      if (targetSidebar.classList.contains("open")) {
-        targetSidebar.classList.remove("open");
-      } else {
-        closeSidebars();
-        targetSidebar.classList.add("open");
-      }
-    }
-
-    function closeSidebars() {
-      tabsSidebar.classList.remove("open");
-      stationSidebar.classList.remove("open");
-    }
-
     function exportSettings() {
       const settings = {
-        selectedTheme: localStorage.getItem("selectedTheme") || "shadow-pulse",
+        selectedTheme: localStorage.getItem("selectedTheme") || "neon-pulse",
         customTabs: JSON.parse(localStorage.getItem("customTabs")) || [],
         userAddedStations: JSON.parse(localStorage.getItem("userAddedStations")) || {},
         favoriteStations: JSON.parse(localStorage.getItem("favoriteStations")) || [],
@@ -230,9 +158,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
           const validThemes = [
-            "shadow-pulse", "dark-abyss", "emerald-glow", "retro-wave",
-            "neon-pulse", "lime-surge", "flamingo-flash", "aqua-glow",
-            "aurora-haze", "starlit-amethyst", "lunar-frost"
+            "neon-pulse", "lime-surge", "flamingo-flash", "violet-vortex",
+            "aqua-glow", "cosmic-indigo", "mystic-jade", "aurora-haze",
+            "starlit-amethyst", "lunar-frost"
           ];
           if (settings.selectedTheme && validThemes.includes(settings.selectedTheme)) {
             localStorage.setItem("selectedTheme", settings.selectedTheme);
@@ -633,10 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tabsContainer.appendChild(addBtn);
 
       tabsContainer.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          switchTab(btn.dataset.tab);
-          closeSidebars(); // Close sidebar after selecting a tab
-        });
+        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
         if (customTabs.includes(btn.dataset.tab)) {
           let longPressTimer;
           btn.addEventListener("pointerdown", () => {
@@ -697,7 +622,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTabs();
         switchTab(tabName);
         closeModal();
-        closeSidebars();
       };
 
       const keypressHandler = (e) => {
@@ -757,7 +681,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (currentTab === tab) switchTab(newName);
         renderTabs();
         closeModal();
-        closeSidebars();
       };
 
       const deleteTabHandler = () => {
@@ -774,7 +697,6 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           renderTabs();
           closeModal();
-          closeSidebars();
         }
       };
 
@@ -790,105 +712,87 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const themes = {
-      "shadow-pulse": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#00E676",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #00B248, #00E676)",
-        shadow: "rgba(0, 230, 118, 0.3)"
-      },
-      "dark-abyss": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#AA00FF",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #6A1B9A, #AA00FF)",
-        shadow: "rgba(170, 0, 255, 0.3)"
-      },
-      "emerald-glow": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#2EC4B6",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #1B998B, #2EC4B6)",
-        shadow: "rgba(46, 196, 182, 0.3)"
-      },
-      "retro-wave": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#FF69B4",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #C71585, #FF69B4)",
-        shadow: "rgba(255, 105, 180, 0.3)"
-      },
       "neon-pulse": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
         accent: "#00F0FF",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #0077B6, #00F0FF)",
-        shadow: "rgba(0, 240, 255, 0.3)"
+        text: "#F0F0F0",
+        accentGradient: "#003C4B"
       },
       "lime-surge": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
         accent: "#B2FF59",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #00B248, #B2FF59)",
-        shadow: "rgba(178, 255, 89, 0.3)"
+        text: "#E8F5E9",
+        accentGradient: "#2E4B2F"
       },
       "flamingo-flash": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
         accent: "#FF4081",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #C71585, #FF4081)",
-        shadow: "rgba(255, 64, 129, 0.3)"
+        text: "#FCE4EC",
+        accentGradient: "#4B1A2E"
+      },
+      "violet-vortex": {
+        bodyBg: "#121212",
+        containerBg: "#1A1A1A",
+        accent: "#7C4DFF",
+        text: "#EDE7F6",
+        accentGradient: "#2E1A47"
       },
       "aqua-glow": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
         accent: "#26C6DA",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #0077B6, #26C6DA)",
-        shadow: "rgba(38, 198, 218, 0.3)"
+        text: "#B2EBF2",
+        accentGradient: "#1A3C4B"
+      },
+      "cosmic-indigo": {
+        bodyBg: "#121212",
+        containerBg: "#1A1A1A",
+        accent: "#3F51B5",
+        text: "#BBDEFB",
+        accentGradient: "#1A2A5A"
+      },
+      "mystic-jade": {
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
+        accent: "#26A69A",
+        text: "#B2DFDB",
+        accentGradient: "#1A3C4B"
       },
       "aurora-haze": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#121212",
+        containerBg: "#1A1A1A",
         accent: "#64FFDA",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #1B998B, #64FFDA)",
-        shadow: "rgba(100, 255, 218, 0.3)"
+        text: "#E0F7FA",
+        accentGradient: "#1A4B4B"
       },
       "starlit-amethyst": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
         accent: "#B388FF",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #6A1B9A, #B388FF)",
-        shadow: "rgba(179, 136, 255, 0.3)"
+        text: "#E1BEE7",
+        accentGradient: "#2E1A47"
       },
       "lunar-frost": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#F5F7FA",
+        containerBg: "#FFFFFF",
         accent: "#40C4FF",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #0077B6, #40C4FF)",
-        shadow: "rgba(64, 196, 255, 0.3)"
+        text: "#212121",
+        accentGradient: "#B3E5FC"
       }
     };
-    let currentTheme = localStorage.getItem("selectedTheme") || "shadow-pulse";
+    let currentTheme = localStorage.getItem("selectedTheme") || "neon-pulse";
     if (!themes[currentTheme]) {
-      currentTheme = "shadow-pulse";
+      currentTheme = "neon-pulse";
       localStorage.setItem("selectedTheme", currentTheme);
     }
 
     function applyTheme(theme) {
       if (!themes[theme]) {
-        console.warn(`Theme ${theme} not found, using 'shadow-pulse'`);
-        theme = "shadow-pulse";
+        console.warn(`Theme ${theme} not found, using 'neon-pulse'`);
+        theme = "neon-pulse";
         localStorage.setItem("selectedTheme", theme);
       }
       const root = document.documentElement;
@@ -897,7 +801,6 @@ document.addEventListener("DOMContentLoaded", () => {
       root.style.setProperty("--accent", themes[theme].accent);
       root.style.setProperty("--text", themes[theme].text);
       root.style.setProperty("--accent-gradient", themes[theme].accentGradient);
-      root.style.setProperty("--shadow", themes[theme].shadow);
       localStorage.setItem("selectedTheme", theme);
       currentTheme = theme;
       document.documentElement.setAttribute("data-theme", theme);
@@ -909,9 +812,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function toggleTheme() {
       const themesOrder = [
-        "shadow-pulse", "dark-abyss", "emerald-glow", "retro-wave",
-        "neon-pulse", "lime-surge", "flamingo-flash", "aqua-glow",
-        "aurora-haze", "starlit-amethyst", "lunar-frost"
+        "neon-pulse", "lime-surge", "flamingo-flash", "violet-vortex",
+        "aqua-glow", "cosmic-indigo", "mystic-jade", "aurora-haze",
+        "starlit-amethyst", "lunar-frost"
       ];
       const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
       applyTheme(nextTheme);
@@ -994,8 +897,8 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("Device offline: skipping playback");
           return;
         }
-        if (!stationItems?.length || currentIndex >= stationItems.length) {
-          console.log("Skip tryAutoPlay: no valid station items", { hasStationItems: !!stationItems?.length, isIndexValid: currentIndex < stationItems.length });
+        if (!intendedPlaying || !stationItems?.length || currentIndex >= stationItems.length) {
+          console.log("Skip tryAutoPlay: invalid state", { intendedPlaying, hasStationItems: !!stationItems?.length, isIndexValid: currentIndex < stationItems.length });
           document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
           return;
         }
@@ -1105,19 +1008,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (tab === "search") populateSearchSuggestions();
       updateStationList();
       renderTabs();
-      if (stationItems?.length && currentIndex < stationItems.length) {
+      if (stationItems?.length && currentIndex < stationItems.length && intendedPlaying) {
         const normalizedCurrentUrl = normalizeUrl(stationItems[currentIndex].dataset.value);
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
           console.log("switchTab: Starting playback after tab change");
           isAutoPlayPending = false;
-          intendedPlaying = true; // Ensure playback is attempted
           debouncedTryAutoPlay();
         } else {
           console.log("switchTab: Skip playback, station already playing");
         }
       } else {
-        console.log("switchTab: Skip playback, no valid station items");
+        console.log("switchTab: Skip playback, invalid state");
       }
     }
 
@@ -1176,7 +1078,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (item && !item.classList.contains("empty")) {
           currentIndex = Array.from(stationItems).indexOf(item);
           changeStation(currentIndex);
-          closeSidebars(); // Close station sidebar after selecting a station
         }
         if (favoriteBtn) {
           e.stopPropagation();
@@ -1189,6 +1090,10 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
       };
+
+      if (stationItems.length && currentIndex < stationItems.length) {
+        changeStation(currentIndex);
+      }
     }
 
     function toggleFavorite(stationName) {
@@ -1239,19 +1144,18 @@ document.addEventListener("DOMContentLoaded", () => {
       currentIndex = index;
       updateCurrentStation(item);
       localStorage.setItem(`lastStation_${currentTab}`, index);
-      if (stationItems.length && isValidUrl(item.dataset.value)) {
+      if (intendedPlaying) {
         const normalizedCurrentUrl = normalizeUrl(item.dataset.value);
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
           console.log("changeStation: Starting playback after station change");
           isAutoPlayPending = false;
-          intendedPlaying = true; // Ensure playback is attempted
           debouncedTryAutoPlay();
         } else {
           console.log("changeStation: Skip playback, station already playing");
         }
       } else {
-        console.log("changeStation: Skip playback, invalid URL or no station items");
+        console.log("changeStation: Skip playback, invalid state");
       }
     }
 
@@ -1478,19 +1382,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     applyTheme(currentTheme);
     loadStations();
-    if (stationItems?.length && currentIndex < stationItems.length) {
+    if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
       const normalizedCurrentUrl = normalizeUrl(stationItems[currentIndex].dataset.value);
       const normalizedAudioSrc = normalizeUrl(audio.src);
       if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
         console.log("initializeApp: Starting playback after initialization");
         isAutoPlayPending = false;
-        intendedPlaying = true; // Ensure playback is attempted
         debouncedTryAutoPlay();
       } else {
         console.log("initializeApp: Skip playback, station already playing");
       }
     } else {
-      console.log("initializeApp: Skip playback, no valid station items");
+      console.log("initializeApp: Skip playback, invalid state");
     }
   }
 });

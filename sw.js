@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v75111';
+const CACHE_NAME = 'radio-cache-v111.1.20250974';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -9,8 +9,7 @@ self.addEventListener('install', (event) => {
         '/styles.css',
         '/script.js',
         '/stations.json',
-        '/manifest.json',
-        '/ping.txt'
+        '/manifest.json'
       ]).then(() => {
         caches.keys().then((cacheNames) => {
           return Promise.all(cacheNames.map((cacheName) => {
@@ -63,70 +62,27 @@ self.addEventListener('activate', (event) => {
 
 // Моніторинг стану мережі
 let wasOnline = navigator.onLine;
-let checkInterval = null;
 
-function startNetworkCheck() {
-  if (!checkInterval) {
-    checkInterval = setInterval(() => {
-      fetch("/ping.txt", { method: "HEAD", cache: "no-store" })
-        .then(() => {
-          if (!wasOnline) {
-            wasOnline = true;
-            self.clients.matchAll().then(clients => {
-              clients.forEach(client => {
-                client.postMessage({ type: "NETWORK_STATUS", online: true });
-              });
-            });
-            stopNetworkCheck(); // Stop polling once online
-          }
-        })
-        .catch(error => {
-          if (wasOnline) {
-            wasOnline = false;
-            self.clients.matchAll().then(clients => {
-              clients.forEach(client => {
-                client.postMessage({ type: "NETWORK_STATUS", online: false });
-              });
-            });
-          }
+setInterval(() => {
+  fetch("https://www.google.com", { method: "HEAD", mode: "no-cors" })
+    .then(() => {
+      if (!wasOnline) {
+        wasOnline = true;
+        self.clients.matchAll().then(clients => {
+          clients.forEach(client => {
+            client.postMessage({ type: "NETWORK_STATUS", online: true });
+          });
         });
-    }, 2000); // Перевірка кожні 2 секунди
-  }
-}
-
-function stopNetworkCheck() {
-  if (checkInterval) {
-    clearInterval(checkInterval);
-    checkInterval = null;
-  }
-}
-
-self.addEventListener('online', () => {
-  if (!wasOnline) {
-    wasOnline = true;
-    self.clients.matchAll().then(clients => {
-      clients.forEach(client => {
-        client.postMessage({ type: "NETWORK_STATUS", online: true });
-      });
+      }
+    })
+    .catch(error => {
+      if (wasOnline) {
+        wasOnline = false;
+        self.clients.matchAll().then(clients => {
+          clients.forEach(client => {
+            client.postMessage({ type: "NETWORK_STATUS", online: false });
+          });
+        });
+      }
     });
-    stopNetworkCheck(); // Stop polling when online
-  }
-});
-
-self.addEventListener('offline', () => {
-  if (wasOnline) {
-    wasOnline = false;
-    self.clients.matchAll().then(clients => {
-      clients.forEach(client => {
-        client.postMessage({ type: "NETWORK_STATUS", online: false });
-      });
-    });
-    startNetworkCheck(); // Start polling when offline
-  }
-});
-
-// Start initial check if already offline
-if (!navigator.onLine && wasOnline) {
-  wasOnline = false;
-  startNetworkCheck();
-}
+}, 2000); // Збільшено інтервал до 2 секунд
