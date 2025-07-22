@@ -1,0 +1,63 @@
+/* Стилі для скелетного завантаження */
+.station-item.skeleton {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  margin: 8px 10px;
+  border-radius: 8px;
+  background-color: var(--container-bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: pulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.station-item.skeleton .station-name {
+  flex: 1;
+  height: 20px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 100%);
+  border-radius: 4px;
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: 200px 0;
+  }
+}
+
+/* Адаптивність для мобільних пристроїв */
+@media (max-width: 600px) {
+  .station-item.skeleton {
+    padding: 8px 12px;
+    margin: 6px 8px;
+  }
+
+  .station-item.skeleton .station-name {
+    height: 16px;
+  }
+}
+
+/* Стилі для сумісності з темами */
+.station-item.skeleton {
+  border: 1px solid var(--accent);
+}
+
+.station-item.skeleton .station-name {
+  background: linear-gradient(90deg, var(--accent) 0%, rgba(255, 255, 255, 0.2) 50%, var(--accent) 100%);
+}

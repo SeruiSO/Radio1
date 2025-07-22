@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v277524';
+const CACHE_NAME = 'radio-cache-v2786425';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -10,10 +10,18 @@ self.addEventListener('install', (event) => {
         '/script.js',
         '/stations.json',
         '/manifest.json',
-        '/ping.txt'
-      ]);
-    }).catch((error) => {
-      console.error('Failed to open cache or add resources:', error);
+        '/ping.txt',
+        '/assets/icons/feather-sprite.svg', // Для іконок feather
+        '/assets/styles/skeleton.css'       // Новий файл для стилів скелетного завантаження
+      ]).then(() => {
+        return caches.keys().then((cacheNames) => {
+          return Promise.all(cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+          }));
+        });
+      });
     })
   );
 });
@@ -22,18 +30,21 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (event.request.url.endsWith('stations.json')) {
-        return fetch(event.request, { cache: 'no-store', signal: new AbortController().signal })
-          .then((networkResponse) => {
-            if (networkResponse.ok) {
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, networkResponse.clone());
-              });
-            }
-            return networkResponse;
-          })
-          .catch(() => response || caches.match('/stations.json'));
+        return fetch(event.request, { cache: 'no-store', signal: new AbortController().signal }).then((networkResponse) => {
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+          });
+          return networkResponse;
+        }).catch(() => caches.match('/index.html'));
       }
-      return response || fetch(event.request).catch(() => caches.match('/index.html'));
+      return response || fetch(event.request).then((networkResponse) => {
+        if (event.request.method === 'GET' && !event.request.url.includes('radio-browser.info')) {
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+          });
+        }
+        return networkResponse;
+      }).catch(() => caches.match('/index.html'));
     })
   );
 });
@@ -48,17 +59,14 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).catch((error) => {
-      console.error('Failed to clean up old caches:', error);
-    }).finally(() => {
-      stopNetworkCheck();
+    }).then(() => {
+      self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({ type: 'CACHE_UPDATED', cacheVersion: CACHE_NAME });
+        });
+      });
     })
   );
-  self.clients.matchAll().then((clients) => {
-    clients.forEach((client) => {
-      client.postMessage({ type: 'CACHE_UPDATED', cacheVersion: CACHE_NAME });
-    });
-  });
 });
 
 // Моніторинг стану мережі
@@ -80,8 +88,7 @@ function startNetworkCheck() {
             stopNetworkCheck();
           }
         })
-        .catch(error => {
-          console.error('Network check failed:', error);
+        .catch(() => {
           if (wasOnline) {
             wasOnline = false;
             self.clients.matchAll().then(clients => {
@@ -91,7 +98,7 @@ function startNetworkCheck() {
             });
           }
         });
-    }, 5000);
+    }, 3000); // Збільшено інтервал до 3 секунд для зменшення навантаження
   }
 }
 
@@ -126,7 +133,7 @@ self.addEventListener('offline', () => {
   }
 });
 
-// Start initial check if already offline
+// Початкова перевірка, якщо вже офлайн
 if (!navigator.onLine && wasOnline) {
   wasOnline = false;
   startNetworkCheck();

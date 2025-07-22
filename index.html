@@ -41,27 +41,32 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#00F0FF">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#00E676">
   <title>Radio S O</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
+  <script src="https://unpkg.com/feather-icons"></script>
 </head>
-<body>
+<body data-theme="shadow-pulse">
+  <button class="theme-toggle"><i data-feather="moon"></i></button>
+  <button class="share-button"><i data-feather="share-2"></i></button>
+  <button class="sleep-timer-button"><i data-feather="clock"></i></button>
+  <button class="export-button"><i data-feather="download"></i></button>
+  <button class="import-button"><i data-feather="upload"></i></button>
+  <input type="file" id="importFileInput" accept=".json">
+
   <div class="container">
-    <button class="theme-toggle" aria-label="Змінити тему">🌙</button>
-    <button class="share-button" aria-label="Поділитися">📤</button>
-    <button class="export-button" aria-label="Експортувати станції">💾</button>
-    <button class="import-button" aria-label="Імпортувати станції">📥</button>
-    <input type="file" id="importFileInput" accept=".json" aria-hidden="true">
-    <h1>Radio S O</h1>
+    <h1>🎧 Radio Music</h1>
+    <audio id="audioPlayer"></audio>
+
     <div id="currentStationInfo">
       <div class="station-info-content">
         <div class="station-icon">🎵</div>
         <div class="station-text">
-          <span class="station-name">No station selected</span>
-          <span class="station-genre"></span>
-          <span class="station-country"></span>
+          <div class="station-name">Обирайте станцію</div>
+          <div class="station-genre">жанр: -</div>
+          <div class="station-country">країна: -</div>
         </div>
         <div class="wave-visualizer">
           <div class="wave-line"></div>
@@ -72,36 +77,94 @@
           <div class="wave-line"></div>
           <div class="wave-line"></div>
           <div class="wave-line"></div>
-          <div class="wave-line"></div>
         </div>
       </div>
     </div>
-    <div id="searchInput">
-      <input id="searchQuery" type="text" placeholder="Search by name..." list="stationNames">
-      <input id="searchCountry" type="text" placeholder="Search by country..." list="countries">
-      <input id="searchGenre" type="text" placeholder="Search by genre..." list="genres">
-      <button class="search-btn" aria-label="Пошук">Search</button>
-    </div>
-    <div class="station-list" id="stationList">
-      <div class="station-item empty">Loading...</div>
-    </div>
+
+    <div class="station-list" id="stationList"></div>
+
     <div class="tabs-wrapper">
       <div class="tabs" id="tabs">
-        <!-- Tabs will be populated dynamically -->
+        <button class="tab-btn" data-tab="best">Best</button>
+        <button class="tab-btn" data-tab="techno">Techno</button>
+        <button class="tab-btn" data-tab="trance">Trance</button>
+        <button class="tab-btn" data-tab="ukraine">UA</button>
+        <button class="tab-btn" data-tab="pop">Pop</button>
+        <button class="tab-btn" data-tab="search">Search</button>
+        <button class="add-tab-btn">+</button>
       </div>
     </div>
+
+    <div id="searchInput">
+      <input type="text" id="searchQuery" list="pastSearches" placeholder="Назва станції">
+      <datalist id="pastSearches"></datalist>
+      <input type="text" id="searchCountry" list="suggestedCountries" placeholder="Країна">
+      <datalist id="suggestedCountries"></datalist>
+      <input type="text" id="searchGenre" list="suggestedGenres" placeholder="Жанр">
+      <datalist id="suggestedGenres"></datalist>
+      <button class="search-btn"><i data-feather="search"></i> Пошук</button>
+    </div>
+
     <div class="controls-container">
       <div class="controls">
-        <button class="control-btn" aria-label="Попередня станція">⏮</button>
-        <button class="control-btn" aria-label="Відтворити або призупинити">▶</button>
-        <button class="control-btn" aria-label="Наступна станція">⏭</button>
+        <button class="control-btn"><i data-feather="skip-back"></i></button>
+        <button class="control-btn"><i data-feather="play"></i></button>
+        <button class="control-btn"><i data-feather="skip-forward"></i></button>
+        <div class="volume-control">
+          <span class="volume-icon"><i data-feather="volume-2"></i></span>
+          <div class="volume-slider">
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.9">
+          </div>
+        </div>
       </div>
     </div>
-    <div id="network-status" style="display: none; position: fixed; top: 10px; right: 10px; padding: 10px; background: var(--container-bg); border: 1px solid var(--accent); border-radius: 8px;">
-      Network offline
+
+    <div class="mini-player">
+      <span class="station-name">Обирайте станцію</span>
+      <button class="control-btn"><i data-feather="play"></i></button>
+    </div>
+
+    <div class="offline-message">Відсутнє підключення до мережі</div>
+
+    <div class="new-tab-modal modal-overlay" style="display: none;">
+      <div class="modal">
+        <h2>Створити нову вкладку</h2>
+        <input type="text" id="newTabName" placeholder="Назва вкладки (до 10 символів)">
+        <div class="modal-tabs">
+          <button id="createTabBtn">Створити</button>
+          <button class="modal-cancel-btn">Відміна</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="edit-tab-modal modal-overlay" style="display: none;">
+      <div class="modal">
+        <h2>Дії з вкладкою</h2>
+        <input type="text" id="renameTabName" placeholder="Нова назва вкладки">
+        <div class="modal-tabs">
+          <button id="renameTabBtn">Перейменувати</button>
+          <button id="deleteTabBtn">Видалити</button>
+          <button class="modal-cancel-btn">Відміна</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sleep-timer-modal modal-overlay" style="display: none;">
+      <div class="modal">
+        <h2>Таймер сну</h2>
+        <div class="modal-tabs">
+          <button class="sleep-timer-option" data-minutes="15">15 хвилин</button>
+          <button class="sleep-timer-option" data-minutes="30">30 хвилин</button>
+          <button class="sleep-timer-option" data-minutes="60">60 хвилин</button>
+          <button class="modal-cancel-btn">Відміна</button>
+        </div>
+      </div>
     </div>
   </div>
-  <audio id="audio"></audio>
+
   <script src="script.js"></script>
+  <script>
+    feather.replace();
+  </script>
 </body>
 </html>
