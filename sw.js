@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v2786425';
+const CACHE_NAME = 'radio-cache-v2773796';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -11,8 +11,11 @@ self.addEventListener('install', (event) => {
         '/stations.json',
         '/manifest.json',
         '/ping.txt',
-        '/assets/icons/feather-sprite.svg', // Для іконок feather
-        '/assets/styles/skeleton.css'       // Новий файл для стилів скелетного завантаження
+        '/assets/icons/feather-sprite.svg',
+        '/assets/styles/skeleton.css',
+        '/icon-192.png',
+        '/icon-512.png',
+        '/icon-96.png'
       ]).then(() => {
         return caches.keys().then((cacheNames) => {
           return Promise.all(cacheNames.map((cacheName) => {
@@ -69,7 +72,6 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Моніторинг стану мережі
 let wasOnline = navigator.onLine;
 let checkInterval = null;
 
@@ -98,7 +100,7 @@ function startNetworkCheck() {
             });
           }
         });
-    }, 3000); // Збільшено інтервал до 3 секунд для зменшення навантаження
+    }, 3000);
   }
 }
 
@@ -133,7 +135,6 @@ self.addEventListener('offline', () => {
   }
 });
 
-// Початкова перевірка, якщо вже офлайн
 if (!navigator.onLine && wasOnline) {
   wasOnline = false;
   startNetworkCheck();
