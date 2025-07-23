@@ -1,4 +1,4 @@
-/* Updated on July 23, 2025 at 04:06 PM EEST */
+/* Updated on July 23, 2025 at 04:18 PM EEST */
 :root {
   --body-bg: #000000;
   --container-bg: #000000;
@@ -313,12 +313,12 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 50px);
+  max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px); /* Зменшено на 80px */
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
   border-radius: 12px;
-  margin: 2px 0; /* Зменшено з 4px до 2px */
+  margin: 2px 0;
   padding: 8px 2%;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
@@ -441,9 +441,9 @@ h1 {
 
 .tabs-wrapper {
   overflow-x: auto;
-  margin: 2px 0; /* Зменшено з 5px до 2px */
+  margin: 2px 0;
   position: sticky;
-  bottom: calc(123px + 5px + env(safe-area-inset-bottom)); /* Додано 5px відступу від controls */
+  bottom: calc(140px + 10px + env(safe-area-inset-bottom)); /* Піднято вище з 5px до 10px відступу */
   z-index: 10;
   background: var(--container-bg);
   padding: 0 2%;
@@ -760,8 +760,8 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 50px);
-    margin: 2px 0; /* Зменшено з 4px до 2px */
+    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px); /* Зменшено на 80px */
+    margin: 2px 0;
     padding: 6px 2%;
     border-width: 1px;
   }
@@ -809,9 +809,9 @@ datalist {
   }
 
   .tabs-wrapper {
-    margin: 2px 0; /* Зменшено з 3px до 2px */
+    margin: 2px 0;
     padding: 0 2%;
-    bottom: calc(113px + 5px + env(safe-area-inset-bottom)); /* Додано 5px відступу від controls */
+    bottom: calc(130px + 10px + env(safe-area-inset-bottom)); /* Піднято вище з 5px до 10px відступу */
   }
 
   .tab-btn,
@@ -907,7 +907,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 50px);
+    max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px); /* Зменшено на 80px */
   }
 
   .controls-container {
@@ -915,7 +915,7 @@ datalist {
   }
 
   .tabs-wrapper {
-    bottom: calc(123px + 5px + env(safe-area-inset-bottom)); /* Додано 5px відступу від controls */
+    bottom: calc(140px + 10px + env(safe-area-inset-bottom)); /* Піднято вище з 5px до 10px відступу */
   }
 }
 
@@ -925,7 +925,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 50px);
+    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px); /* Зменшено на 80px */
   }
 
   .controls-container {
@@ -933,7 +933,7 @@ datalist {
   }
 
   .tabs-wrapper {
-    bottom: calc(113px + 5px + env(safe-area-inset-bottom)); /* Додано 5px відступу від controls */
+    bottom: calc(130px + 10px + env(safe-area-inset-bottom)); /* Піднято вище з 5px до 10px відступу */
   }
 
   .control-btn {
