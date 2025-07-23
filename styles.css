@@ -1,4 +1,4 @@
-/* Updated on July 23, 2025 at 04:18 PM EEST */
+/* Updated on July 23, 2025 at 04:50 PM EEST */
 :root {
   --body-bg: #000000;
   --container-bg: #000000;
@@ -313,7 +313,7 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px); /* Зменшено на 80px */
+  max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px);
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
@@ -441,9 +441,11 @@ h1 {
 
 .tabs-wrapper {
   overflow-x: auto;
+  overflow-y: hidden; /* Додано для видалення вертикальної прокрутки */
+  height: 50px; /* Фіксована висота для одного рядка */
   margin: 2px 0;
   position: sticky;
-  bottom: calc(140px + 10px + env(safe-area-inset-bottom)); /* Піднято вище з 5px до 10px відступу */
+  bottom: calc(140px + 10px + env(safe-area-inset-bottom));
   z-index: 10;
   background: var(--container-bg);
   padding: 0 2%;
@@ -760,7 +762,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px); /* Зменшено на 80px */
+    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px);
     margin: 2px 0;
     padding: 6px 2%;
     border-width: 1px;
@@ -809,9 +811,12 @@ datalist {
   }
 
   .tabs-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden; /* Додано для видалення вертикальної прокрутки */
+    height: 50px; /* Фіксована висота для одного рядка */
     margin: 2px 0;
     padding: 0 2%;
-    bottom: calc(130px + 10px + env(safe-area-inset-bottom)); /* Піднято вище з 5px до 10px відступу */
+    bottom: calc(130px + 10px + env(safe-area-inset-bottom));
   }
 
   .tab-btn,
@@ -907,7 +912,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px); /* Зменшено на 80px */
+    max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px);
   }
 
   .controls-container {
@@ -915,7 +920,10 @@ datalist {
   }
 
   .tabs-wrapper {
-    bottom: calc(140px + 10px + env(safe-area-inset-bottom)); /* Піднято вище з 5px до 10px відступу */
+    overflow-x: auto;
+    overflow-y: hidden; /* Додано для видалення вертикальної прокрутки */
+    height: 50px; /* Фіксована висота для одного рядка */
+    bottom: calc(140px + 10px + env(safe-area-inset-bottom));
   }
 }
 
@@ -925,7 +933,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px); /* Зменшено на 80px */
+    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px);
   }
 
   .controls-container {
@@ -933,7 +941,10 @@ datalist {
   }
 
   .tabs-wrapper {
-    bottom: calc(130px + 10px + env(safe-area-inset-bottom)); /* Піднято вище з 5px до 10px відступу */
+    overflow-x: auto;
+    overflow-y: hidden; /* Додано для видалення вертикальної прокрутки */
+    height: 50px; /* Фіксована висота для одного рядка */
+    bottom: calc(130px + 10px + env(safe-area-inset-bottom));
   }
 
   .control-btn {
