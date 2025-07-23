@@ -207,7 +207,7 @@ h1 {
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: left;
-  height: 140px;
+  height: 126px;
   display: flex;
   align-items: center;
   position: sticky;
@@ -257,8 +257,8 @@ h1 {
 }
 
 .station-icon {
-  width: 134px;
-  height: 134px;
+  width: 120px;
+  height: 120px;
   order: 1;
   font-size: 80px;
   display: flex;
@@ -443,7 +443,7 @@ h1 {
   overflow-x: auto;
   margin: 5px 0;
   position: sticky;
-  bottom: 0;
+  top: 130px;
   z-index: 10;
   background: var(--container-bg);
   padding: 0 2%;
@@ -756,7 +756,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 140px - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+    max-height: calc(100vh - 126px - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
     margin: 4px 0;
     padding: 6px 2%;
     border-width: 1px;
@@ -807,6 +807,7 @@ datalist {
   .tabs-wrapper {
     margin: 3px 0;
     padding: 0 2%;
+    top: 110px;
   }
 
   .tab-btn,
@@ -828,7 +829,7 @@ datalist {
 
   #currentStationInfo {
     padding: 10px 2%;
-    height: 120px;
+    height: 126px;
   }
 
   .station-info-content {
@@ -840,8 +841,8 @@ datalist {
   }
 
   .station-icon {
-    width: 114px;
-    height: 114px;
+    width: 120px;
+    height: 120px;
     font-size: 70px;
     padding: 3px;
   }
@@ -906,6 +907,6 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 140px - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+    max-height: calc(100vh - 126px - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
   }
 }
