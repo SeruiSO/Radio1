@@ -201,13 +201,13 @@ h1 {
 
 #currentStationInfo {
   background: var(--container-bg);
-  padding: 15px;
+  padding: 10px;
   border-radius: 12px;
   margin: 4px 0;
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: left;
-  height: 116px;
+  height: 90px; /* Зменшено з 116px до 90px */
   display: flex;
   align-items: center;
   position: sticky;
@@ -238,7 +238,7 @@ h1 {
 }
 
 #currentStationInfo .station-name {
-  font-size: 16px;
+  font-size: 14px; /* Зменшено для адаптації */
   font-weight: 600;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -250,17 +250,17 @@ h1 {
 
 #currentStationInfo .station-genre,
 #currentStationInfo .station-country {
-  font-size: 14px;
+  font-size: 12px; /* Зменшено для адаптації */
   font-weight: 400;
   opacity: 0.85;
   margin-top: 4px;
 }
 
 .station-icon {
-  width: 110px;
-  height: 110px;
+  width: 80px; /* Зменшено з 110px */
+  height: 80px; /* Зменшено з 110px */
   order: 1;
-  font-size: 80px;
+  font-size: 60px; /* Зменшено з 80px */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,15 +276,15 @@ h1 {
   justify-content: center;
   margin-left: auto;
   order: 3;
-  width: 100px;
-  height: 60px;
+  width: 80px; /* Зменшено з 100px */
+  height: 50px; /* Зменшено з 60px */
   position: relative;
   overflow: hidden;
 }
 
 .wave-line {
   position: absolute;
-  width: 8px;
+  width: 6px; /* Зменшено з 8px */
   background: var(--accent-gradient);
   border-radius: 4px;
   bottom: 0;
@@ -313,7 +313,7 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 116px - 97px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 8px - 36px);
+  max-height: calc(100vh - 90px - 50px - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px); /* Оновлено */
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
@@ -440,13 +440,14 @@ h1 {
 }
 
 .tabs-wrapper {
-  overflow-x: auto;
-  margin: 2px 0;
   position: sticky;
-  bottom: calc(env(safe-area-inset-bottom) + 100px);
+  bottom: calc(90px + env(safe-area-inset-bottom)); /* Оновлено для sticky над controls */
   z-index: 10;
   background: var(--container-bg);
   padding: 0 2%;
+  margin: 2px 0;
+  overflow-x: auto;
+  transition: background 0.3s ease;
 }
 
 .tabs-wrapper::-webkit-scrollbar {
@@ -579,14 +580,14 @@ h1 {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  max-width: 340px;
+  max-width: 260px; /* Зменшено з 340px */
   margin: 0 auto;
 }
 
 .control-btn {
-  width: 100px;
-  height: 100px;
-  font-size: 36px;
+  width: 80px; /* Зменшено з 100px */
+  height: 80px; /* Зменшено з 100px */
+  font-size: 32px; /* Зменшено з 36px */
   background: var(--container-bg);
   color: var(--text);
   border: 1px solid var(--accent);
@@ -745,14 +746,14 @@ datalist {
   }
 
   .control-btn {
-    width: 90px;
-    height: 90px;
-    font-size: 32px;
+    width: 70px; /* Зменшено з 90px */
+    height: 70px; /* Зменшено з 90px */
+    font-size: 28px; /* Зменшено з 32px */
     border: 1px solid var(--accent);
   }
 
   .controls {
-    max-width: 300px;
+    max-width: 230px; /* Зменшено з 300px */
   }
 
   .controls-container {
@@ -760,7 +761,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 116px - 93px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 8px - 32px);
+    max-height: calc(100vh - 90px - 50px - 80px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px); /* Оновлено */
     margin: 4px 0;
     padding: 6px 2%;
     border-width: 1px;
@@ -809,10 +810,11 @@ datalist {
   }
 
   .tabs-wrapper {
+    position: sticky;
+    bottom: calc(80px + env(safe-area-inset-bottom)); /* Оновлено для sticky */
     margin: 2px 0;
     padding: 0 2%;
-    bottom: calc(env(safe-area-inset-bottom) + 90px);
-    position: sticky;
+    z-index: 10;
   }
 
   .tab-btn,
@@ -828,13 +830,9 @@ datalist {
     font-size: 16px;
   }
 
-  .tabs {
-    gap: 4px;
-  }
-
   #currentStationInfo {
-    padding: 10px 2%;
-    height: 116px;
+    padding: 8px 2%;
+    height: 80px; /* Зменшено з 116px */
   }
 
   .station-info-content {
@@ -842,19 +840,19 @@ datalist {
   }
 
   .station-icon {
-    width: 110px;
-    height: 110px;
-    font-size: 70px;
+    width: 70px; /* Зменшено з 110px */
+    height: 70px; /* Зменшено з 110px */
+    font-size: 50px; /* Зменшено з 70px */
     padding: 3px;
   }
 
   .wave-visualizer {
-    width: 80px;
-    height: 50px;
+    width: 70px; /* Зменшено з 80px */
+    height: 45px; /* Зменшено з 50px */
   }
 
   .wave-line {
-    width: 6px;
+    width: 5px; /* Зменшено з 6px */
   }
 
   #searchInput {
@@ -908,7 +906,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 116px - 97px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 8px - 36px);
+    max-height: calc(100vh - 90px - 50px - 90px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px); /* Оновлено */
   }
 
   .controls-container {
@@ -916,7 +914,63 @@ datalist {
   }
 
   .tabs-wrapper {
-    bottom: calc(env(safe-area-inset-bottom) + 100px);
     position: sticky;
+    bottom: calc(90px + env(safe-area-inset-bottom)); /* Оновлено для sticky */
+    z-index: 10;
+  }
+}
+
+@media (max-height: 600px) {
+  .container {
+    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+  }
+
+  .station-list {
+    max-height: calc(100vh - 80px - 45px - 80px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px); /* Оновлено для малих екранів */
+  }
+
+  #currentStationInfo {
+    height: 80px; /* Зменшено для малих екранів */
+  }
+
+  .station-icon {
+    width: 70px;
+    height: 70px;
+    font-size: 50px;
+  }
+
+  .wave-visualizer {
+    width: 70px;
+    height: 45px;
+  }
+
+  .wave-line {
+    width: 5px;
+  }
+
+  .control-btn {
+    width: 70px;
+    height: 70px;
+    font-size: 28px;
+  }
+
+  .controls {
+    max-width: 230px;
+  }
+
+  .tabs-wrapper {
+    bottom: calc(80px + env(safe-area-inset-bottom)); /* Оновлено для малих екранів */
+  }
+
+  .tab-btn,
+  .add-tab-btn {
+    min-width: 60px;
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .add-tab-btn {
+    width: 36px;
+    font-size: 16px;
   }
 }
