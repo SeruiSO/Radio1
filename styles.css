@@ -313,7 +313,7 @@ h1 {
 }
 
 .station-list {
-  max-height: 55vh;
+  max-height: calc(100vh - 100px - 121px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 8px - 36px);
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
@@ -760,7 +760,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 111px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+    max-height: calc(100vh - 100px - 111px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 8px - 32px);
     margin: 4px 0;
     padding: 6px 2%;
     border-width: 1px;
@@ -907,7 +907,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 111px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+    max-height: calc(100vh - 100px - 121px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 8px - 36px);
   }
 
   .controls-container {
