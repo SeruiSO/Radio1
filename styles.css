@@ -207,7 +207,7 @@ h1 {
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: left;
-  height: 116px;
+  height: 100px;
   display: flex;
   align-items: center;
   position: sticky;
@@ -257,8 +257,8 @@ h1 {
 }
 
 .station-icon {
-  width: 110px;
-  height: 110px;
+  width: 94px;
+  height: 94px;
   order: 1;
   font-size: 80px;
   display: flex;
@@ -443,7 +443,7 @@ h1 {
   overflow-x: auto;
   margin: 5px 0;
   position: sticky;
-  bottom: calc(env(safe-area-inset-bottom) + 130px);
+  bottom: calc(env(safe-area-inset-bottom) + 123px);
   z-index: 10;
   background: var(--container-bg);
   padding: 0 2%;
@@ -567,7 +567,7 @@ h1 {
   bottom: env(safe-area-inset-bottom);
   background: var(--container-bg);
   border-top: 1px solid var(--accent);
-  padding: 15px 2%;
+  padding: 10px 2%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -755,8 +755,12 @@ datalist {
     max-width: 300px;
   }
 
+  .controls-container {
+    padding: 10px 2%;
+  }
+
   .station-list {
-    max-height: calc(100vh - 116px - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+    max-height: calc(100vh - 100px - 111px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
     margin: 4px 0;
     padding: 6px 2%;
     border-width: 1px;
@@ -807,7 +811,7 @@ datalist {
   .tabs-wrapper {
     margin: 3px 0;
     padding: 0 2%;
-    bottom: calc(env(safe-area-inset-bottom) + 110px);
+    bottom: calc(env(safe-area-inset-bottom) + 113px);
   }
 
   .tab-btn,
@@ -829,7 +833,7 @@ datalist {
 
   #currentStationInfo {
     padding: 10px 2%;
-    height: 116px;
+    height: 100px;
   }
 
   .station-info-content {
@@ -837,8 +841,8 @@ datalist {
   }
 
   .station-icon {
-    width: 110px;
-    height: 110px;
+    width: 94px;
+    height: 94px;
     font-size: 70px;
     padding: 3px;
   }
@@ -862,6 +866,11 @@ datalist {
   #searchGenre {
     font-size: 13px;
     padding: 6px;
+  }
+
+  #searchInput button.search-btn {
+    padding: 8px;
+    font-size: 13px;
   }
 
   .modal {
@@ -898,6 +907,14 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 116px - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+    max-height: calc(100vh - 100px - 111px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+  }
+
+  .controls-container {
+    padding: 10px 2%;
+  }
+
+  .tabs-wrapper {
+    bottom: calc(env(safe-area-inset-bottom) + 123px);
   }
 }
