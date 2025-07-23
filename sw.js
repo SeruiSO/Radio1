@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v2773796';
+const CACHE_NAME = 'radio-cache-v2568745524';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -10,14 +10,9 @@ self.addEventListener('install', (event) => {
         '/script.js',
         '/stations.json',
         '/manifest.json',
-        '/ping.txt',
-        '/assets/icons/feather-sprite.svg',
-        '/assets/styles/skeleton.css',
-        '/icon-192.png',
-        '/icon-512.png',
-        '/icon-96.png'
+        '/ping.txt'
       ]).then(() => {
-        return caches.keys().then((cacheNames) => {
+        caches.keys().then((cacheNames) => {
           return Promise.all(cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
               return caches.delete(cacheName);
@@ -41,11 +36,6 @@ self.addEventListener('fetch', (event) => {
         }).catch(() => caches.match('/index.html'));
       }
       return response || fetch(event.request).then((networkResponse) => {
-        if (event.request.method === 'GET' && !event.request.url.includes('radio-browser.info')) {
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-          });
-        }
         return networkResponse;
       }).catch(() => caches.match('/index.html'));
     })
@@ -62,16 +52,16 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => {
-      self.clients.matchAll().then((clients) => {
-        clients.forEach((client) => {
-          client.postMessage({ type: 'CACHE_UPDATED', cacheVersion: CACHE_NAME });
-        });
-      });
     })
   );
+  self.clients.matchAll().then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({ type: 'CACHE_UPDATED', cacheVersion: CACHE_NAME });
+    });
+  });
 });
 
+// Моніторинг стану мережі
 let wasOnline = navigator.onLine;
 let checkInterval = null;
 
@@ -87,10 +77,10 @@ function startNetworkCheck() {
                 client.postMessage({ type: "NETWORK_STATUS", online: true });
               });
             });
-            stopNetworkCheck();
+            stopNetworkCheck(); // Stop polling once online
           }
         })
-        .catch(() => {
+        .catch(error => {
           if (wasOnline) {
             wasOnline = false;
             self.clients.matchAll().then(clients => {
@@ -100,7 +90,7 @@ function startNetworkCheck() {
             });
           }
         });
-    }, 3000);
+    }, 2000); // Перевірка кожні 2 секунди
   }
 }
 
@@ -119,7 +109,7 @@ self.addEventListener('online', () => {
         client.postMessage({ type: "NETWORK_STATUS", online: true });
       });
     });
-    stopNetworkCheck();
+    stopNetworkCheck(); // Stop polling when online
   }
 });
 
@@ -131,10 +121,11 @@ self.addEventListener('offline', () => {
         client.postMessage({ type: "NETWORK_STATUS", online: false });
       });
     });
-    startNetworkCheck();
+    startNetworkCheck(); // Start polling when offline
   }
 });
 
+// Start initial check if already offline
 if (!navigator.onLine && wasOnline) {
   wasOnline = false;
   startNetworkCheck();
