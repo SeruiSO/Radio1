@@ -1,4 +1,4 @@
-/* Updated on July 23, 2025 */
+/* Updated on July 23, 2025 at 04:06 PM EEST */
 :root {
   --body-bg: #000000;
   --container-bg: #000000;
@@ -207,7 +207,7 @@ h1 {
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: left;
-  height: 100px; /* Відновлено до 100px */
+  height: 100px;
   display: flex;
   align-items: center;
   position: sticky;
@@ -238,7 +238,7 @@ h1 {
 }
 
 #currentStationInfo .station-name {
-  font-size: 16px; /* Відновлено до 16px */
+  font-size: 16px;
   font-weight: 600;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -250,17 +250,17 @@ h1 {
 
 #currentStationInfo .station-genre,
 #currentStationInfo .station-country {
-  font-size: 14px; /* Відновлено до 14px */
+  font-size: 14px;
   font-weight: 400;
   opacity: 0.85;
   margin-top: 4px;
 }
 
 .station-icon {
-  width: 94px; /* Відновлено до 94px */
-  height: 94px; /* Відновлено до 94px */
+  width: 94px;
+  height: 94px;
   order: 1;
-  font-size: 80px; /* Відновлено до 80px */
+  font-size: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,15 +276,15 @@ h1 {
   justify-content: center;
   margin-left: auto;
   order: 3;
-  width: 100px; /* Відновлено до 100px */
-  height: 60px; /* Відновлено до 60px */
+  width: 100px;
+  height: 60px;
   position: relative;
   overflow: hidden;
 }
 
 .wave-line {
   position: absolute;
-  width: 8px; /* Відновлено до 8px */
+  width: 8px;
   background: var(--accent-gradient);
   border-radius: 4px;
   bottom: 0;
@@ -313,12 +313,12 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 50px); /* Зменшено на 50px */
+  max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 50px);
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
   border-radius: 12px;
-  margin: 4px 0;
+  margin: 2px 0; /* Зменшено з 4px до 2px */
   padding: 8px 2%;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
@@ -441,9 +441,9 @@ h1 {
 
 .tabs-wrapper {
   overflow-x: auto;
-  margin: 5px 0;
+  margin: 2px 0; /* Зменшено з 5px до 2px */
   position: sticky;
-  bottom: calc(env(safe-area-inset-bottom) + 123px); /* Залишено без змін */
+  bottom: calc(123px + 5px + env(safe-area-inset-bottom)); /* Додано 5px відступу від controls */
   z-index: 10;
   background: var(--container-bg);
   padding: 0 2%;
@@ -579,14 +579,14 @@ h1 {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  max-width: 340px; /* Відновлено до 340px */
+  max-width: 340px;
   margin: 0 auto;
 }
 
 .control-btn {
-  width: 100px; /* Відновлено до 100px */
-  height: 100px; /* Відновлено до 100px */
-  font-size: 36px; /* Відновлено до 36px */
+  width: 100px;
+  height: 100px;
+  font-size: 36px;
   background: var(--container-bg);
   color: var(--text);
   border: 1px solid var(--accent);
@@ -745,14 +745,14 @@ datalist {
   }
 
   .control-btn {
-    width: 90px; /* Відновлено до 90px */
-    height: 90px; /* Відновлено до 90px */
-    font-size: 32px; /* Відновлено до 32px */
+    width: 90px;
+    height: 90px;
+    font-size: 32px;
     border: 1px solid var(--accent);
   }
 
   .controls {
-    max-width: 300px; /* Відновлено до 300px */
+    max-width: 300px;
   }
 
   .controls-container {
@@ -760,8 +760,8 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 50px); /* Зменшено на 50px */
-    margin: 4px 0;
+    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 50px);
+    margin: 2px 0; /* Зменшено з 4px до 2px */
     padding: 6px 2%;
     border-width: 1px;
   }
@@ -809,9 +809,9 @@ datalist {
   }
 
   .tabs-wrapper {
-    margin: 3px 0;
+    margin: 2px 0; /* Зменшено з 3px до 2px */
     padding: 0 2%;
-    bottom: calc(env(safe-area-inset-bottom) + 113px); /* Залишено без змін */
+    bottom: calc(113px + 5px + env(safe-area-inset-bottom)); /* Додано 5px відступу від controls */
   }
 
   .tab-btn,
@@ -833,7 +833,7 @@ datalist {
 
   #currentStationInfo {
     padding: 10px 2%;
-    height: 100px; /* Відновлено до 100px */
+    height: 100px;
   }
 
   .station-info-content {
@@ -841,19 +841,19 @@ datalist {
   }
 
   .station-icon {
-    width: 94px; /* Відновлено до 94px */
-    height: 94px; /* Відновлено до 94px */
-    font-size: 70px; /* Відновлено до 70px */
+    width: 94px;
+    height: 94px;
+    font-size: 70px;
     padding: 3px;
   }
 
   .wave-visualizer {
-    width: 80px; /* Відновлено до 80px */
-    height: 50px; /* Відновлено до 50px */
+    width: 80px;
+    height: 50px;
   }
 
   .wave-line {
-    width: 6px; /* Відновлено до 6px */
+    width: 6px;
   }
 
   #searchInput {
@@ -907,7 +907,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 50px); /* Зменшено на 50px */
+    max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 50px);
   }
 
   .controls-container {
@@ -915,7 +915,7 @@ datalist {
   }
 
   .tabs-wrapper {
-    bottom: calc(env(safe-area-inset-bottom) + 123px); /* Залишено без змін */
+    bottom: calc(123px + 5px + env(safe-area-inset-bottom)); /* Додано 5px відступу від controls */
   }
 }
 
@@ -925,7 +925,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 50px); /* Зменшено на 50px */
+    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 50px);
   }
 
   .controls-container {
@@ -933,32 +933,32 @@ datalist {
   }
 
   .tabs-wrapper {
-    bottom: calc(env(safe-area-inset-bottom) + 113px); /* Залишено без змін */
+    bottom: calc(113px + 5px + env(safe-area-inset-bottom)); /* Додано 5px відступу від controls */
   }
 
   .control-btn {
-    width: 90px; /* Відновлено до 90px */
-    height: 90px; /* Відновлено до 90px */
-    font-size: 32px; /* Відновлено до 32px */
+    width: 90px;
+    height: 90px;
+    font-size: 32px;
   }
 
   .controls {
-    max-width: 300px; /* Відновлено до 300px */
+    max-width: 300px;
   }
 
   .station-icon {
-    width: 94px; /* Відновлено до 94px */
-    height: 94px; /* Відновлено до 94px */
-    font-size: 70px; /* Відновлено до 70px */
+    width: 94px;
+    height: 94px;
+    font-size: 70px;
   }
 
   .wave-visualizer {
-    width: 80px; /* Відновлено до 80px */
-    height: 50px; /* Відновлено до 50px */
+    width: 80px;
+    height: 50px;
   }
 
   .wave-line {
-    width: 6px; /* Відновлено до 6px */
+    width: 6px;
   }
 
   .tab-btn,
