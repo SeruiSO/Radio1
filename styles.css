@@ -125,7 +125,7 @@ body {
 }
 
 .container {
-  max-width: 96%;
+  max-width: 95%;
   width: 100%;
   background: var(--container-bg);
   padding: 15px;
@@ -258,10 +258,10 @@ h1 {
 }
 
 .station-icon {
-  width: 90px;
-  height: 90px;
+  width: 80px;
+  height: 80px;
   order: 1;
-  font-size: 70px;
+  font-size: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -503,8 +503,8 @@ h1 {
 }
 
 .add-tab-btn {
-  width: 48px;
-  font-size: 20px;
+  width: 40px;
+  font-size: 18px;
 }
 
 #searchInput {
@@ -647,7 +647,7 @@ h1 {
   padding: 15px 2%;
   z-index: 21;
   width: 90%;
-  max-width: 96%;
+  max-width: 95%;
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 8px 24px var(--shadow);
@@ -838,8 +838,8 @@ datalist {
   }
 
   .add-tab-btn {
-    width: 40px;
-    font-size: 18px;
+    width: 36px;
+    font-size: 16px;
   }
 
   .tabs {
@@ -856,9 +856,9 @@ datalist {
   }
 
   .station-icon {
-    width: 80px;
-    height: 80px;
-    font-size: 60px;
+    width: 70px;
+    height: 70px;
+    font-size: 50px;
     padding: 3px;
   }
 
@@ -890,6 +890,23 @@ datalist {
     font-size: 13px;
     padding: 8px;
   }
+
+  #searchInput {
+    padding: 6px 2%;
+    gap: 6px;
+  }
+
+  #searchQuery,
+  #searchCountry,
+  #searchGenre {
+    font-size: 13px;
+    padding: 6px;
+  }
+
+  #searchInput button.search-btn {
+    padding: 8px;
+    font-size: 13px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -904,14 +921,14 @@ datalist {
     height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
   }
 
-  .controls {
-    max-width: 340px;
-  }
-
   .control-btn {
     width: 80px;
     height: 80px;
     font-size: 32px;
+  }
+
+  .controls {
+    max-width: 340px;
   }
 
   .station-list {
@@ -1008,6 +1025,23 @@ datalist {
     font-size: 13px;
     padding: 8px;
   }
+
+  #searchInput {
+    padding: 6px 2%;
+    gap: 6px;
+  }
+
+  #searchQuery,
+  #searchCountry,
+  #searchGenre {
+    font-size: 13px;
+    padding: 6px;
+  }
+
+  #searchInput button.search-btn {
+    padding: 8px;
+    font-size: 13px;
+  }
 }
 
 @media (min-width: 721px) {
@@ -1025,7 +1059,7 @@ datalist {
   }
 }
 
-@media (min-height: 1600px) {
+@media (min-height: 1200px) {
   .container {
     height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
   }
