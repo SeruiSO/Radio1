@@ -314,7 +314,7 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 120px - 60px - 120px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: calc(100vh - 120px - 60px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
@@ -442,12 +442,13 @@ h1 {
 
 .tabs-wrapper {
   position: sticky;
-  bottom: calc(env(safe-area-inset-bottom) + 120px);
+  bottom: calc(env(safe-area-inset-bottom) + 121px);
   z-index: 10;
   background: var(--container-bg);
-  padding: 10px 2% 120px;
+  padding: 8px 2%;
   margin: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
 }
 
@@ -458,6 +459,7 @@ h1 {
 .tabs {
   display: flex;
   justify-content: flex-start;
+  flex-wrap: nowrap;
   background: var(--container-bg);
   padding: 8px;
   border-radius: 12px;
@@ -517,6 +519,7 @@ h1 {
   gap: 8px;
   align-items: stretch;
   transition: all 0.3s ease;
+  z-index: 5; /* Lower z-index to allow overlap by .controls-container */
 }
 
 #searchInput:focus-within {
@@ -759,7 +762,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 110px - 60px - 110px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - 110px - 60px - 111px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     margin: 4px 0 8px;
     padding: 6px 2%;
     border-width: 1px;
@@ -808,8 +811,8 @@ datalist {
   }
 
   .tabs-wrapper {
-    padding: 8px 2% 110px;
-    bottom: calc(env(safe-area-inset-bottom) + 110px);
+    padding: 8px 2%;
+    bottom: calc(env(safe-area-inset-bottom) + 111px);
   }
 
   .tab-btn,
@@ -898,7 +901,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 110px - 60px - 110px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - 110px - 60px - 111px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     margin: 4px 0 8px;
     padding: 6px 2%;
     border-width: 1px;
@@ -947,8 +950,8 @@ datalist {
   }
 
   .tabs-wrapper {
-    padding: 8px 2% 110px;
-    bottom: calc(env(safe-area-inset-bottom) + 110px);
+    padding: 8px 2%;
+    bottom: calc(env(safe-area-inset-bottom) + 111px);
   }
 
   .tabs {
@@ -966,11 +969,6 @@ datalist {
 
   .wave-line {
     width: 6px;
-  }
-
-  #searchInput {
-    padding: 6px 2%;
-    gap: 6px;
   }
 
   .modal {
@@ -1001,7 +999,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 120px - 60px - 120px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - 120px - 60px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
 
@@ -1011,6 +1009,6 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 120px - 60px - 120px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - 120px - 60px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
