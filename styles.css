@@ -1,4 +1,4 @@
-/* Updated on July 23, 2025 at 04:50 PM EEST */
+/* Updated on July 24, 2025 */
 :root {
   --body-bg: #000000;
   --container-bg: #000000;
@@ -113,29 +113,30 @@ body {
   background: var(--body-bg);
   color: var(--text);
   margin: 0;
-  padding: 0 2%;
-  height: 100vh;
+  padding: 0;
+  min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   display: flex;
   justify-content: center;
   align-items: flex-start;
   overflow-x: hidden;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
   box-sizing: border-box;
   transition: background 0.3s ease, color 0.3s ease;
-  padding: env(safe-area-inset-top) 2% env(safe-area-inset-bottom);
 }
 
 .container {
   max-width: 96%;
-  width: 100%;
+  width: calc(100% - 4%);
   background: var(--container-bg);
   padding: 15px;
   border-radius: 12px;
   border: 1px solid var(--accent);
-  margin: 0 auto;
-  height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+  margin: 0 2%;
+  min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   box-shadow: 0 8px 32px var(--shadow);
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
@@ -155,7 +156,7 @@ h1 {
 .export-button,
 .import-button {
   position: absolute;
-  top: 10px;
+  top: calc(10px + env(safe-area-inset-top));
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 12px;
@@ -171,19 +172,19 @@ h1 {
 }
 
 .theme-toggle {
-  left: 10px;
+  left: calc(10px + env(safe-area-inset-left));
 }
 
 .share-button {
-  left: 60px;
+  left: calc(60px + env(safe-area-inset-left));
 }
 
 .export-button {
-  right: 10px;
+  right: calc(10px + env(safe-area-inset-right));
 }
 
 .import-button {
-  right: 60px;
+  right: calc(60px + env(safe-area-inset-right));
 }
 
 .theme-toggle:hover,
@@ -203,15 +204,15 @@ h1 {
   background: var(--container-bg);
   padding: 15px;
   border-radius: 12px;
-  margin: 4px 0;
+  margin: 4px 2%;
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: left;
-  height: 100px;
+  height: 120px;
   display: flex;
   align-items: center;
   position: sticky;
-  top: 0;
+  top: env(safe-area-inset-top);
   z-index: 10;
   box-shadow: 0 4px 15px var(--shadow);
   transition: all 0.3s ease;
@@ -227,7 +228,6 @@ h1 {
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 0 2%;
 }
 
 .station-text {
@@ -257,17 +257,17 @@ h1 {
 }
 
 .station-icon {
-  width: 94px;
-  height: 94px;
+  height: calc(100% - 6px);
+  width: auto;
   order: 1;
-  font-size: 80px;
+  font-size: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  padding: 3px;
+  margin: 3px 0;
 }
 
 .wave-visualizer {
@@ -313,13 +313,13 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px);
+  max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 120px - 60px - 80px - 4px - 4px);
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
   border-radius: 12px;
-  margin: 2px 0;
-  padding: 8px 2%;
+  margin: 4px 2%;
+  padding: 8px;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
   flex-grow: 1;
@@ -441,14 +441,11 @@ h1 {
 
 .tabs-wrapper {
   overflow-x: auto;
-  overflow-y: hidden; /* Додано для видалення вертикальної прокрутки */
-  height: 50px; /* Фіксована висота для одного рядка */
-  margin: 2px 0;
+  margin: 4px 2%;
   position: sticky;
-  bottom: calc(140px + 10px + env(safe-area-inset-bottom));
-  z-index: 10;
+  bottom: calc(90px + env(safe-area-inset-bottom));
+  z-index: 15;
   background: var(--container-bg);
-  padding: 0 2%;
 }
 
 .tabs-wrapper::-webkit-scrollbar {
@@ -503,14 +500,14 @@ h1 {
 
 #searchInput {
   display: none;
-  margin: 8px 0;
-  padding: 8px 2%;
+  margin: 8px 2%;
+  padding: 8px;
   border-radius: 12px;
   border: 1px solid var(--accent);
   background: var(--container-bg);
   color: var(--text);
   font-size: 14px;
-  width: 100%;
+  width: calc(100% - 4%);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -569,25 +566,26 @@ h1 {
   bottom: env(safe-area-inset-bottom);
   background: var(--container-bg);
   border-top: 1px solid var(--accent);
-  padding: 10px 2%;
+  padding: 15px;
+  margin: 0 2%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 30px;
   z-index: 10;
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .controls {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
+  gap: 30px;
   width: 100%;
-  max-width: 340px;
-  margin: 0 auto;
 }
 
 .control-btn {
-  width: 100px;
-  height: 100px;
+  width: 90px;
+  height: 90px;
   font-size: 36px;
   background: var(--container-bg);
   color: var(--text);
@@ -630,11 +628,11 @@ h1 {
   background: var(--container-bg);
   border: 1px solid var(--accent);
   border-radius: 12px;
-  padding: 15px 2%;
+  padding: 15px;
   z-index: 21;
-  width: 90%;
-  max-width: 96%;
-  max-height: 80vh;
+  width: calc(90% - 4%);
+  max-width: calc(90% - 4%);
+  max-height: calc(80vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow-y: auto;
   box-shadow: 0 8px 24px var(--shadow);
   transition: all 0.3s ease;
@@ -742,29 +740,21 @@ datalist {
   }
 
   .container {
-    padding: 10px 2%;
-    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+    padding: 10px;
+    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
   }
 
   .control-btn {
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
     font-size: 32px;
     border: 1px solid var(--accent);
   }
 
-  .controls {
-    max-width: 300px;
-  }
-
-  .controls-container {
-    padding: 10px 2%;
-  }
-
   .station-list {
-    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px);
-    margin: 2px 0;
-    padding: 6px 2%;
+    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 110px - 60px - 80px - 4px - 4px);
+    margin: 4px 2%;
+    padding: 6px;
     border-width: 1px;
   }
 
@@ -775,48 +765,45 @@ datalist {
   }
 
   .station-item .station-name {
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.3;
   }
 
   .station-item img {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
   }
 
   .theme-toggle,
   .share-button,
   .export-button,
   .import-button {
-    top: 8px;
+    top: calc(8px + env(safe-area-inset-top));
     height: 36px;
     width: 36px;
     font-size: 16px;
   }
 
   .theme-toggle {
-    left: 8px;
+    left: calc(8px + env( safe-area-inset-left));
   }
 
   .share-button {
-    left: 52px;
+    left: calc(52px + env(safe-area-inset-left));
   }
 
   .export-button {
-    right: 8px;
+    right: calc(8px + env(safe-area-inset-right));
   }
 
   .import-button {
-    right: 52px;
+    right: calc(52px + env(safe-area-inset-right));
   }
 
   .tabs-wrapper {
-    overflow-x: auto;
-    overflow-y: hidden; /* Додано для видалення вертикальної прокрутки */
-    height: 50px; /* Фіксована висота для одного рядка */
-    margin: 2px 0;
-    padding: 0 2%;
-    bottom: calc(130px + 10px + env(safe-area-inset-bottom));
+    margin: 3px 2%;
+    padding: 0 5px;
+    bottom: calc(80px + env(safe-area-inset-bottom));
   }
 
   .tab-btn,
@@ -837,19 +824,24 @@ datalist {
   }
 
   #currentStationInfo {
-    padding: 10px 2%;
-    height: 100px;
+    padding: 10px;
+    height: 110px;
+    margin: 4px 2%;
   }
 
   .station-info-content {
     gap: 8px;
   }
 
+  #currentStationInfo .station-name {
+    font-size: 15px;
+  }
+
   .station-icon {
-    width: 94px;
-    height: 94px;
-    font-size: 70px;
-    padding: 3px;
+    height: calc(100% - 6px);
+    width: auto;
+    font-size: 42px;
+    margin: 3px 0;
   }
 
   .wave-visualizer {
@@ -862,24 +854,27 @@ datalist {
   }
 
   #searchInput {
-    padding: 6px 2%;
+    padding: 6px;
+    margin: 8px 2%;
     gap: 6px;
   }
 
   #searchQuery,
   #searchCountry,
   #searchGenre {
-    font-size: 13px;
+    font-size: 14px;
     padding: 6px;
   }
 
   #searchInput button.search-btn {
     padding: 8px;
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .modal {
-    padding: 12px 2%;
+    padding: 12px;
+    width: calc(90% - 4%);
+    max-width: calc(90% - 4%);
   }
 
   .modal h2 {
@@ -888,13 +883,13 @@ datalist {
 
   .modal-tab-btn,
   .modal-cancel-btn {
-    font-size: 13px;
+    font-size: 14px;
     padding: 8px;
   }
 
   .new-tab-modal input,
   .edit-tab-modal input {
-    font-size: 13px;
+    font-size: 14px;
     padding: 8px;
   }
 }
@@ -908,79 +903,10 @@ datalist {
 
 @media (max-height: 1600px) {
   .container {
-    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 50px - 123px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px);
-  }
-
-  .controls-container {
-    padding: 10px 2%;
-  }
-
-  .tabs-wrapper {
-    overflow-x: auto;
-    overflow-y: hidden; /* Додано для видалення вертикальної прокрутки */
-    height: 50px; /* Фіксована висота для одного рядка */
-    bottom: calc(140px + 10px + env(safe-area-inset-bottom));
-  }
-}
-
-@media (max-height: 600px) {
-  .container {
-    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
-  }
-
-  .station-list {
-    max-height: calc(100vh - 100px - 50px - 113px - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 18px - 80px);
-  }
-
-  .controls-container {
-    padding: 10px 2%;
-  }
-
-  .tabs-wrapper {
-    overflow-x: auto;
-    overflow-y: hidden; /* Додано для видалення вертикальної прокрутки */
-    height: 50px; /* Фіксована висота для одного рядка */
-    bottom: calc(130px + 10px + env(safe-area-inset-bottom));
-  }
-
-  .control-btn {
-    width: 90px;
-    height: 90px;
-    font-size: 32px;
-  }
-
-  .controls {
-    max-width: 300px;
-  }
-
-  .station-icon {
-    width: 94px;
-    height: 94px;
-    font-size: 70px;
-  }
-
-  .wave-visualizer {
-    width: 80px;
-    height: 50px;
-  }
-
-  .wave-line {
-    width: 6px;
-  }
-
-  .tab-btn,
-  .add-tab-btn {
-    min-width: 60px;
-    padding: 8px;
-    font-size: 12px;
-  }
-
-  .add-tab-btn {
-    width: 36px;
-    font-size: 16px;
+    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 120px - 60px - 80px - 4px - 4px);
   }
 }
