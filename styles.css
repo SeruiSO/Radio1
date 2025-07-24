@@ -314,7 +314,7 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 120px - 60px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: calc(100vh - 120px - 35px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
@@ -325,6 +325,10 @@ h1 {
   scrollbar-color: var(--accent) transparent;
   flex-grow: 1;
   transition: all 0.3s ease;
+}
+
+#searchInput.hidden + .station-list {
+  max-height: calc(100vh - 120px - 35px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
 }
 
 .station-list::-webkit-scrollbar {
@@ -442,10 +446,10 @@ h1 {
 
 .tabs-wrapper {
   position: sticky;
-  bottom: calc(env(safe-area-inset-bottom) + 121px);
+  bottom: calc(env(safe-area-inset-bottom) + 121px + 4px);
   z-index: 10;
   background: var(--container-bg);
-  padding: 8px 2%;
+  padding: 0 2%;
   margin: 0;
   overflow-x: auto;
   overflow-y: hidden;
@@ -518,8 +522,14 @@ h1 {
   flex-direction: column;
   gap: 8px;
   align-items: stretch;
-  transition: all 0.3s ease;
-  z-index: 5; /* Lower z-index to allow overlap by .controls-container */
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  z-index: 5;
+}
+
+#searchInput.hidden {
+  transform: translateY(100%);
+  opacity: 0;
+  display: none;
 }
 
 #searchInput:focus-within {
@@ -762,10 +772,14 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 110px - 60px - 111px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - 110px - 35px - 111px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     margin: 4px 0 8px;
     padding: 6px 2%;
     border-width: 1px;
+  }
+
+  #searchInput.hidden + .station-list {
+    max-height: calc(100vh - 110px - 35px - 111px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 
   .station-item {
@@ -811,8 +825,8 @@ datalist {
   }
 
   .tabs-wrapper {
-    padding: 8px 2%;
-    bottom: calc(env(safe-area-inset-bottom) + 111px);
+    padding: 0 2%;
+    bottom: calc(env(safe-area-inset-bottom) + 111px + 4px);
   }
 
   .tab-btn,
@@ -901,10 +915,14 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 110px - 60px - 111px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - 110px - 35px - 111px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     margin: 4px 0 8px;
     padding: 6px 2%;
     border-width: 1px;
+  }
+
+  #searchInput.hidden + .station-list {
+    max-height: calc(100vh - 110px - 35px - 111px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 
   .station-item {
@@ -950,8 +968,8 @@ datalist {
   }
 
   .tabs-wrapper {
-    padding: 8px 2%;
-    bottom: calc(env(safe-area-inset-bottom) + 111px);
+    padding: 0 2%;
+    bottom: calc(env(safe-area-inset-bottom) + 111px + 4px);
   }
 
   .tabs {
@@ -999,7 +1017,11 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 120px - 60px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - 120px - 35px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+
+  #searchInput.hidden + .station-list {
+    max-height: calc(100vh - 120px - 35px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
 
@@ -1009,6 +1031,10 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 120px - 60px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - 120px - 35px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+
+  #searchInput.hidden + .station-list {
+    max-height: calc(100vh - 120px - 35px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
