@@ -314,7 +314,7 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 120px - 35px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: 434px;
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
@@ -328,7 +328,7 @@ h1 {
 }
 
 #searchInput.hidden + .station-list {
-  max-height: calc(100vh - 120px - 35px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: 434px;
 }
 
 .station-list::-webkit-scrollbar {
@@ -446,8 +446,8 @@ h1 {
 
 .tabs-wrapper {
   position: sticky;
-  bottom: calc(env(safe-area-inset-bottom) + 121px + 4px);
-  z-index: 10;
+  bottom: calc(env(safe-area-inset-bottom) + 121px + 8px);
+  z-index: 11;
   background: var(--container-bg);
   padding: 0 2%;
   margin: 0;
@@ -772,14 +772,14 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 110px - 35px - 111px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: 350px;
     margin: 4px 0 8px;
     padding: 6px 2%;
     border-width: 1px;
   }
 
   #searchInput.hidden + .station-list {
-    max-height: calc(100vh - 110px - 35px - 111px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: 350px;
   }
 
   .station-item {
@@ -826,7 +826,7 @@ datalist {
 
   .tabs-wrapper {
     padding: 0 2%;
-    bottom: calc(env(safe-area-inset-bottom) + 111px + 4px);
+    bottom: calc(env(safe-area-inset-bottom) + 111px + 8px);
   }
 
   .tab-btn,
@@ -915,14 +915,14 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 110px - 35px - 111px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: 350px;
     margin: 4px 0 8px;
     padding: 6px 2%;
     border-width: 1px;
   }
 
   #searchInput.hidden + .station-list {
-    max-height: calc(100vh - 110px - 35px - 111px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: 350px;
   }
 
   .station-item {
@@ -969,7 +969,7 @@ datalist {
 
   .tabs-wrapper {
     padding: 0 2%;
-    bottom: calc(env(safe-area-inset-bottom) + 111px + 4px);
+    bottom: calc(env(safe-area-inset-bottom) + 111px + 8px);
   }
 
   .tabs {
@@ -1017,11 +1017,11 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 120px - 35px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: 434px;
   }
 
   #searchInput.hidden + .station-list {
-    max-height: calc(100vh - 120px - 35px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: 434px;
   }
 }
 
@@ -1031,10 +1031,10 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 120px - 35px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: 434px;
   }
 
   #searchInput.hidden + .station-list {
-    max-height: calc(100vh - 120px - 35px - 121px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: 434px;
   }
 }
