@@ -207,7 +207,7 @@ h1 {
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: left;
-  height: 110px;
+  height: 120px;
   display: flex;
   align-items: center;
   position: sticky;
@@ -258,10 +258,10 @@ h1 {
 }
 
 .station-icon {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   order: 1;
-  font-size: 60px;
+  font-size: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -314,12 +314,12 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 110px - 120px - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: calc(100vh - 120px - 60px - 120px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
   border-radius: 12px;
-  margin: 4px 0;
+  margin: 4px 0 8px;
   padding: 8px 2%;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
@@ -445,7 +445,7 @@ h1 {
   bottom: calc(env(safe-area-inset-bottom) + 120px);
   z-index: 10;
   background: var(--container-bg);
-  padding: 10px 2%;
+  padding: 10px 2% 120px;
   margin: 0;
   overflow-x: auto;
   scrollbar-width: none;
@@ -587,9 +587,9 @@ h1 {
 }
 
 .control-btn {
-  width: 80px;
-  height: 80px;
-  font-size: 32px;
+  width: 90px;
+  height: 90px;
+  font-size: 36px;
   background: var(--container-bg);
   color: var(--text);
   border: 1px solid var(--accent);
@@ -748,9 +748,9 @@ datalist {
   }
 
   .control-btn {
-    width: 70px;
-    height: 70px;
-    font-size: 28px;
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
     border: 1px solid var(--accent);
   }
 
@@ -759,8 +759,8 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 110px - 50px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    margin: 4px 0;
+    max-height: calc(100vh - 110px - 60px - 110px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    margin: 4px 0 8px;
     padding: 6px 2%;
     border-width: 1px;
   }
@@ -808,7 +808,7 @@ datalist {
   }
 
   .tabs-wrapper {
-    padding: 8px 2%;
+    padding: 8px 2% 110px;
     bottom: calc(env(safe-area-inset-bottom) + 110px);
   }
 
@@ -831,7 +831,7 @@ datalist {
 
   #currentStationInfo {
     padding: 8px 2%;
-    height: 100px;
+    height: 110px;
   }
 
   .station-info-content {
@@ -839,9 +839,9 @@ datalist {
   }
 
   .station-icon {
-    width: 70px;
-    height: 70px;
-    font-size: 50px;
+    width: 80px;
+    height: 80px;
+    font-size: 60px;
     padding: 3px;
   }
 
@@ -852,18 +852,6 @@ datalist {
 
   .wave-line {
     width: 6px;
-  }
-
-  #searchInput {
-    padding: 6px 2%;
-    gap: 6px;
-  }
-
-  #searchQuery,
-  #searchCountry,
-  #searchGenre {
-    font-size: 13px;
-    padding: 6px;
   }
 
   .modal {
@@ -904,14 +892,14 @@ datalist {
   }
 
   .control-btn {
-    width: 70px;
-    height: 70px;
-    font-size: 28px;
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
   }
 
   .station-list {
-    max-height: calc(100vh - 100px - 110px - 50px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    margin: 4px 0;
+    max-height: calc(100vh - 110px - 60px - 110px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    margin: 4px 0 8px;
     padding: 6px 2%;
     border-width: 1px;
   }
@@ -959,7 +947,7 @@ datalist {
   }
 
   .tabs-wrapper {
-    padding: 8px 2%;
+    padding: 8px 2% 110px;
     bottom: calc(env(safe-area-inset-bottom) + 110px);
   }
 
@@ -983,13 +971,6 @@ datalist {
   #searchInput {
     padding: 6px 2%;
     gap: 6px;
-  }
-
-  #searchQuery,
-  #searchCountry,
-  #searchGenre {
-    font-size: 13px;
-    padding: 6px;
   }
 
   .modal {
@@ -1020,7 +1001,7 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 110px - 120px - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - 120px - 60px - 120px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
 
@@ -1030,6 +1011,6 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 110px - 120px - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - 120px - 60px - 120px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
