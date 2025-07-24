@@ -1,4 +1,4 @@
-/* Updated on July 24, 2025 - Optimized for mobile */
+/* Updated on July 24, 2025 */
 :root {
   --body-bg: #000000;
   --container-bg: #000000;
@@ -128,7 +128,7 @@ body {
   max-width: 96%;
   width: 100%;
   background: var(--container-bg);
-  padding: 12px;
+  padding: 15px;
   border-radius: 12px;
   border: 1px solid var(--accent);
   margin: 0 auto;
@@ -141,7 +141,7 @@ body {
 }
 
 h1 {
-  font-size: 1.8em;
+  font-size: 2.2em;
   margin: 5px 0;
   text-align: center;
   color: var(--accent);
@@ -155,35 +155,35 @@ h1 {
 .export-button,
 .import-button {
   position: absolute;
-  top: 8px;
+  top: 10px;
   background: var(--container-bg);
   border: 2px solid var(--accent);
   border-radius: 12px;
-  padding: 6px;
+  padding: 8px;
   cursor: pointer;
-  height: 36px;
-  width: 36px;
+  height: 40px;
+  width: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .theme-toggle {
-  left: 8px;
+  left: 10px;
 }
 
 .share-button {
-  left: 52px;
+  left: 60px;
 }
 
 .export-button {
-  right: 8px;
+  right: 10px;
 }
 
 .import-button {
-  right: 52px;
+  right: 60px;
 }
 
 .theme-toggle:hover,
@@ -201,13 +201,13 @@ h1 {
 
 #currentStationInfo {
   background: var(--container-bg);
-  padding: 10px;
+  padding: 8px;
   border-radius: 12px;
   margin: 4px 0;
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: left;
-  height: 80px;
+  height: 90px;
   display: flex;
   align-items: center;
   position: sticky;
@@ -225,7 +225,7 @@ h1 {
 .station-info-content {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   width: 100%;
   padding: 0 2%;
 }
@@ -235,10 +235,11 @@ h1 {
   flex-direction: column;
   flex: 1;
   order: 2;
+  font-size: 14px;
 }
 
 #currentStationInfo .station-name {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -250,24 +251,24 @@ h1 {
 
 #currentStationInfo .station-genre,
 #currentStationInfo .station-country {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   opacity: 0.85;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .station-icon {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   order: 1;
-  font-size: 40px;
+  font-size: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  padding: 2px;
+  padding: 3px;
 }
 
 .wave-visualizer {
@@ -276,17 +277,17 @@ h1 {
   justify-content: center;
   margin-left: auto;
   order: 3;
-  width: 70px;
-  height: 40px;
+  width: 100px;
+  height: 60px;
   position: relative;
   overflow: hidden;
 }
 
 .wave-line {
   position: absolute;
-  width: 5px;
+  width: 8px;
   background: var(--accent-gradient);
-  border-radius: 3px;
+  border-radius: 4px;
   bottom: 0;
   animation: wavePulse 1s ease-in-out infinite;
   animation-play-state: paused;
@@ -308,18 +309,18 @@ h1 {
 
 @keyframes wavePulse {
   0% { height: 20%; transform: translateY(0); }
-  50% { height: 80%; transform: translateY(-6px); }
+  50% { height: 80%; transform: translateY(-10px); }
   100% { height: 20%; transform: translateY(0); }
 }
 
 .station-list {
-  max-height: calc(100vh - 80px - 110px - 50px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: calc(100vh - 90px - 110px - 50px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
   border-radius: 12px;
   margin: 4px 0;
-  padding: 6px 2%;
+  padding: 8px 2%;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
   flex-grow: 1;
@@ -327,7 +328,7 @@ h1 {
 }
 
 .station-list::-webkit-scrollbar {
-  width: 3px;
+  width: 4px;
 }
 
 .station-list::-webkit-scrollbar-track {
@@ -340,23 +341,23 @@ h1 {
 }
 
 .station-item {
-  padding: 8px;
+  padding: 10px;
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 12px;
   font-weight: 500;
-  margin: 3px 0;
+  margin: 4px 0;
   color: var(--text);
   background: var(--container-bg);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   border: 1px solid var(--accent);
   transition: all 0.2s ease;
 }
 
 .station-item img {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
 }
 
@@ -366,9 +367,9 @@ h1 {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.3;
+  line-height: 1.4;
   flex: 1;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .station-item:hover,
@@ -377,13 +378,13 @@ h1 {
   border: 1px solid var(--accent);
   color: var(--text);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px var(--shadow);
+  box-shadow: 0 4px 12px var(--shadow);
 }
 
 .station-item .buttons-container {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .station-item .favorite-btn,
@@ -392,7 +393,7 @@ h1 {
   background: none;
   border: none;
   color: var(--text);
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -419,7 +420,7 @@ h1 {
   font-style: italic;
   color: var(--text);
   opacity: 0.7;
-  padding: 15px;
+  padding: 20px;
   border: none;
   background: var(--container-bg);
   display: flex;
@@ -429,8 +430,8 @@ h1 {
 
 .station-item.empty::before {
   content: "⏳";
-  font-size: 20px;
-  margin-right: 8px;
+  font-size: 24px;
+  margin-right: 10px;
   animation: spin 1s linear infinite;
 }
 
@@ -441,7 +442,7 @@ h1 {
 
 .tabs-wrapper {
   position: sticky;
-  bottom: calc(env(safe-area-inset-bottom) + 100px);
+  bottom: calc(env(safe-area-inset-bottom) + 110px);
   z-index: 10;
   background: var(--container-bg);
   padding: 0 2%;
@@ -456,10 +457,14 @@ h1 {
 
 .tabs {
   display: flex;
-  gap: 4px;
+  justify-content: flex-start;
+  background: var(--container-bg);
   padding: 6px;
-  overflow-x: auto;
+  border-radius: 12px;
+  white-space: nowrap;
+  gap: 4px;
   scroll-behavior: smooth;
+  transition: background 0.3s ease;
 }
 
 .tab-btn,
@@ -469,9 +474,10 @@ h1 {
   padding: 8px;
   background: var(--container-bg);
   border: 1px solid var(--accent);
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--text);
   cursor: pointer;
+  margin: 0 3px;
   text-align: center;
   font-size: 12px;
   transition: all 0.2s ease;
@@ -491,30 +497,31 @@ h1 {
 }
 
 .add-tab-btn {
-  width: 36px;
-  font-size: 16px;
+  width: 40px;
+  font-size: 18px;
 }
 
 #searchInput {
-  margin: 6px 0;
-  padding: 6px 2%;
-  border-radius: 10px;
+  display: none;
+  margin: 8px 0;
+  padding: 8px 2%;
+  border-radius: 12px;
   border: 1px solid var(--accent);
   background: var(--container-bg);
   color: var(--text);
-  font-size: 13px;
+  font-size: 14px;
   width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   align-items: stretch;
   transition: all 0.3s ease;
 }
 
 #searchInput:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 6px var(--shadow);
+  box-shadow: 0 0 8px var(--shadow);
 }
 
 #searchQuery,
@@ -524,10 +531,10 @@ h1 {
   min-width: 100%;
   background: var(--container-bg);
   border: 1px solid var(--accent);
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--text);
-  font-size: 13px;
-  padding: 6px;
+  font-size: 14px;
+  padding: 8px;
   outline: none;
 }
 
@@ -541,11 +548,11 @@ h1 {
 #searchInput button.search-btn {
   background: var(--container-bg);
   border: 1px solid var(--accent);
-  border-radius: 10px;
-  padding: 8px;
+  border-radius: 12px;
+  padding: 10px;
   color: var(--text);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   width: 100%;
   box-sizing: border-box;
   transition: all 0.2s ease;
@@ -562,10 +569,10 @@ h1 {
   bottom: env(safe-area-inset-bottom);
   background: var(--container-bg);
   border-top: 1px solid var(--accent);
-  padding: 10px 2%;
+  padding: 15px 2%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   z-index: 10;
   transition: background 0.3s ease, border-color 0.3s ease;
 }
@@ -575,19 +582,20 @@ h1 {
   justify-content: center;
   gap: 10px;
   width: 100%;
-  max-width: 280px;
+  max-width: 340px;
+  margin: 0 auto;
 }
 
 .control-btn {
   width: 70px;
   height: 70px;
-  font-size: 24px;
+  font-size: 28px;
   background: var(--container-bg);
   color: var(--text);
   border: 1px solid var(--accent);
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 4px 8px var(--shadow);
+  box-shadow: 0 4px 12px var(--shadow);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -622,38 +630,38 @@ h1 {
   transform: translate(-50%, -50%);
   background: var(--container-bg);
   border: 1px solid var(--accent);
-  border-radius: 10px;
-  padding: 12px 2%;
+  border-radius: 12px;
+  padding: 15px 2%;
   z-index: 21;
   width: 90%;
   max-width: 96%;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 8px 20px var(--shadow);
+  box-shadow: 0 8px 24px var(--shadow);
   transition: all 0.3s ease;
 }
 
 .modal h2 {
   color: var(--accent);
-  font-size: 1.2em;
-  margin: 0 0 10px;
+  font-size: 1.4em;
+  margin: 0 0 12px;
   text-align: center;
 }
 
 .modal-tabs {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .modal-tab-btn,
 .modal-cancel-btn {
-  padding: 8px;
+  padding: 10px;
   background: var(--container-bg);
   border: 1px solid var(--accent);
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--text);
-  font-size: 13px;
+  font-size: 15px;
   cursor: pointer;
   text-align: center;
   transition: all 0.2s ease;
@@ -679,13 +687,13 @@ h1 {
 .new-tab-modal input,
 .edit-tab-modal input {
   width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
+  padding: 10px;
+  margin-bottom: 12px;
   background: var(--container-bg);
   border: 1px solid var(--accent);
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--text);
-  font-size: 13px;
+  font-size: 15px;
   box-sizing: border-box;
   transition: all 0.3s ease;
 }
@@ -693,7 +701,7 @@ h1 {
 .new-tab-modal input:focus,
 .edit-tab-modal input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 6px var(--shadow);
+  box-shadow: 0 0 8px var(--shadow);
   outline: none;
 }
 
@@ -714,8 +722,8 @@ datalist {
 #searchGenre[list] {
   background: var(--container-bg);
   border: 1px solid var(--accent);
-  border-radius: 10px;
-  padding: 6px;
+  border-radius: 12px;
+  padding: 8px;
   color: var(--text);
   transition: all 0.3s ease;
 }
@@ -724,7 +732,280 @@ datalist {
 #searchCountry[list]:focus,
 #searchGenre[list]:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 6px var(--shadow);
+  box-shadow: 0 0 8px var(--shadow);
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.6em;
+    line-height: 1.2;
+    margin: 5px 0;
+  }
+
+  .container {
+    padding: 10px 2%;
+    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+  }
+
+  .control-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+    border: 1px solid var(--accent);
+  }
+
+  .controls {
+    max-width: 300px;
+  }
+
+  .station-list {
+    max-height: calc(100vh - 80px - 100px - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    margin: 4px 0;
+    padding: 6px 2%;
+    border-width: 1px;
+  }
+
+  .station-item {
+    padding: 8px;
+    margin: 3px 0;
+    border-radius: 12px;
+  }
+
+  .station-item .station-name {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .station-item img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .theme-toggle,
+  .share-button,
+  .export-button,
+  .import-button {
+    top: 8px;
+    height: 36px;
+    width: 36px;
+    font-size: 16px;
+  }
+
+  .theme-toggle {
+    left: 8px;
+  }
+
+  .share-button {
+    left: 52px;
+  }
+
+  .export-button {
+    right: 8px;
+  }
+
+  .import-button {
+    right: 52px;
+  }
+
+  .tabs-wrapper {
+    margin: 3px 0;
+    padding: 0 2%;
+    bottom: calc(env(safe-area-inset-bottom) + 100px);
+  }
+
+  .tab-btn,
+  .add-tab-btn {
+    min-width: 60px;
+    padding: 8px;
+    font-size: 12px;
+    border-radius: 12px;
+  }
+
+  .add-tab-btn {
+    width: 36px;
+    font-size: 16px;
+  }
+
+  .tabs {
+    gap: 4px;
+  }
+
+  #currentStationInfo {
+    padding: 8px 2%;
+    height: 80px;
+  }
+
+  .station-info-content {
+    gap: 8px;
+  }
+
+  .station-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 40px;
+    padding: 3px;
+  }
+
+  .wave-visualizer {
+    width: 80px;
+    height: 50px;
+  }
+
+  .wave-line {
+    width: 6px;
+  }
+
+  #searchInput {
+    padding: 6px 2%;
+    gap: 6px;
+  }
+
+  #searchQuery,
+  #searchCountry,
+  #searchGenre {
+    font-size: 13px;
+    padding: 6px;
+  }
+
+  .modal {
+    padding: 12px 2%;
+  }
+
+  .modal h2 {
+    font-size: 1.2em;
+  }
+
+  .modal-tab-btn,
+  .modal-cancel-btn {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .new-tab-modal input,
+  .edit-tab-modal input {
+    font-size: 13px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 720px) {
+  h1 {
+    font-size: 1.8em;
+    line-height: 1.2;
+    margin: 5px 0;
+  }
+
+  .container {
+    padding: 10px 2%;
+    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
+  }
+
+  .controls {
+    max-width: 300px;
+  }
+
+  .station-list {
+    margin: 4px 0;
+    padding: 6px 2%;
+    border-width: 1px;
+  }
+
+  .station-item {
+    padding: 8px;
+    margin: 3px 0;
+    border-radius: 12px;
+  }
+
+  .station-item .station-name {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .station-item img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .theme-toggle,
+  .share-button,
+  .export-button,
+  .import-button {
+    top: 8px;
+    height: 36px;
+    width: 36px;
+    font-size: 16px;
+  }
+
+  .theme-toggle {
+    left: 8px;
+  }
+
+  .share-button {
+    left: 52px;
+  }
+
+  .export-button {
+    right: 8px;
+  }
+
+  .import-button {
+    right: 52px;
+  }
+
+  .tabs-wrapper {
+    margin: 3px 0;
+    padding: 0 2%;
+    bottom: calc(env(safe-area-inset-bottom) + 100px);
+  }
+
+  .tabs {
+    gap: 4px;
+  }
+
+  .station-info-content {
+    gap: 8px;
+  }
+
+  .wave-visualizer {
+    width: 80px;
+    height: 50px;
+  }
+
+  .wave-line {
+    width: 6px;
+  }
+
+  #searchInput {
+    padding: 6px 2%;
+    gap: 6px;
+  }
+
+  #searchQuery,
+  #searchCountry,
+  #searchGenre {
+    font-size: 13px;
+    padding: 6px;
+  }
+
+  .modal {
+    padding: 12px 2%;
+  }
+
+  .modal h2 {
+    font-size: 1.2em;
+  }
+
+  .modal-tab-btn,
+  .modal-cancel-btn {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .new-tab-modal input,
+  .edit-tab-modal input {
+    font-size: 13px;
+    padding: 8px;
+  }
 }
 
 @media (min-width: 721px) {
@@ -734,33 +1015,12 @@ datalist {
   }
 }
 
-@media (max-width: 480px) {
-  .control-btn {
-    width: 60px;
-    height: 60px;
-    font-size: 20px;
+@media (min-height: 1600px) {
+  .container {
+    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4%);
   }
 
   .station-list {
-    max-height: calc(100vh - 70px - 90px - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  }
-
-  #currentStationInfo {
-    height: 70px;
-  }
-
-  .station-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 30px;
-  }
-
-  .wave-visualizer {
-    width: 60px;
-    height: 30px;
-  }
-
-  .wave-line {
-    width: 4px;
+    max-height: calc(100vh - 90px - 110px - 50px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
