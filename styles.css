@@ -201,13 +201,13 @@ h1 {
 
 #currentStationInfo {
   background: var(--container-bg);
-  padding: 8px;
+  padding: 10px 2%;
   border-radius: 12px;
   margin: 4px 0;
   color: var(--text);
   border: 1px solid var(--accent);
   text-align: left;
-  height: 90px;
+  height: 110px;
   display: flex;
   align-items: center;
   position: sticky;
@@ -258,17 +258,17 @@ h1 {
 }
 
 .station-icon {
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   order: 1;
-  font-size: 50px;
+  font-size: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  padding: 3px;
+  padding: 4px;
 }
 
 .wave-visualizer {
@@ -314,7 +314,7 @@ h1 {
 }
 
 .station-list {
-  max-height: calc(100vh - 90px - 110px - 50px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  max-height: calc(100vh - 110px - 120px - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
@@ -442,10 +442,10 @@ h1 {
 
 .tabs-wrapper {
   position: sticky;
-  bottom: calc(env(safe-area-inset-bottom) + 110px);
+  bottom: calc(env(safe-area-inset-bottom) + 120px);
   z-index: 10;
   background: var(--container-bg);
-  padding: 0 2%;
+  padding: 10px 2%;
   margin: 0;
   overflow-x: auto;
   scrollbar-width: none;
@@ -459,10 +459,10 @@ h1 {
   display: flex;
   justify-content: flex-start;
   background: var(--container-bg);
-  padding: 6px;
+  padding: 8px;
   border-radius: 12px;
   white-space: nowrap;
-  gap: 4px;
+  gap: 6px;
   scroll-behavior: smooth;
   transition: background 0.3s ease;
 }
@@ -470,16 +470,16 @@ h1 {
 .tab-btn,
 .add-tab-btn {
   flex: 0 0 auto;
-  min-width: 60px;
-  padding: 8px;
+  min-width: 70px;
+  padding: 10px;
   background: var(--container-bg);
   border: 1px solid var(--accent);
   border-radius: 12px;
   color: var(--text);
   cursor: pointer;
-  margin: 0 3px;
+  margin: 0 4px;
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
   transition: all 0.2s ease;
 }
 
@@ -497,8 +497,8 @@ h1 {
 }
 
 .add-tab-btn {
-  width: 40px;
-  font-size: 18px;
+  width: 48px;
+  font-size: 20px;
 }
 
 #searchInput {
@@ -572,7 +572,7 @@ h1 {
   padding: 15px 2%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   z-index: 10;
   transition: background 0.3s ease, border-color 0.3s ease;
 }
@@ -580,16 +580,16 @@ h1 {
 .controls {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  max-width: 340px;
+  max-width: 400px;
   margin: 0 auto;
 }
 
 .control-btn {
-  width: 70px;
-  height: 70px;
-  font-size: 28px;
+  width: 80px;
+  height: 80px;
+  font-size: 32px;
   background: var(--container-bg);
   color: var(--text);
   border: 1px solid var(--accent);
@@ -748,18 +748,18 @@ datalist {
   }
 
   .control-btn {
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
+    width: 70px;
+    height: 70px;
+    font-size: 28px;
     border: 1px solid var(--accent);
   }
 
   .controls {
-    max-width: 300px;
+    max-width: 340px;
   }
 
   .station-list {
-    max-height: calc(100vh - 80px - 100px - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - 100px - 110px - 50px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     margin: 4px 0;
     padding: 6px 2%;
     border-width: 1px;
@@ -808,9 +808,8 @@ datalist {
   }
 
   .tabs-wrapper {
-    margin: 3px 0;
-    padding: 0 2%;
-    bottom: calc(env(safe-area-inset-bottom) + 100px);
+    padding: 8px 2%;
+    bottom: calc(env(safe-area-inset-bottom) + 110px);
   }
 
   .tab-btn,
@@ -822,8 +821,8 @@ datalist {
   }
 
   .add-tab-btn {
-    width: 36px;
-    font-size: 16px;
+    width: 40px;
+    font-size: 18px;
   }
 
   .tabs {
@@ -832,7 +831,7 @@ datalist {
 
   #currentStationInfo {
     padding: 8px 2%;
-    height: 80px;
+    height: 100px;
   }
 
   .station-info-content {
@@ -840,9 +839,9 @@ datalist {
   }
 
   .station-icon {
-    width: 60px;
-    height: 60px;
-    font-size: 40px;
+    width: 70px;
+    height: 70px;
+    font-size: 50px;
     padding: 3px;
   }
 
@@ -901,10 +900,17 @@ datalist {
   }
 
   .controls {
-    max-width: 300px;
+    max-width: 340px;
+  }
+
+  .control-btn {
+    width: 70px;
+    height: 70px;
+    font-size: 28px;
   }
 
   .station-list {
+    max-height: calc(100vh - 100px - 110px - 50px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     margin: 4px 0;
     padding: 6px 2%;
     border-width: 1px;
@@ -953,9 +959,8 @@ datalist {
   }
 
   .tabs-wrapper {
-    margin: 3px 0;
-    padding: 0 2%;
-    bottom: calc(env(safe-area-inset-bottom) + 100px);
+    padding: 8px 2%;
+    bottom: calc(env(safe-area-inset-bottom) + 110px);
   }
 
   .tabs {
@@ -1013,6 +1018,10 @@ datalist {
     flex-direction: row;
     flex-wrap: wrap;
   }
+
+  .station-list {
+    max-height: calc(100vh - 110px - 120px - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
 }
 
 @media (min-height: 1600px) {
@@ -1021,6 +1030,6 @@ datalist {
   }
 
   .station-list {
-    max-height: calc(100vh - 90px - 110px - 50px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - 110px - 120px - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
