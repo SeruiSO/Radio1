@@ -142,7 +142,7 @@ body {
 
 h1 {
   font-size: 2.2em;
-  margin: 5px 0;
+  margin: 2px 0;
   text-align: center;
   color: var(--accent);
   font-weight: 700;
@@ -314,13 +314,13 @@ h1 {
 }
 
 .station-list {
-  max-height: 434px;
+  max-height: 496px;
   overflow-y: auto;
   background: var(--container-bg);
   border: 1px solid var(--accent);
   border-radius: 12px;
-  margin: 4px 0 8px;
-  padding: 8px 2%;
+  margin: 2px 0 4px;
+  padding: 4px 2%;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
   flex-grow: 1;
@@ -328,7 +328,7 @@ h1 {
 }
 
 #searchInput.hidden + .station-list {
-  max-height: 434px;
+  max-height: calc(100vh - 334px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
 }
 
 .station-list::-webkit-scrollbar {
@@ -465,7 +465,7 @@ h1 {
   justify-content: flex-start;
   flex-wrap: nowrap;
   background: var(--container-bg);
-  padding: 8px;
+  padding: 4px;
   border-radius: 12px;
   white-space: nowrap;
   gap: 6px;
@@ -752,7 +752,7 @@ datalist {
   h1 {
     font-size: 1.6em;
     line-height: 1.2;
-    margin: 5px 0;
+    margin: 2px 0;
   }
 
   .container {
@@ -772,14 +772,14 @@ datalist {
   }
 
   .station-list {
-    max-height: 350px;
-    margin: 4px 0 8px;
-    padding: 6px 2%;
+    max-height: 400px;
+    margin: 2px 0 4px;
+    padding: 4px 2%;
     border-width: 1px;
   }
 
   #searchInput.hidden + .station-list {
-    max-height: 350px;
+    max-height: calc(100vh - 303px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 
   .station-item {
@@ -829,6 +829,11 @@ datalist {
     bottom: calc(env(safe-area-inset-bottom) + 111px + 8px);
   }
 
+  .tabs {
+    padding: 4px;
+    gap: 4px;
+  }
+
   .tab-btn,
   .add-tab-btn {
     min-width: 60px;
@@ -840,10 +845,6 @@ datalist {
   .add-tab-btn {
     width: 36px;
     font-size: 16px;
-  }
-
-  .tabs {
-    gap: 4px;
   }
 
   #currentStationInfo {
@@ -913,7 +914,7 @@ datalist {
   h1 {
     font-size: 1.8em;
     line-height: 1.2;
-    margin: 5px 0;
+    margin: 2px 0;
   }
 
   .container {
@@ -932,14 +933,14 @@ datalist {
   }
 
   .station-list {
-    max-height: 350px;
-    margin: 4px 0 8px;
-    padding: 6px 2%;
+    max-height: 400px;
+    margin: 2px 0 4px;
+    padding: 4px 2%;
     border-width: 1px;
   }
 
   #searchInput.hidden + .station-list {
-    max-height: 350px;
+    max-height: calc(100vh - 303px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 
   .station-item {
@@ -990,7 +991,26 @@ datalist {
   }
 
   .tabs {
+    padding: 4px;
     gap: 4px;
+  }
+
+  .tab-btn,
+  .add-tab-btn {
+    min-width: 60px;
+    padding: 8px;
+    font-size: 12px;
+    border-radius: 12px;
+  }
+
+  .add-tab-btn {
+    width: 36px;
+    font-size: 16px;
+  }
+
+  #currentStationInfo {
+    padding: 8px 2%;
+    height: 110px;
   }
 
   .station-info-content {
@@ -1051,11 +1071,11 @@ datalist {
   }
 
   .station-list {
-    max-height: 434px;
+    max-height: 496px;
   }
 
   #searchInput.hidden + .station-list {
-    max-height: 434px;
+    max-height: calc(100vh - 334px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
 
@@ -1065,10 +1085,10 @@ datalist {
   }
 
   .station-list {
-    max-height: 434px;
+    max-height: 496px;
   }
 
   #searchInput.hidden + .station-list {
-    max-height: 434px;
+    max-height: calc(100vh - 334px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
