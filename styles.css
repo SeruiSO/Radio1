@@ -904,24 +904,66 @@ datalist {
 @media (orientation: landscape) and (min-width: 720px) {
   body {
     align-items: stretch;
-    padding-top: 50px;
+    padding: 0;
   }
 
   .container {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: stretch;
-    min-height: calc(100vh - 70px);
-    margin: 0;
+    min-height: calc(100vh - 50px);
+    margin: 0 20px 50px 0;
     padding: 10px;
-    max-width: 100%;
+    max-width: calc(100% - 20px);
+    position: relative;
+  }
+
+  h1 {
+    display: none;
+  }
+
+  .theme-toggle,
+  .share-button,
+  .export-button,
+  .import-button {
+    position: absolute;
+    top: 10px;
+    z-index: 11;
+  }
+
+  .theme-toggle {
+    left: 10px;
+    height: 40px;
+    width: 40px;
+    font-size: 18px;
+  }
+
+  .share-button {
+    left: 60px;
+    height: 40px;
+    width: 40px;
+    font-size: 18px;
+  }
+
+  .export-button {
+    right: 10px;
+    height: 36px;
+    width: 36px;
+    font-size: 16px;
+  }
+
+  .import-button {
+    right: 56px;
+    height: 36px;
+    width: 36px;
+    font-size: 16px;
   }
 
   #currentStationInfo {
     width: 30%;
     height: auto;
-    min-height: calc(100vh - 90px);
-    margin: 0 5px;
+    min-height: calc(100vh - 70px);
+    margin: 0;
     padding: 10px;
     position: static;
     display: flex;
@@ -958,30 +1000,46 @@ datalist {
   }
 
   .station-list-container {
-    width: 50%;
+    width: calc(100% - 30% - 90px);
     margin: 0 5px;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 90px);
+    height: calc(100vh - 70px);
   }
 
   .station-list {
     max-height: none;
     height: 100%;
     margin: 0;
-    padding: 8px;
+    padding: 6px;
     overflow-y: auto;
+  }
+
+  .station-item {
+    padding: 6px;
+    margin: 2px 0;
+  }
+
+  .station-item .station-name {
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .station-item img {
+    width: 28px;
+    height: 28px;
   }
 
   #searchInput {
     margin: 8px 0;
     padding: 8px;
     flex-direction: column;
-    border: none;
+    border: 1px solid var(--accent);
+    border-radius: 12px;
   }
 
   [data-tab="search"] .station-list-container {
-    justify-content: space-between;
+    justify-content: flex-start;
   }
 
   [data-tab="search"] .station-list {
@@ -994,16 +1052,16 @@ datalist {
   }
 
   .controls-container {
-    width: 20%;
-    margin: 0 5px;
-    padding: 10px;
+    width: 90px;
+    margin: 0;
+    padding: 5px;
     position: static;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     border-top: none;
-    height: calc(100vh - 90px);
+    height: calc(100vh - 70px);
   }
 
   .controls {
@@ -1020,47 +1078,30 @@ datalist {
   .tabs-wrapper {
     position: fixed;
     bottom: 0;
-    left: 0;
-    right: 0;
-    margin: 0;
+    margin: 0 20px 0 0;
     padding: 5px;
-    width: 100%;
+    width: calc(100% - 20px);
+    max-width: calc(91% - 20px);
     z-index: 10;
+    overflow-x: auto;
   }
 
   .tabs {
-    justify-content: center;
-    gap: 6px;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 5px;
   }
 
-  .theme-toggle,
-  .share-button,
-  .export-button,
-  .import-button {
-    height: 36px;
+  .tab-btn,
+  .add-tab-btn {
+    min-width: 60px;
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .add-tab-btn {
     width: 36px;
     font-size: 16px;
-    top: 8px;
-  }
-
-  .theme-toggle {
-    left: 8px;
-  }
-
-  .share-button {
-    left: 52px;
-  }
-
-  .export-button {
-    right: 8px;
-  }
-
-  .import-button {
-    right: 52px;
-  }
-
-  h1 {
-    font-size: 1.8em;
   }
 
   #currentStationInfo .station-name {
@@ -1070,14 +1111,5 @@ datalist {
   #currentStationInfo .station-genre,
   #currentStationInfo .station-country {
     font-size: 13px;
-  }
-
-  .station-item .station-name {
-    font-size: 14px;
-  }
-
-  .station-item img {
-    width: 32px;
-    height: 32px;
   }
 }
