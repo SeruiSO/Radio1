@@ -137,7 +137,7 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   box-shadow: 0 8px 32px var(--shadow);
-  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow: 0.3s ease;
 }
 
 h1 {
@@ -147,7 +147,7 @@ h1 {
   color: var(--accent);
   font-weight: 700;
   letter-spacing: 0.5px;
-  transition: color 0.3s ease;
+  transition: color: 0.3s ease;
 }
 
 .theme-toggle,
@@ -570,7 +570,7 @@ h1 {
   justify-content: center;
   gap: 40px;
   z-index: 10;
-  transition: background 0.3s ease, border-color 0.3s ease;
+  transition: background 0.3s ease, border-color: 0.3s ease;
 }
 
 .controls {
@@ -613,7 +613,7 @@ h1 {
   height: 100%;
   background: rgba(0, 0, 0, 0.7);
   z-index: 20;
-  transition: opacity 0.3s ease;
+  transition: opacity: 0.3s ease;
 }
 
 .modal {
@@ -911,10 +911,10 @@ datalist {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: stretch;
-    min-height: calc(100vh - 50px);
-    margin: 0 20px 50px 0;
+    min-height: calc(100vh - 60px);
+    margin: 0 2% 60px 2%;
     padding: 10px;
-    max-width: calc(100% - 20px);
+    max-width: 91%;
     position: relative;
   }
 
@@ -962,7 +962,7 @@ datalist {
   #currentStationInfo {
     width: 30%;
     height: auto;
-    min-height: calc(100vh - 70px);
+    min-height: calc(100vh - 80px);
     margin: 0;
     padding: 10px;
     position: static;
@@ -1004,7 +1004,7 @@ datalist {
     margin: 0 5px;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 70px);
+    height: calc(100vh - 80px);
   }
 
   .station-list {
@@ -1038,6 +1038,22 @@ datalist {
     border-radius: 12px;
   }
 
+  #searchQuery,
+  #searchCountry,
+  #searchGenre {
+    max-width: 90%;
+    margin: 0 auto;
+    padding: 6px;
+    font-size: 13px;
+  }
+
+  #searchInput button.search-btn {
+    max-width: 90%;
+    margin: 0 auto;
+    padding: 8px;
+    font-size: 13px;
+  }
+
   [data-tab="search"] .station-list-container {
     justify-content: flex-start;
   }
@@ -1061,7 +1077,7 @@ datalist {
     justify-content: center;
     align-items: center;
     border-top: none;
-    height: calc(100vh - 70px);
+    height: calc(100vh - 80px);
   }
 
   .controls {
@@ -1078,10 +1094,9 @@ datalist {
   .tabs-wrapper {
     position: fixed;
     bottom: 0;
-    margin: 0 20px 0 0;
+    margin: 0 2%;
     padding: 5px;
-    width: calc(100% - 20px);
-    max-width: calc(91% - 20px);
+    width: 91%;
     z-index: 10;
     overflow-x: auto;
   }
