@@ -137,7 +137,7 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   box-shadow: 0 8px 32px var(--shadow);
-  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow: 0.3s ease;
 }
 
 h1 {
@@ -570,7 +570,7 @@ h1 {
   justify-content: center;
   gap: 40px;
   z-index: 10;
-  transition: background 0.3s ease, border-color 0.3s ease;
+  transition: background 0.3s ease, border-color: 0.3s ease;
 }
 
 .controls {
@@ -864,11 +864,11 @@ datalist {
   }
 
   .modal {
-    padding: 12px;
+    padding: 10px;
   }
 
   .modal h2 {
-    font-size: 1.2em;
+    font-size: 18px;
   }
 
   .modal-tab-btn,
@@ -891,7 +891,7 @@ datalist {
   }
 }
 
-@media (max-height: 1600px) {
+@media (max-height: 55vh) {
   .container {
     min-height: 80vh;
   }
@@ -901,9 +901,9 @@ datalist {
   }
 }
 
-@media (orientation: landscape) and (min-width: 720px) {
+@media (orientation: landscape) {
   body {
-    align-items: stretch;
+    align-items: center;
     padding: 0;
   }
 
@@ -911,8 +911,8 @@ datalist {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: stretch;
-    min-height: calc(100vh - 70px);
-    margin: 0 2% 70px 2%;
+    min-height: calc(100vh - 40px);
+    margin: 0 2% 20px 2%;
     padding: 10px;
     max-width: 91%;
     position: relative;
@@ -948,23 +948,23 @@ datalist {
 
   .export-button {
     right: 10px;
-    height: 36px;
-    width: 36px;
-    font-size: 16px;
+    height: 40px;
+    width: 40px;
+    font-size: 18px;
   }
 
   .import-button {
-    right: 56px;
-    height: 36px;
-    width: 36px;
-    font-size: 16px;
+    right: 60px;
+    height: 40px;
+    width: 40px;
+    font-size: 18px;
   }
 
   #currentStationInfo {
     flex: 0 0 30%;
     width: 30%;
-    height: auto;
-    min-height: calc(100vh - 90px);
+    height: 100%;
+    min-height: calc(100vh - 40px);
     margin: 0;
     padding: 10px;
     position: static;
@@ -973,6 +973,7 @@ datalist {
     justify-content: flex-start;
     align-items: center;
     box-sizing: border-box;
+    border: 0;
   }
 
   .station-info-content {
@@ -1008,12 +1009,13 @@ datalist {
     margin: 0 5px;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 90px);
+    height: 100%;
+    min-height: calc(100vh - 40px);
     box-sizing: border-box;
   }
 
   .station-list {
-    max-height: calc(100% - 10px);
+    max-height: calc(100% - 8px);
     height: auto;
     margin: 0;
     padding: 6px;
@@ -1037,40 +1039,44 @@ datalist {
   }
 
   #searchInput {
-    margin: 8px 0;
-    padding: 8px;
+    margin: 4px 0;
+    padding: 4px;
     flex-direction: column;
-    border: 1px solid var(--accent);
-    border-radius: 12px;
+    border-radius: 8px;
     box-sizing: border-box;
   }
 
   #searchQuery,
   #searchCountry,
   #searchGenre {
-    max-width: 70%;
+    max-width: 60%;
     margin: 0 auto;
-    padding: 5px;
-    font-size: 13px;
+    padding: 4px;
+    font-size: 12px;
+    border-radius: 8px;
   }
 
   #searchInput button.search-btn {
-    max-width: 70%;
+    max-width: 60%;
     margin: 0 auto;
-    padding: 8px;
-    font-size: 13px;
+    padding: 4px;
+    font-size: 12px;
+    border-radius: 8px;
   }
 
   [data-tab="search"] .station-list-container {
     justify-content: flex-start;
+    flex-direction: column;
   }
 
   [data-tab="search"] .station-list {
-    max-height: calc(100% - 160px);
-    margin-bottom: 8px;
+    order: 0;
+    max-height: calc(100% - 140px);
+    margin-bottom: 4px;
   }
 
   [data-tab="search"] #searchInput {
+    order: 1;
     display: flex;
   }
 
@@ -1085,7 +1091,8 @@ datalist {
     justify-content: center;
     align-items: center;
     border-top: none;
-    height: calc(100vh - 90px);
+    height: 100%;
+    min-height: calc(100vh - 40px);
     box-sizing: border-box;
   }
 
@@ -1125,7 +1132,7 @@ datalist {
   }
 
   .add-tab-btn {
-    width: 36px;
+    width: 40px;
     font-size: 16px;
   }
 
