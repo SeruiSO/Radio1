@@ -571,7 +571,7 @@ h1 {
   justify-content: center;
   gap: 40px;
   z-index: 10;
-  transition: background 0.3s ease, border-color 0.3s ease;
+  transition: background 0.3s ease, border-color: 0.3s ease;
 }
 
 .controls {
@@ -867,7 +867,7 @@ datalist {
   .container {
     max-width: 91%;
     width: 100%;
-    margin: 0 2% 20px 2%;
+    margin: 2% 2%;
     padding: 0;
     min-height: calc(100vh - 40px);
     height: calc(100vh - 40px);
@@ -969,8 +969,7 @@ datalist {
   }
 
   .wave-line {
-    height: 1px;
-    animation: wavePulse 1s infinite;
+    width: 8px;
   }
 
   .station-list-container {
@@ -1021,7 +1020,7 @@ datalist {
   #searchQuery,
   #searchCountry,
   #searchGenre {
-    max-width: 60%;
+    max-width: 50%;
     margin: 0 auto;
     padding: clamp(3px, 1vw, 5px);
     font-size: clamp(10px, 1.8vw, 12px);
@@ -1029,7 +1028,7 @@ datalist {
   }
 
   #searchInput button.search-btn {
-    max-width: 60%;
+    max-width: 50%;
     margin: 0 auto;
     padding: clamp(3px, 1vw, 5px) clamp(6px, 1.5vw, 8px);
     font-size: clamp(10px, 1.8vw, 12px);
@@ -1043,7 +1042,7 @@ datalist {
 
   [data-tab="search"] .station-list {
     order: 0;
-    max-height: calc(100% - 140px);
+    max-height: calc(100% - 120px);
     margin-bottom: 4px;
   }
 
