@@ -731,18 +731,20 @@ datalist {
 /* Landscape layout */
 @media (orientation: landscape) and (min-width: 720px) {
   body {
-    padding: 10px;
+    padding: 2%;
     align-items: center;
   }
 
   .container {
-    max-width: 91%;
-    min-height: 90vh;
+    max-width: 96%;
+    width: 96%;
+    margin: 2%;
+    padding: 2%;
+    min-height: 96vh;
     display: grid;
     grid-template-columns: 25% 60% 15%; /* Left: 25% station info, Center: 60% station list, Right: 15% controls */
     grid-template-rows: auto 1fr; /* Row 1: buttons, Row 2: main content + tabs */
-    gap: 10px;
-    padding: 10px;
+    gap: 5px;
     align-items: stretch;
   }
 
@@ -754,26 +756,26 @@ datalist {
   .share-button,
   .export-button,
   .import-button {
-    top: 10px;
+    top: calc(2% + 10px);
     height: 36px;
     width: 36px;
     font-size: 16px;
   }
 
   .theme-toggle {
-    left: 10px;
+    left: calc(2% + 10px);
   }
 
   .share-button {
-    left: 50px;
+    left: calc(2% + 50px);
   }
 
   .export-button {
-    right: 10px;
+    right: calc(2% + 10px);
   }
 
   .import-button {
-    right: 50px;
+    right: calc(2% + 50px);
   }
 
   #currentStationInfo {
@@ -781,20 +783,21 @@ datalist {
     grid-row: 1 / 2;
     position: static;
     height: auto;
-    max-height: calc(100vh - 80px); /* Account for tabs and padding */
+    max-height: calc(96vh - 70px); /* Account for tabs and padding */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 8px;
-    margin: 5px 0;
+    padding: 2%;
+    margin: 2% 0;
     overflow-y: auto;
+    border-radius: 8px;
   }
 
   .station-info-content {
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
   }
 
   .station-icon {
@@ -835,21 +838,23 @@ datalist {
   .station-list {
     grid-column: 2 / 3;
     grid-row: 1 / 2;
-    max-height: calc(100vh - 80px); /* Account for tabs and padding */
-    margin: 5px 0;
-    padding: 6px;
+    max-height: calc(96vh - 70px); /* Account for tabs and padding */
+    margin: 2% 0;
+    padding: 2%;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    border-radius: 8px;
   }
 
   .station-item {
     padding: 6px;
-    margin: 3px 0;
+    margin: 2% 0;
     font-size: 14px;
     min-height: 36px;
     align-items: center;
+    border-radius: 8px;
   }
 
   .station-item img {
@@ -874,20 +879,21 @@ datalist {
     position: static;
     border-top: none;
     border-left: 1px solid var(--accent);
-    padding: 8px;
-    margin: 5px 0;
+    padding: 2%;
+    margin: 2% 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 15px;
-    max-height: calc(100vh - 80px); /* Account for tabs and padding */
+    gap: 10px;
+    max-height: calc(96vh - 70px); /* Account for tabs and padding */
     overflow-y: auto;
+    border-radius: 8px;
   }
 
   .controls {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
   }
 
   .control-btn {
@@ -900,18 +906,19 @@ datalist {
     grid-column: 1 / 4;
     grid-row: 2 / 3;
     position: static;
-    margin: 5px 0;
-    padding: 0;
+    margin: 2% 0;
+    padding: 2%;
     max-width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
     box-sizing: border-box;
+    border-radius: 8px;
   }
 
   .tabs {
     justify-content: flex-start;
-    padding: 6px;
-    gap: 4px;
+    padding: 0;
+    gap: 5px;
     max-width: 100%;
     box-sizing: border-box;
   }
@@ -921,6 +928,7 @@ datalist {
     min-width: 60px;
     padding: 6px;
     font-size: 12px;
+    border-radius: 8px;
   }
 
   .add-tab-btn {
@@ -934,10 +942,11 @@ datalist {
     display: none;
     flex-direction: column;
     align-items: stretch;
-    padding: 6px;
-    margin: 5px 0;
-    max-height: calc(100vh - 80px); /* Account for tabs and padding */
+    padding: 2%;
+    margin: 2% 0;
+    max-height: calc(96vh - 70px); /* Account for tabs and padding */
     overflow-y: auto;
+    border-radius: 8px;
   }
 
   #searchInput.active {
@@ -956,22 +965,36 @@ datalist {
     display: flex;
   }
 
+  /* When search results are active, hide search inputs and show full-width station list */
+  .search-results-active .station-list {
+    width: 100%;
+    float: none;
+  }
+
+  .search-results-active #searchInput {
+    display: none;
+  }
+
   #searchQuery,
   #searchCountry,
   #searchGenre {
     font-size: 14px;
     padding: 6px;
-    min-height: 36px; /* Match station-item height */
+    min-height: 36px;
+    border-radius: 8px;
   }
 
   #searchInput button.search-btn {
     padding: 6px;
     font-size: 14px;
-    min-height: 36px; /* Match station-item height */
+    min-height: 36px;
+    border-radius: 8px;
   }
 
   .modal {
     max-width: 500px;
+    padding: 2%;
+    margin: 2%;
   }
 }
 
@@ -1093,7 +1116,7 @@ datalist {
     width: 6px;
   }
 
-  #searchInput {
+  .searchInput {
     padding: 6px;
     gap: 6px;
   }
