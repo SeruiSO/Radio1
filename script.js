@@ -26,9 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentStationInfo = document.getElementById("currentStationInfo");
   const themeToggle = document.querySelector(".theme-toggle");
   const shareButton = document.querySelector(".share-button");
-  const exportButton = document.querySelector(".export-button");
-  const importButton = document.querySelector(".import-button");
-  const importFileInput = document.getElementById("importFileInput");
   const searchInput = document.getElementById("searchInput");
   const searchQuery = document.getElementById("searchQuery");
   const searchCountry = document.getElementById("searchCountry");
@@ -37,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const pastSearchesList = document.getElementById("pastSearches");
   const tabsContainer = document.getElementById("tabs");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer) {
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer) {
     console.error("One of required DOM elements not found", {
       audio: !!audio,
       stationList: !!stationList,
@@ -45,9 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
       currentStationInfo: !!currentStationInfo,
       themeToggle: !!themeToggle,
       shareButton: !!shareButton,
-      exportButton: !!exportButton,
-      importButton: !!importButton,
-      importFileInput: !!importFileInput,
       searchInput: !!searchInput,
       searchQuery: !!searchQuery,
       searchCountry: !!searchCountry,
@@ -85,10 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    exportButton.addEventListener("click", exportSettings);
-    importButton.addEventListener("click", () => importFileInput.click());
-    importFileInput.addEventListener("change", importSettings);
-
     document.querySelector(".controls .control-btn:nth-child(1)").addEventListener("click", prevStation);
     document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", togglePlayPause);
     document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", nextStation);
@@ -123,116 +113,6 @@ document.addEventListener("DOMContentLoaded", () => {
     searchGenre.addEventListener("keypress", (e) => {
       if (e.key === "Enter") searchBtn.click();
     });
-
-    function exportSettings() {
-      const settings = {
-        selectedTheme: localStorage.getItem("selectedTheme") || "shadow-pulse",
-        customTabs: JSON.parse(localStorage.getItem("customTabs")) || [],
-        userAddedStations: JSON.parse(localStorage.getItem("userAddedStations")) || {},
-        favoriteStations: JSON.parse(localStorage.getItem("favoriteStations")) || [],
-        pastSearches: JSON.parse(localStorage.getItem("pastSearches")) || [],
-        deletedStations: JSON.parse(localStorage.getItem("deletedStations")) || [],
-        currentTab: localStorage.getItem("currentTab") || "techno"
-      };
-      const blob = new Blob([JSON.stringify(settings, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "radio_settings.json";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      console.log("Settings exported:", settings);
-    }
-
-    function importSettings(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const settings = JSON.parse(e.target.result);
-          if (!settings || typeof settings !== "object") {
-            alert("Invalid settings file!");
-            return;
-          }
-          const validThemes = [
-            "shadow-pulse", "dark-abyss", "emerald-glow", "retro-wave",
-            "neon-pulse", "lime-surge", "flamingo-flash", "aqua-glow",
-            "aurora-haze", "starlit-amethyst", "lunar-frost"
-          ];
-          if (settings.selectedTheme && validThemes.includes(settings.selectedTheme)) {
-            localStorage.setItem("selectedTheme", settings.selectedTheme);
-            applyTheme(settings.selectedTheme);
-          }
-          if (Array.isArray(settings.customTabs)) {
-            const validTabs = settings.customTabs.filter(tab => 
-              typeof tab === "string" && 
-              tab.trim() && 
-              tab.length <= 10 && 
-              /^[a-z0-9_-]+$/.test(tab) && 
-              !["best", "techno", "trance", "ukraine", "pop", "search"].includes(tab) &&
-              !customTabs.includes(tab)
-            );
-            if (validTabs.length + customTabs.length <= 7) {
-              customTabs = validTabs;
-              localStorage.setItem("customTabs", JSON.stringify(customTabs));
-            } else {
-              console.warn("Imported custom tabs exceed limit of 7, skipping");
-            }
-          }
-          if (settings.userAddedStations && typeof settings.userAddedStations === "object") {
-            const validStations = {};
-            Object.keys(settings.userAddedStations).forEach(tab => {
-              if (["techno", "trance", "ukraine", "pop", ...customTabs].includes(tab)) {
-                const stations = Array.isArray(settings.userAddedStations[tab]) 
-                  ? settings.userAddedStations[tab].filter(s => 
-                      s && typeof s === "object" && 
-                      s.name && typeof s.name === "string" && 
-                      s.value && isValidUrl(s.value) && 
-                      s.genre && typeof s.genre === "string" && 
-                      s.country && typeof s.country === "string"
-                    )
-                  : [];
-                validStations[tab] = stations;
-              }
-            });
-            userAddedStations = validStations;
-            localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
-          }
-          if (Array.isArray(settings.favoriteStations)) {
-            favoriteStations = settings.favoriteStations.filter(name => typeof name === "string");
-            localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-          }
-          if (Array.isArray(settings.pastSearches)) {
-            pastSearches = settings.pastSearches.filter(search => typeof search === "string").slice(0, 5);
-            localStorage.setItem("pastSearches", JSON.stringify(pastSearches));
-            updatePastSearches();
-          }
-          if (Array.isArray(settings.deletedStations)) {
-            deletedStations = settings.deletedStations.filter(name => typeof name === "string");
-            localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
-          }
-          if (settings.currentTab && typeof settings.currentTab === "string") {
-            const validTabs = ["best", "techno", "trance", "ukraine", "pop", "search", ...customTabs];
-            if (validTabs.includes(settings.currentTab)) {
-              currentTab = settings.currentTab;
-              localStorage.setItem("currentTab", currentTab);
-            }
-          }
-          loadStations();
-          switchTab(currentTab);
-          console.log("Settings imported:", settings);
-          alert("Settings imported successfully!");
-        } catch (error) {
-          console.error("Error importing settings:", error);
-          alert("Error importing settings. Please check the file format.");
-        }
-        importFileInput.value = "";
-      };
-      reader.readAsText(file);
-    }
 
     function populateSearchSuggestions() {
       const suggestedCountries = [
@@ -712,105 +592,87 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const themes = {
-      "shadow-pulse": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#00E676",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #00B248, #00E676)",
-        shadow: "rgba(0, 230, 118, 0.3)"
-      },
-      "dark-abyss": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#AA00FF",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #6A1B9A, #AA00FF)",
-        shadow: "rgba(170, 0, 255, 0.3)"
-      },
-      "emerald-glow": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#2EC4B6",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #1B998B, #2EC4B6)",
-        shadow: "rgba(46, 196, 182, 0.3)"
-      },
-      "retro-wave": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
-        accent: "#FF69B4",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #C71585, #FF69B4)",
-        shadow: "rgba(255, 105, 180, 0.3)"
-      },
       "neon-pulse": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
         accent: "#00F0FF",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #0077B6, #00F0FF)",
-        shadow: "rgba(0, 240, 255, 0.3)"
+        text: "#F0F0F0",
+        accentGradient: "#003C4B"
       },
       "lime-surge": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
         accent: "#B2FF59",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #00B248, #B2FF59)",
-        shadow: "rgba(178, 255, 89, 0.3)"
+        text: "#E8F5E9",
+        accentGradient: "#2E4B2F"
       },
       "flamingo-flash": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
         accent: "#FF4081",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #C71585, #FF4081)",
-        shadow: "rgba(255, 64, 129, 0.3)"
+        text: "#FCE4EC",
+        accentGradient: "#4B1A2E"
+      },
+      "violet-vortex": {
+        bodyBg: "#121212",
+        containerBg: "#1A1A1A",
+        accent: "#7C4DFF",
+        text: "#EDE7F6",
+        accentGradient: "#2E1A47"
       },
       "aqua-glow": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
         accent: "#26C6DA",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #0077B6, #26C6DA)",
-        shadow: "rgba(38, 198, 218, 0.3)"
+        text: "#B2EBF2",
+        accentGradient: "#1A3C4B"
+      },
+      "cosmic-indigo": {
+        bodyBg: "#121212",
+        containerBg: "#1A1A1A",
+        accent: "#3F51B5",
+        text: "#BBDEFB",
+        accentGradient: "#1A2A5A"
+      },
+      "mystic-jade": {
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
+        accent: "#26A69A",
+        text: "#B2DFDB",
+        accentGradient: "#1A3C4B"
       },
       "aurora-haze": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#121212",
+        containerBg: "#1A1A1A",
         accent: "#64FFDA",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #1B998B, #64FFDA)",
-        shadow: "rgba(100, 255, 218, 0.3)"
+        text: "#E0F7FA",
+        accentGradient: "#1A4B4B"
       },
       "starlit-amethyst": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#0A0A0A",
+        containerBg: "#121212",
         accent: "#B388FF",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #6A1B9A, #B388FF)",
-        shadow: "rgba(179, 136, 255, 0.3)"
+        text: "#E1BEE7",
+        accentGradient: "#2E1A47"
       },
       "lunar-frost": {
-        bodyBg: "#000000",
-        containerBg: "#000000",
+        bodyBg: "#F5F7FA",
+        containerBg: "#FFFFFF",
         accent: "#40C4FF",
-        text: "#FFFFFF",
-        accentGradient: "linear-gradient(45deg, #0077B6, #40C4FF)",
-        shadow: "rgba(64, 196, 255, 0.3)"
+        text: "#212121",
+        accentGradient: "#B3E5FC"
       }
     };
-    let currentTheme = localStorage.getItem("selectedTheme") || "shadow-pulse";
+    let currentTheme = localStorage.getItem("selectedTheme") || "neon-pulse";
     if (!themes[currentTheme]) {
-      currentTheme = "shadow-pulse";
+      currentTheme = "neon-pulse";
       localStorage.setItem("selectedTheme", currentTheme);
     }
 
     function applyTheme(theme) {
       if (!themes[theme]) {
-        console.warn(`Theme ${theme} not found, using 'shadow-pulse'`);
-        theme = "shadow-pulse";
+        console.warn(`Theme ${theme} not found, using 'neon-pulse'`);
+        theme = "neon-pulse";
         localStorage.setItem("selectedTheme", theme);
       }
       const root = document.documentElement;
@@ -819,7 +681,6 @@ document.addEventListener("DOMContentLoaded", () => {
       root.style.setProperty("--accent", themes[theme].accent);
       root.style.setProperty("--text", themes[theme].text);
       root.style.setProperty("--accent-gradient", themes[theme].accentGradient);
-      root.style.setProperty("--shadow", themes[theme].shadow);
       localStorage.setItem("selectedTheme", theme);
       currentTheme = theme;
       document.documentElement.setAttribute("data-theme", theme);
@@ -831,9 +692,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function toggleTheme() {
       const themesOrder = [
-        "shadow-pulse", "dark-abyss", "emerald-glow", "retro-wave",
-        "neon-pulse", "lime-surge", "flamingo-flash", "aqua-glow",
-        "aurora-haze", "starlit-amethyst", "lunar-frost"
+        "neon-pulse", "lime-surge", "flamingo-flash", "violet-vortex",
+        "aqua-glow", "cosmic-indigo", "mystic-jade", "aurora-haze",
+        "starlit-amethyst", "lunar-frost"
       ];
       const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
       applyTheme(nextTheme);
