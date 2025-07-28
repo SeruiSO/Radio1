@@ -1,4 +1,4 @@
-/* Updated on July 26, 2025 */
+/* Updated on July 28, 2025 */
 :root {
   --body-bg: #000000;
   --container-bg: #000000;
@@ -125,13 +125,13 @@ body {
 }
 
 .container {
-  max-width: 91%;
+  max-width: 95%;
   width: 100%;
   background: var(--container-bg);
   padding: 15px;
   border-radius: 12px;
   border: 1px solid var(--accent);
-  margin: 0 2%;
+  margin: 0 auto;
   min-height: 85vh;
   display: flex;
   flex-direction: column;
@@ -141,9 +141,8 @@ body {
 }
 
 h1 {
-  font-size: clamp(1.2em, 4vw, 1.5em);
+  font-size: 2.2em;
   margin: 5px 0;
-  padding: 0 10px;
   text-align: center;
   color: var(--accent);
   font-weight: 700;
@@ -257,8 +256,8 @@ h1 {
 }
 
 .station-icon {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   order: 1;
   font-size: 40px;
   display: flex;
@@ -569,7 +568,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 40px;
+  gap: 30px;
   z-index: 10;
   transition: background 0.3s ease, border-color 0.3s ease;
 }
@@ -577,12 +576,12 @@ h1 {
 .controls {
   display: flex;
   justify-content: center;
-  gap: 40px;
+  gap: 30px;
 }
 
 .control-btn {
-  width: 90px;
-  height: 90px;
+  width: 80px;
+  height: 80px;
   font-size: 32px;
   background: var(--container-bg);
   color: var(--text);
@@ -729,12 +728,195 @@ datalist {
   box-shadow: 0 0 8px var(--shadow);
 }
 
+/* Landscape layout */
+@media (orientation: landscape) and (min-width: 720px) {
+  body {
+    padding: 15px;
+    align-items: center;
+  }
+
+  .container {
+    max-width: 95%;
+    min-height: 90vh;
+    display: grid;
+    grid-template-columns: 300px 1fr 200px; /* Left: station info, Center: station list, Right: controls */
+    grid-template-rows: auto 1fr auto; /* Top: header/buttons, Middle: main content, Bottom: tabs */
+    gap: 15px;
+    padding: 15px;
+    align-items: stretch;
+  }
+
+  h1 {
+    grid-column: 1 / 4;
+    grid-row: 1 / 2;
+    margin: 0;
+    font-size: 2em;
+  }
+
+  .theme-toggle,
+  .share-button,
+  .export-button,
+  .import-button {
+    top: 15px;
+    height: 36px;
+    width: 36px;
+    font-size: 16px;
+  }
+
+  .theme-toggle {
+    left: 15px;
+  }
+
+  .share-button {
+    left: 55px;
+  }
+
+  .export-button {
+    right: 15px;
+  }
+
+  .import-button {
+    right: 55px;
+  }
+
+  #currentStationInfo {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+    position: static;
+    height: auto;
+    min-height: 150px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+    margin: 0;
+  }
+
+  .station-info-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .station-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 50px;
+    order: 1;
+  }
+
+  .station-text {
+    order: 2;
+    width: 100%;
+  }
+
+  .wave-visualizer {
+    order: 3;
+    width: 100%;
+    height: 80px;
+    margin-left: 0;
+  }
+
+  .wave-line {
+    width: 10px;
+  }
+
+  .station-list {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    max-height: 80vh;
+    margin: 0;
+    padding: 10px;
+  }
+
+  .controls-container {
+    grid-column: 3 / 4;
+    grid-row: 2 / 3;
+    position: static;
+    border-top: none;
+    border-left: 1px solid var(--accent);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .controls {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .control-btn {
+    width: 70px;
+    height: 70px;
+    font-size: 28px;
+  }
+
+  .tabs-wrapper {
+    grid-column: 1 / 4;
+    grid-row: 3 / 4;
+    position: static;
+    margin: 0;
+    padding: 0;
+  }
+
+  .tabs {
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .tab-btn,
+  .add-tab-btn {
+    min-width: 80px;
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .add-tab-btn {
+    width: 40px;
+  }
+
+  #searchInput {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    display: none; /* Hidden by default, shown when search tab is active */
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px;
+    margin: 0;
+    max-height: 80vh;
+  }
+
+  #searchInput.active {
+    display: flex;
+  }
+
+  #searchQuery,
+  #searchCountry,
+  #searchGenre {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  #searchInput button.search-btn {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .modal {
+    max-width: 600px;
+  }
+}
+
+/* Portrait and smaller screens */
 @media (max-width: 720px) {
   h1 {
-    font-size: clamp(1.2em, 4vw, 1.5em);
+    font-size: 1.8em;
     line-height: 1.2;
     margin: 5px 0;
-    padding: 0 10px;
   }
 
   .container {
@@ -743,8 +925,8 @@ datalist {
   }
 
   .control-btn {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     font-size: 28px;
     border: 1px solid var(--accent);
   }
@@ -820,6 +1002,51 @@ datalist {
     gap: 4px;
   }
 
+  #currentStationInfo {
+    padding: 10px;
+    height: 90px;
+  }
+
+  .station-info-content {
+    gap: 8px;
+  }
+
+  #currentStationInfo .station-name {
+    font-size: 14px;
+  }
+
+  .station-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 36px;
+  }
+
+  .wave-visualizer {
+    width: 80px;
+    height: 50px;
+  }
+
+  .wave-line {
+    width: 6px;
+  }
+
+  #searchInput {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  #searchQuery,
+  #searchCountry,
+  #searchGenre {
+    font-size: 13px;
+    padding: 6px;
+  }
+
+  #searchInput button.search-btn {
+    padding: 8px;
+    font-size: 13px;
+  }
+
   .modal {
     padding: 12px;
   }
@@ -841,7 +1068,7 @@ datalist {
   }
 }
 
-@media (min-width: 721px) {
+@media (min-width: 721px) and (orientation: portrait) {
   #searchInput {
     flex-direction: row;
     flex-wrap: wrap;
@@ -855,286 +1082,5 @@ datalist {
 
   .station-list {
     max-height: 50vh;
-  }
-}
-
-@media (orientation: landscape) and (min-width: 720px) {
-  body {
-    align-items: stretch;
-    padding: 0;
-  }
-
-  .container {
-    max-width: 91%;
-    width: 100%;
-    margin: 0 2% 20px 2%;
-    padding: 0;
-    min-height: calc(100vh - 40px);
-    height: calc(100vh - 40px);
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    box-sizing: border-box;
-    border: 1px solid var(--accent);
-    border-radius: 12px;
-  }
-
-  h1 {
-    display: none;
-  }
-
-  .theme-toggle,
-  .share-button,
-  .export-button,
-  .import-button {
-    position: absolute;
-    top: clamp(3px, 1vw, 5px);
-    height: clamp(25px, 5vw, 30px);
-    width: clamp(25px, 5vw, 30px);
-    padding: clamp(3px, 1vw, 4px);
-    font-size: clamp(14px, 3vw, 16px);
-    z-index: 11;
-  }
-
-  .theme-toggle {
-    left: clamp(3px, 1vw, 5px);
-  }
-
-  .share-button {
-    left: clamp(38px, 8vw, 45px);
-  }
-
-  .export-button {
-    right: clamp(3px, 1vw, 5px);
-  }
-
-  .import-button {
-    right: clamp(38px, 8vw, 45px);
-  }
-
-  #currentStationInfo {
-    flex: 0 0 30%;
-    min-width: 120px;
-    padding: clamp(8px, 2vw, 10px);
-    padding-bottom: 10px;
-    margin: 0;
-    position: static;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    height: 100%;
-    overflow-y: auto;
-    border: 2px solid var(--accent);
-    border-radius: 12px;
-    box-sizing: border-box;
-  }
-
-  .station-info-content {
-    flex-direction: column;
-    gap: clamp(8px, 1.5vw, 10px);
-    width: 100%;
-    align-items: center;
-  }
-
-  #currentStationInfo .station-name {
-    font-size: clamp(12px, 2.5vw, 14px);
-    text-align: center;
-  }
-
-  #currentStationInfo .station-genre,
-  #currentStationInfo .station-country {
-    font-size: clamp(8px, 1.8vw, 10px);
-    text-align: center;
-  }
-
-  .station-icon {
-    width: 100%;
-    height: clamp(50px, 10vw, 80px);
-    font-size: clamp(30px, 6vw, 50px);
-    order: 1;
-  }
-
-  .station-text {
-    order: 2;
-    text-align: center;
-    flex: none;
-  }
-
-  .wave-visualizer {
-    order: 3;
-    margin: 8px auto 0;
-    width: 100%;
-    height: clamp(30px, 5vw, 50px);
-  }
-
-  .wave-line {
-    height: 1px;
-    animation: wavePulse 1s infinite;
-  }
-
-  .station-list-container {
-    flex: 0 0 50%;
-    min-width: 150px;
-    margin: 0 5px;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    box-sizing: border-box;
-  }
-
-  .station-list {
-    max-height: calc(100% - 8px);
-    height: 100%;
-    margin: 0;
-    padding: clamp(8px, 1.5vw, 10px);
-    padding-bottom: 10px;
-    overflow-y: auto;
-    border: 2px solid var(--accent);
-    border-radius: 12px;
-    box-sizing: border-box;
-  }
-
-  .station-item {
-    padding: clamp(4px, 1vw, 6px);
-    margin: 2px 0;
-  }
-
-  .station-item .station-name {
-    font-size: clamp(10px, 2vw, 12px);
-  }
-
-  .station-item img {
-    width: clamp(16px, 3vw, 20px);
-    height: clamp(16px, 3vw, 20px);
-  }
-
-  #searchInput {
-    display: none;
-    margin: 4px 0;
-    padding: clamp(3px, 1vw, 5px);
-    flex-direction: column;
-    border-radius: 8px;
-    box-sizing: border-box;
-  }
-
-  #searchQuery,
-  #searchCountry,
-  #searchGenre {
-    max-width: 60%;
-    margin: 0 auto;
-    padding: clamp(3px, 1vw, 5px);
-    font-size: clamp(10px, 1.8vw, 12px);
-    border-radius: 8px;
-  }
-
-  #searchInput button.search-btn {
-    max-width: 60%;
-    margin: 0 auto;
-    padding: clamp(3px, 1vw, 5px) clamp(6px, 1.5vw, 8px);
-    font-size: clamp(10px, 1.8vw, 12px);
-    border-radius: 8px;
-  }
-
-  [data-tab="search"] .station-list-container {
-    justify-content: flex-start;
-    flex-direction: column;
-  }
-
-  [data-tab="search"] .station-list {
-    order: 0;
-    max-height: calc(100% - 140px);
-    margin-bottom: 4px;
-  }
-
-  [data-tab="search"] #searchInput {
-    order: 1;
-    display: flex;
-  }
-
-  .controls-container {
-    flex: 0 0 20%;
-    min-width: 60px;
-    padding: clamp(8px, 1.5vw, 10px);
-    padding-bottom: 10px;
-    margin: 0;
-    position: static;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    border: 2px solid var(--accent);
-    border-radius: 12px;
-    box-sizing: border-box;
-  }
-
-  .controls {
-    flex-direction: column;
-    gap: clamp(20px, 4vw, 25px);
-    align-items: center;
-    justify-content: space-between;
-    height: 100%;
-  }
-
-  .control-btn {
-    width: clamp(70px, 10vw, 80px);
-    height: clamp(70px, 10vw, 80px);
-    font-size: clamp(28px, 4vw, 32px);
-  }
-
-  .tabs-wrapper {
-    position: fixed;
-    bottom: 0;
-    margin: 0 2%;
-    padding: clamp(2px, 0.5vw, 3px);
-    width: 91%;
-    height: 40px;
-    z-index: 11;
-    overflow-x: auto;
-    box-sizing: border-box;
-    border-radius: 10px 10px 0 0;
-  }
-
-  .tabs {
-    width: 100%;
-    height: 100%;
-    justify-content: space-around;
-    gap: 2px;
-    padding: clamp(2px, 0.5vw, 3px);
-  }
-
-  .tab-btn,
-  .add-tab-btn {
-    min-width: clamp(35px, 7vw, 45px);
-    padding: clamp(4px, 1vw, 6px);
-    font-size: clamp(8px, 1.8vw, 10px);
-  }
-
-  .add-tab-btn {
-    width: clamp(20px, 4vw, 25px);
-    font-size: clamp(10px, 2.5vw, 12px);
-  }
-
-  .modal {
-    max-width: clamp(250px, 70vw, 350px);
-    width: 80%;
-    padding: 12px;
-  }
-
-  .modal h2 {
-    font-size: clamp(0.8em, 2.5vw, 0.9em);
-  }
-
-  .modal-tab-btn,
-  .modal-cancel-btn {
-    font-size: clamp(10px, 1.8vw, 12px);
-    padding: clamp(3px, 1vw, 5px);
-  }
-
-  .new-tab-modal input,
-  .edit-tab-modal input {
-    font-size: clamp(10px, 1.8vw, 12px);
-    padding: clamp(3px, 1vw, 5px);
   }
 }
