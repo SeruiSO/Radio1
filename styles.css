@@ -731,7 +731,7 @@ datalist {
 /* Landscape layout */
 @media (orientation: landscape) and (min-width: 720px) {
   body {
-    padding: 15px;
+    padding: 10px;
     align-items: center;
   }
 
@@ -739,44 +739,44 @@ datalist {
     max-width: 95%;
     min-height: 90vh;
     display: grid;
-    grid-template-columns: 300px 1fr 200px; /* Left: station info, Center: station list, Right: controls */
+    grid-template-columns: 25% 60% 15%; /* Left: 25% station info, Center: 60% station list, Right: 15% controls */
     grid-template-rows: auto 1fr auto; /* Top: header/buttons, Middle: main content, Bottom: tabs */
-    gap: 15px;
-    padding: 15px;
+    gap: 10px;
+    padding: 10px;
     align-items: stretch;
   }
 
   h1 {
     grid-column: 1 / 4;
     grid-row: 1 / 2;
-    margin: 0;
-    font-size: 2em;
+    margin: 5px 0;
+    font-size: 1.8em;
   }
 
   .theme-toggle,
   .share-button,
   .export-button,
   .import-button {
-    top: 15px;
+    top: 10px;
     height: 36px;
     width: 36px;
     font-size: 16px;
   }
 
   .theme-toggle {
-    left: 15px;
+    left: 10px;
   }
 
   .share-button {
-    left: 55px;
+    left: 50px;
   }
 
   .export-button {
-    right: 15px;
+    right: 10px;
   }
 
   .import-button {
-    right: 55px;
+    right: 50px;
   }
 
   #currentStationInfo {
@@ -784,25 +784,26 @@ datalist {
     grid-row: 2 / 3;
     position: static;
     height: auto;
-    min-height: 150px;
-    max-height: 80vh;
+    min-height: 120px;
+    max-height: calc(100vh - 140px); /* Account for header and tabs */
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding: 10px;
-    margin: 0;
+    justify-content: flex-start;
+    padding: 8px;
+    margin: 5px 0;
+    overflow-y: auto;
   }
 
   .station-info-content {
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
   }
 
   .station-icon {
-    width: 80px;
-    height: 80px;
-    font-size: 50px;
+    width: 60px;
+    height: 60px;
+    font-size: 40px;
     order: 1;
   }
 
@@ -811,23 +812,59 @@ datalist {
     width: 100%;
   }
 
+  #currentStationInfo .station-name {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  #currentStationInfo .station-genre,
+  #currentStationInfo .station-country {
+    font-size: 12px;
+    margin-top: 3px;
+  }
+
   .wave-visualizer {
     order: 3;
     width: 100%;
-    height: 80px;
+    height: 50px;
     margin-left: 0;
   }
 
   .wave-line {
-    width: 10px;
+    width: 6px;
   }
 
   .station-list {
     grid-column: 2 / 3;
     grid-row: 2 / 3;
-    max-height: 80vh;
-    margin: 0;
-    padding: 10px;
+    max-height: calc(100vh - 140px); /* Account for header and tabs */
+    margin: 5px 0;
+    padding: 6px;
+    overflow-y: auto;
+  }
+
+  .station-item {
+    padding: 6px;
+    margin: 3px 0;
+    font-size: 14px;
+    min-height: 36px; /* Reduced height */
+    align-items: center;
+  }
+
+  .station-item img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .station-item .station-name {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .station-item .favorite-btn,
+  .station-item .add-btn,
+  .station-item .delete-btn {
+    font-size: 16px;
   }
 
   .controls-container {
@@ -836,47 +873,58 @@ datalist {
     position: static;
     border-top: none;
     border-left: 1px solid var(--accent);
-    padding: 10px;
+    padding: 8px;
+    margin: 5px 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
+    max-height: calc(100vh - 140px); /* Account for header and tabs */
+    overflow-y: auto;
   }
 
   .controls {
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
   }
 
   .control-btn {
-    width: 70px;
-    height: 70px;
-    font-size: 28px;
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
   }
 
   .tabs-wrapper {
     grid-column: 1 / 4;
     grid-row: 3 / 4;
     position: static;
-    margin: 0;
+    margin: 5px 0;
     padding: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-sizing: border-box;
   }
 
   .tabs {
-    justify-content: center;
-    padding: 10px;
+    justify-content: flex-start;
+    padding: 6px;
+    gap: 4px;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .tab-btn,
   .add-tab-btn {
-    min-width: 80px;
-    padding: 8px;
-    font-size: 14px;
+    min-width: 60px;
+    padding: 6px;
+    font-size: 12px;
   }
 
   .add-tab-btn {
-    width: 40px;
+    width: 36px;
+    font-size: 16px;
   }
 
   #searchInput {
@@ -885,9 +933,10 @@ datalist {
     display: none; /* Hidden by default, shown when search tab is active */
     flex-direction: column;
     align-items: stretch;
-    padding: 10px;
-    margin: 0;
-    max-height: 80vh;
+    padding: 6px;
+    margin: 5px 0;
+    max-height: calc(100vh - 140px); /* Account for header and tabs */
+    overflow-y: auto;
   }
 
   #searchInput.active {
@@ -898,16 +947,18 @@ datalist {
   #searchCountry,
   #searchGenre {
     font-size: 14px;
-    padding: 8px;
+    padding: 6px;
+    min-height: 36px; /* Match station-item height */
   }
 
   #searchInput button.search-btn {
-    padding: 8px;
+    padding: 6px;
     font-size: 14px;
+    min-height: 36px; /* Match station-item height */
   }
 
   .modal {
-    max-width: 600px;
+    max-width: 500px;
   }
 }
 
