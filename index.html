@@ -41,38 +41,35 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#00DDEB">
-  <meta name="description" content="Progressive Web App for streaming radio stations">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Radio Music">
-  <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎧 Radio Music</title>
+  <meta name="theme-color" content="#0D1B2A">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded">
-  <title>Radio Music</title>
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
   <div class="container">
-    <h1>🎧 Radio Music</h1>
-    <div class="top-panel">
-      <button class="theme-toggle" title="Змінити тему">
-        <span class="material-symbols-rounded">dark_mode</span>
-      </button>
-      <button class="share-button" title="Поділитися">
-        <span class="material-symbols-rounded">share</span>
-      </button>
-      <button class="export-button" title="Експортувати">
-        <span class="material-symbols-rounded">file_download</span>
-      </button>
-      <button class="import-button" title="Імпортувати">
-        <span class="material-symbols-rounded">file_upload</span>
-      </button>
+    <header class="header">
+      <button class="theme-toggle" aria-label="Перемикання теми"><span class="icon-moon">🌙</span></button>
+      <button class="share-button" aria-label="Поділитися"><span class="icon-share">📢</span></button>
+      <button class="export-button" aria-label="Експортувати вкладки"><span class="icon-export">📤</span></button>
+      <button class="import-button" aria-label="Імпортувати вкладки"><span class="icon-import">📥</span></button>
       <input type="file" id="importFileInput" accept=".json">
+    </header>
+
+    <main class="station-list" data-swipe="true" aria-label="Список радіостанцій">
+      <div class="station-item empty" aria-live="polite">Обирайте станцію</div>
+    </main>
+
+    <div class="controls-container">
+      <div class="controls">
+        <button class="control-btn prev-btn" aria-label="Попередня станція"><span class="icon-prev">⏮</span></button>
+        <button class="control-btn play-btn" aria-label="Відтворити або призупинити"><span class="icon-play">▶</span></button>
+        <button class="control-btn next-btn" aria-label="Наступна станція"><span class="icon-next">⏭</span></button>
+      </div>
     </div>
 
-    <div id="currentStationInfo">
+    <footer id="currentStationInfo" aria-label="Інформація про поточну станцію">
       <div class="station-info-content">
         <div class="station-icon">🎵</div>
         <div class="station-text">
@@ -80,11 +77,10 @@
           <div class="station-genre">жанр: -</div>
           <div class="station-country">країна: -</div>
         </div>
+        <div class="volume-control">
+          <input type="range" min="0" max="100" value="50" aria-label="Регулятор гучності">
+        </div>
         <div class="wave-visualizer">
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
-          <div class="wave-line"></div>
           <div class="wave-line"></div>
           <div class="wave-line"></div>
           <div class="wave-line"></div>
@@ -92,60 +88,29 @@
           <div class="wave-line"></div>
         </div>
       </div>
-    </div>
+    </footer>
 
     <div class="tabs-wrapper">
       <div class="tabs">
-        <button class="tab-btn active" data-tab="Best">Best</button>
-        <button class="tab-btn" data-tab="Techno">Techno</button>
-        <button class="tab-btn" data-tab="Trance">Trance</button>
-        <button class="tab-btn" data-tab="UA">UA</button>
-        <button class="tab-btn" data-tab="Pop">Pop</button>
-        <button class="tab-btn" data-tab="Search">Search</button>
-        <button class="add-tab-btn">+</button>
+        <button class="tab-btn active" data-tab-id="0" aria-label="Вкладка Favorites">Favorites</button>
+        <button class="tab-btn" data-tab-id="1" aria-label="Вкладка Search">Search</button>
+        <button class="add-tab-btn" aria-label="Додати нову вкладку">+</button>
       </div>
     </div>
 
-    <div id="searchInput">
-      <div style="position: relative;">
-        <input type="text" id="searchQuery" placeholder="Пошук за назвою" list="querySuggestions">
-        <button class="search-clear" title="Очистити">×</button>
-      </div>
-      <div style="position: relative;">
-        <input type="text" id="searchCountry" placeholder="Країна" list="countrySuggestions">
-        <button class="search-clear" title="Очистити">×</button>
-      </div>
-      <div style="position: relative;">
-        <input type="text" id="searchGenre" placeholder="Жанр" list="genreSuggestions">
-        <button class="search-clear" title="Очистити">×</button>
-      </div>
-      <button class="search-btn">🔍</button>
-      <datalist id="querySuggestions"></datalist>
-      <datalist id="countrySuggestions"></datalist>
-      <datalist id="genreSuggestions"></datalist>
+    <div id="searchInput" aria-label="Пошук радіостанцій">
+      <input type="text" id="searchQuery" placeholder="Назва або тег">
+      <input type="text" id="searchGenre" placeholder="Жанр" list="genres">
+      <input type="text" id="searchCountry" placeholder="Країна" list="countries">
+      <button class="search-btn" aria-label="Шукати">🔍</button>
     </div>
+  </div>
 
-    <div class="station-list"></div>
-
-    <div class="controls-container">
-      <div class="controls">
-        <button class="control-btn" id="prevBtn" title="Попередня станція">
-          <span class="material-symbols-rounded">skip_previous</span>
-        </button>
-        <button class="control-btn" id="playPauseBtn" title="Відтворити/Пауза">
-          <span class="material-symbols-rounded">play_arrow</span>
-        </button>
-        <button class="control-btn" id="nextBtn" title="Наступна станція">
-          <span class="material-symbols-rounded">skip_next</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="modal-overlay" style="display: none;"></div>
+  <div class="modal-overlay" style="display: none;">
     <div class="modal new-tab-modal" style="display: none;">
       <h2>Створити нову вкладку</h2>
       <div class="modal-tabs">
-        <input type="text" id="newTabName" placeholder="Назва вкладки">
+        <input type="text" placeholder="Назва вкладки">
         <button class="modal-tab-btn">Створити</button>
         <button class="modal-cancel-btn">Відміна</button>
       </div>
@@ -154,16 +119,17 @@
     <div class="modal edit-tab-modal" style="display: none;">
       <h2>Дії з вкладкою</h2>
       <div class="modal-tabs">
-        <input type="text" id="editTabName" placeholder="Нова назва вкладки">
-        <button class="modal-tab-btn rename">Перейменувати</button>
-        <button class="modal-tab-btn delete">Видалити</button>
+        <input type="text" placeholder="Нова назва вкладки">
+        <button class="modal-tab-btn rename-btn">Перейменувати</button>
+        <button class="modal-tab-btn delete-btn">Видалити</button>
         <button class="modal-cancel-btn">Відміна</button>
       </div>
     </div>
-
-    <audio id="player" preload="none"></audio>
   </div>
+
+  <datalist id="genres"></datalist>
+  <datalist id="countries"></datalist>
+
   <script src="script.js"></script>
-  <script src="sw.js"></script>
 </body>
 </html>
