@@ -1,4 +1,4 @@
-/* Updated on July 15, 2025 */
+/* Updated on August 01, 2025 */
 :root {
   --body-bg: #000000;
   --container-bg: #000000;
@@ -728,6 +728,7 @@ datalist {
   box-shadow: 0 0 8px var(--shadow);
 }
 
+/* Медіа-запит для портретного режиму (720px і менше) */
 @media (max-width: 720px) {
   h1 {
     font-size: 1.8em;
@@ -884,6 +885,190 @@ datalist {
   }
 }
 
+/* Медіа-запит для альбомного режиму (телефони) */
+@media (max-width: 900px) and (orientation: landscape) {
+  body {
+    padding-top: 5px;
+  }
+
+  .container {
+    max-width: 95%;
+    padding: 8px;
+    min-height: auto;
+    height: 95vh;
+  }
+
+  h1 {
+    font-size: 1.6em;
+    margin: 3px 0;
+  }
+
+  .theme-toggle,
+  .share-button,
+  .export-button,
+  .import-button {
+    top: 5px;
+    height: 30px;
+    width: 30px;
+    font-size: 14px;
+  }
+
+  .theme-toggle {
+    left: 5px;
+  }
+
+  .share-button {
+    left: 40px;
+  }
+
+  .export-button {
+    right: 5px;
+  }
+
+  .import-button {
+    right: 40px;
+  }
+
+  #currentStationInfo {
+    padding: 8px;
+    height: 70px;
+  }
+
+  .station-info-content {
+    gap: 6px;
+  }
+
+  #currentStationInfo .station-name {
+    font-size: 12px;
+    -webkit-line-clamp: 1;
+  }
+
+  #currentStationInfo .station-genre,
+  #currentStationInfo .station-country {
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  .station-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+
+  .wave-visualizer {
+    width: 60px;
+    height: 40px;
+  }
+
+  .wave-line {
+    width: 5px;
+  }
+
+  .station-list {
+    max-height: 40vh;
+    margin: 3px 0;
+    padding: 5px;
+  }
+
+  .station-item {
+    padding: 6px;
+    margin: 2px 0;
+  }
+
+  .station-item .station-name {
+    font-size: 12px;
+    line-height: 1.2;
+    -webkit-line-clamp: 1;
+  }
+
+  .station-item img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .station-item .favorite-btn,
+  .station-item .add-btn,
+  .station-item .delete-btn {
+    font-size: 16px;
+  }
+
+  .tabs-wrapper {
+    margin: 2px 0;
+    padding: 0 3px;
+  }
+
+  .tabs {
+    padding: 5px;
+    gap: 3px;
+  }
+
+  .tab-btn,
+  .add-tab-btn {
+    min-width: 50px;
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .add-tab-btn {
+    width: 30px;
+    font-size: 14px;
+  }
+
+  .controls-container {
+    padding: 8px;
+    gap: 20px;
+  }
+
+  .controls {
+    gap: 20px;
+  }
+
+  .control-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+
+  #searchInput {
+    padding: 5px;
+    gap: 5px;
+  }
+
+  #searchQuery,
+  #searchCountry,
+  #searchGenre {
+    font-size: 11px;
+    padding: 5px;
+  }
+
+  #searchInput button.search-btn {
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .modal {
+    padding: 10px;
+    max-height: 70vh;
+  }
+
+  .modal h2 {
+    font-size: 1.1em;
+  }
+
+  .modal-tab-btn,
+  .modal-cancel-btn {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .new-tab-modal input,
+  .edit-tab-modal input {
+    font-size: 12px;
+    padding: 6px;
+  }
+}
+
+/* Медіа-запит для ширших екранів у портретному режимі */
 @media (min-width: 721px) {
   #searchInput {
     flex-direction: row;
@@ -891,6 +1076,7 @@ datalist {
   }
 }
 
+/* Медіа-запит для високих екранів */
 @media (max-height: 1600px) {
   .container {
     min-height: 80vh;
@@ -898,5 +1084,41 @@ datalist {
 
   .station-list {
     max-height: 50vh;
+  }
+}
+
+/* Додатковий медіа-запит для дуже низьких екранів у альбомному режимі */
+@media (max-height: 400px) and (orientation: landscape) {
+  .container {
+    height: 90vh;
+  }
+
+  .station-list {
+    max-height: 35vh;
+  }
+
+  .control-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  #currentStationInfo {
+    height: 60px;
+  }
+
+  .station-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .wave-visualizer {
+    width: 50px;
+    height: 30px;
+  }
+
+  .wave-line {
+    width: 4px;
   }
 }
