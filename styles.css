@@ -168,6 +168,7 @@ h1 {
   justify-content: center;
   transition: all 0.2s ease;
   font-size: 18px;
+  z-index: 10;
 }
 
 .theme-toggle {
@@ -212,7 +213,7 @@ h1 {
   align-items: center;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 9;
   box-shadow: 0 4px 15px var(--shadow);
   transition: all 0.3s ease;
 }
@@ -322,6 +323,7 @@ h1 {
   scrollbar-color: var(--accent) transparent;
   flex-grow: 1;
   transition: all 0.3s ease;
+  order: 3;
 }
 
 .station-list::-webkit-scrollbar {
@@ -438,7 +440,7 @@ h1 {
 }
 
 .tabs-wrapper {
-  order: 3;
+  order: 4;
   overflow-x: auto;
   margin: 5px 0;
   z-index: 10;
@@ -819,6 +821,10 @@ datalist {
     gap: 4px;
   }
 
+  .controls-container {
+    order: 4;
+  }
+
   #currentStationInfo {
     padding: 10px;
     height: 90px;
@@ -888,7 +894,7 @@ datalist {
 /* Медіа-запит для альбомного режиму (телефони) */
 @media (max-width: 900px) and (orientation: landscape) {
   body {
-    padding-top: 35px; /* Збільшуємо відступ зверху для кнопок теми та налаштувань */
+    padding-top: 5px;
   }
 
   h1 {
@@ -909,23 +915,32 @@ datalist {
   .share-button,
   .export-button,
   .import-button {
-    position: static; /* Видаляємо абсолютне позиціонування */
-    width: 23.5%; /* Розподіляємо ширину рівномірно на 4 кнопки */
-    height: 28px;
-    font-size: 13px;
-    padding: 4px;
-    margin: 2px;
-    border-radius: 8px;
-    display: inline-flex;
+    width: 40px; /* Збільшена ширина для ширшого вигляду */
+    height: 24px; /* Компактна висота */
+    font-size: 12px;
+    padding: 3px;
+    border-radius: 6px;
+    z-index: 10;
   }
 
-  /* Контейнер для кнопок теми та налаштувань */
-  .settings-buttons {
-    display: flex;
-    justify-content: space-between;
-    gap: 2px;
-    margin-bottom: 2px;
-    order: 1; /* Розташовуємо перед #currentStationInfo */
+  .theme-toggle {
+    left: 3px;
+    top: 3px;
+  }
+
+  .share-button {
+    left: 46px; /* Відступ для розташування поруч із theme-toggle */
+    top: 3px;
+  }
+
+  .export-button {
+    right: 3px;
+    top: 3px;
+  }
+
+  .import-button {
+    right: 46px; /* Відступ для розташування поруч із export-button */
+    top: 3px;
   }
 
   #currentStationInfo {
@@ -934,12 +949,12 @@ datalist {
     margin: 2px 0;
     order: 2;
     top: 30px; /* Зміщуємо нижче кнопок */
-    z-index: 9; /* Зменшуємо z-index, щоб кнопки були зверху */
+    z-index: 9;
   }
 
   .station-info-content {
     gap: 4px;
-    justify-content: center; /* Вирівнюємо по центру */
+    justify-content: center;
     align-items: center;
   }
 
@@ -978,7 +993,7 @@ datalist {
   }
 
   .station-list {
-    max-height: 50vh; /* Збільшуємо висоту списку станцій */
+    max-height: 50vh;
     margin: 2px 0;
     padding: 4px;
     border-width: 1px;
@@ -1009,7 +1024,7 @@ datalist {
   }
 
   .tabs-wrapper {
-    order: 4; /* Переміщуємо вкладки вниз */
+    order: 4;
     margin: 2px 0;
     padding: 0 2px;
   }
@@ -1034,7 +1049,7 @@ datalist {
   }
 
   .controls-container {
-    order: 5; /* Переміщуємо панель кнопок вниз */
+    order: 5;
     padding: 5px;
     gap: 10px;
     border-top-width: 1px;
@@ -1127,7 +1142,7 @@ datalist {
   }
 
   .station-list {
-    max-height: 45vh; /* Збільшуємо висоту для низьких екранів */
+    max-height: 45vh;
   }
 
   .control-btn {
@@ -1179,9 +1194,30 @@ datalist {
   .share-button,
   .export-button,
   .import-button {
-    width: 23.5%;
-    height: 25px;
-    font-size: 12px;
-    padding: 3px;
+    width: 36px;
+    height: 22px;
+    font-size: 11px;
+    padding: 2px;
+    border-radius: 5px;
+  }
+
+  .theme-toggle {
+    left: 2px;
+    top: 2px;
+  }
+
+  .share-button {
+    left: 40px;
+    top: 2px;
+  }
+
+  .export-button {
+    right: 2px;
+    top: 2px;
+  }
+
+  .import-button {
+    right: 40px;
+    top: 2px;
   }
 }
