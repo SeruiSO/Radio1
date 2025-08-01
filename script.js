@@ -1,7 +1,6 @@
-let currentTab = localStorage.getItem("currentTab") || "favorites";
+let currentTab = localStorage.getItem("currentTab") || "techno";
 let currentIndex = 0;
 let favoriteStations = JSON.parse(localStorage.getItem("favoriteStations")) || [];
-let recentStations = JSON.parse(localStorage.getItem("recentStations")) || [];
 let isPlaying = localStorage.getItem("isPlaying") === "true" || false;
 let intendedPlaying = localStorage.getItem("intendedPlaying") === "true" || false;
 let stationLists = JSON.parse(localStorage.getItem("stationLists")) || {};
@@ -9,7 +8,7 @@ let userAddedStations = JSON.parse(localStorage.getItem("userAddedStations")) ||
 let stationItems = [];
 let abortController = new AbortController();
 let errorCount = 0;
-const ERROR_LIMIT = 7;
+const ERROR_LIMIT = 15;
 let pastSearches = JSON.parse(localStorage.getItem("pastSearches")) || [];
 let deletedStations = JSON.parse(localStorage.getItem("deletedStations")) || [];
 let customTabs = JSON.parse(localStorage.getItem("customTabs")) || [];
@@ -18,31 +17,28 @@ let lastSuccessfulPlayTime = 0;
 let streamAbortController = null;
 let errorTimeout = null;
 let autoPlayRequestId = 0;
-let searchTimeout = null;
 customTabs = Array.isArray(customTabs) ? customTabs.filter(tab => typeof tab === "string" && tab.trim()) : [];
 
 document.addEventListener("DOMContentLoaded", () => {
-  const audio = document.createElement("audio");
-  audio.id = "audioPlayer";
-  document.body.appendChild(audio);
-  const stationList = document.querySelector(".station-list");
-  const playPauseBtn = document.querySelector(".control-btn.play-btn");
-  const currentStationInfo = document.querySelector("#currentStationInfo");
+  const audio = document.getElementById("audioPlayer");
+  const stationList = document.getElementById("stationList");
+  const playPauseBtn = document.querySelector(".controls .control-btn:nth-child(2)");
+  const currentStationInfo = document.getElementById("currentStationInfo");
   const themeToggle = document.querySelector(".theme-toggle");
   const shareButton = document.querySelector(".share-button");
   const exportButton = document.querySelector(".export-button");
   const importButton = document.querySelector(".import-button");
-  const importFileInput = document.querySelector("#importFileInput");
-  const searchInput = document.querySelector("#searchInput");
-  const searchQuery = document.querySelector("#searchQuery");
-  const searchCountry = document.querySelector("#searchCountry");
-  const searchGenre = document.querySelector("#searchGenre");
+  const importFileInput = document.getElementById("importFileInput");
+  const searchInput = document.getElementById("searchInput");
+  const searchQuery = document.getElementById("searchQuery");
+  const searchCountry = document.getElementById("searchCountry");
+  const searchGenre = document.getElementById("searchGenre");
   const searchBtn = document.querySelector(".search-btn");
-  const tabsContainer = document.querySelector(".tabs");
-  const volumeControl = document.querySelector(".volume-control input");
+  const pastSearchesList = document.getElementById("pastSearches");
+  const tabsContainer = document.getElementById("tabs");
 
-  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !tabsContainer || !volumeControl) {
-    console.error("Required DOM elements missing", {
+  if (!audio || !stationList || !playPauseBtn || !currentStationInfo || !themeToggle || !shareButton || !exportButton || !importButton || !importFileInput || !searchInput || !searchQuery || !searchCountry || !searchGenre || !searchBtn || !pastSearchesList || !tabsContainer) {
+    console.error("One of required DOM elements not found", {
       audio: !!audio,
       stationList: !!stationList,
       playPauseBtn: !!playPauseBtn,
@@ -57,8 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
       searchCountry: !!searchCountry,
       searchGenre: !!searchGenre,
       searchBtn: !!searchBtn,
-      tabsContainer: !!tabsContainer,
-      volumeControl: !!volumeControl
+      pastSearchesList: !!pastSearchesList,
+      tabsContainer: !!tabsContainer
     });
     setTimeout(initializeApp, 100);
     return;
@@ -68,25 +64,83 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initializeApp() {
     audio.preload = "auto";
-    audio.volume = parseFloat(localStorage.getItem("volume")) || 0.5;
-    volumeControl.value = audio.volume * 100;
+    audio.volume = parseFloat(localStorage.getItem("volume")) || 0.9;
 
     updatePastSearches();
     populateSearchSuggestions();
     renderTabs();
-    setupSwipeGestures();
+
+    // Періодична перевірка стану кожні 5 хвилин
+    setInterval(async () => {
+      if (!intendedPlaying || isPlaying || !navigator.onLine || !stationItems?.length || currentIndex >= stationItems.length) {
+        console.log("Periodic check: Skip, invalid state");
+        return;
+      }
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioOutputs = devices.filter(device => device.kind === "audiooutput");
+        if (audioOutputs.length > 0) {
+          console.log("Periodic check: Audio device available, attempting to resume playback");
+          isAutoPlayPending = false;
+          debouncedTryAutoPlay();
+        } else {
+          console.log("Periodic check: No audio output devices available");
+        }
+      } catch (error) {
+        console.error("Periodic check: Error checking audio devices:", error);
+      }
+    }, 300000); // Перевірка кожні 5 хвилин
+
+    // Моніторинг змін аудіопристроїв
+    if (navigator.mediaDevices && "ondevicechange" in navigator.mediaDevices) {
+      navigator.mediaDevices.ondevicechange = async () => {
+        console.log("Media device change detected");
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const audioOutputs = devices.filter(device => device.kind === "audiooutput");
+          console.log("Available audio outputs:", audioOutputs);
+          if (audioOutputs.length > 0 && intendedPlaying && !isPlaying) {
+            console.log("Audio device reconnected, attempting to resume playback");
+            isAutoPlayPending = false;
+            debouncedTryAutoPlay();
+          }
+        } catch (error) {
+          console.error("Error enumerating devices:", error);
+        }
+      };
+    } else {
+      console.warn("MediaDevices.ondevicechange not supported");
+    }
+
+    // Перевірка стану при ініціалізації
+    if (intendedPlaying && navigator.onLine && stationItems?.length && currentIndex < stationItems.length) {
+      console.log("initializeApp: Checking for audio output to resume playback");
+      navigator.mediaDevices.enumerateDevices().then(devices => {
+        const audioOutputs = devices.filter(device => device.kind === "audiooutput");
+        if (audioOutputs.length > 0) {
+          console.log("Audio output available, attempting to resume playback");
+          isAutoPlayPending = false;
+          debouncedTryAutoPlay();
+        } else {
+          console.log("No audio output devices available");
+        }
+      }).catch(error => {
+        console.error("Error checking audio devices:", error);
+      });
+    }
 
     shareButton.addEventListener("click", () => {
-      const stationName = currentStationInfo.querySelector(".station-name")?.textContent || "Radio Music";
+      const stationName = currentStationInfo.querySelector(".station-name").textContent || "Radio S O";
       const shareData = {
-        title: "Radio Music",
-        text: `Слухаю ${stationName} на Radio Music! Приєднуйся!`,
+        title: "Radio S O",
+        text: `Listening to ${stationName} on Radio S O! Join my favorite radio stations!`,
         url: window.location.href
       };
       if (navigator.share) {
-        navigator.share(shareData).catch(error => console.error("Помилка поширення:", error));
+        navigator.share(shareData)
+          .catch(error => console.error("Error sharing:", error));
       } else {
-        alert(`Функція поширення не підтримується. Скопіюйте: ${shareData.text} ${shareData.url}`);
+        alert(`Share function not supported. Copy: ${shareData.text} ${shareData.url}`);
       }
     });
 
@@ -94,20 +148,15 @@ document.addEventListener("DOMContentLoaded", () => {
     importButton.addEventListener("click", () => importFileInput.click());
     importFileInput.addEventListener("change", importSettings);
 
-    document.querySelector(".control-btn.prev-btn").addEventListener("click", prevStation);
-    document.querySelector(".control-btn.play-btn").addEventListener("click", togglePlayPause);
-    document.querySelector(".control-btn.next-btn").addEventListener("click", nextStation);
-
-    volumeControl.addEventListener("input", () => {
-      audio.volume = volumeControl.value / 100;
-      localStorage.setItem("volume", audio.volume);
-      currentStationInfo.setAttribute("aria-label", `Поточна станція: ${currentStationInfo.querySelector(".station-name")?.textContent || "Немає"}, гучність: ${Math.round(audio.volume * 100)}%`);
-    });
+    document.querySelector(".controls .control-btn:nth-child(1)").addEventListener("click", prevStation);
+    document.querySelector(".controls .control-btn:nth-child(2)").addEventListener("click", togglePlayPause);
+    document.querySelector(".controls .control-btn:nth-child(3)").addEventListener("click", nextStation);
 
     searchBtn.addEventListener("click", () => {
       const query = searchQuery.value.trim();
       const country = normalizeCountry(searchCountry.value.trim());
       const genre = searchGenre.value.trim().toLowerCase();
+      console.log("Search:", { query, country, genre });
       if (query || country || genre) {
         if (query && !pastSearches.includes(query)) {
           pastSearches.unshift(query);
@@ -115,10 +164,10 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("pastSearches", JSON.stringify(pastSearches));
           updatePastSearches();
         }
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => searchStations(query, country, genre), 300);
+        searchStations(query, country, genre);
       } else {
-        stationList.innerHTML = "<div class='station-item empty'>Введіть назву, країну або жанр</div>";
+        console.warn("All search fields are empty");
+        stationList.innerHTML = "<div class='station-item empty'>Enter station name, country or genre</div>";
       }
     });
 
@@ -134,29 +183,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.key === "Enter") searchBtn.click();
     });
 
-    function setupSwipeGestures() {
-      let touchStartX = 0;
-      let touchEndX = 0;
-      stationList.addEventListener("touchstart", (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-      });
-      stationList.addEventListener("touchend", (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        if (touchStartX - touchEndX > 50) nextStation();
-        if (touchEndX - touchStartX > 50) prevStation();
-      });
-    }
-
     function exportSettings() {
       const settings = {
-        selectedTheme: "cyber-grid",
-        customTabs,
-        userAddedStations,
-        favoriteStations,
-        recentStations,
-        pastSearches,
-        deletedStations,
-        currentTab
+        selectedTheme: localStorage.getItem("selectedTheme") || "shadow-pulse",
+        customTabs: JSON.parse(localStorage.getItem("customTabs")) || [],
+        userAddedStations: JSON.parse(localStorage.getItem("userAddedStations")) || {},
+        favoriteStations: JSON.parse(localStorage.getItem("favoriteStations")) || [],
+        pastSearches: JSON.parse(localStorage.getItem("pastSearches")) || [],
+        deletedStations: JSON.parse(localStorage.getItem("deletedStations")) || [],
+        currentTab: localStorage.getItem("currentTab") || "techno"
       };
       const blob = new Blob([JSON.stringify(settings, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -167,6 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      console.log("Settings exported:", settings);
     }
 
     function importSettings(event) {
@@ -177,33 +213,44 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           const settings = JSON.parse(e.target.result);
           if (!settings || typeof settings !== "object") {
-            alert("Невірний формат файлу!");
+            alert("Invalid settings file!");
             return;
           }
+          const validThemes = [
+            "shadow-pulse", "dark-abyss", "emerald-glow", "retro-wave",
+            "neon-pulse", "lime-surge", "flamingo-flash", "aqua-glow",
+            "aurora-haze", "starlit-amethyst", "lunar-frost"
+          ];
+          if (settings.selectedTheme && validThemes.includes(settings.selectedTheme)) {
+            localStorage.setItem("selectedTheme", settings.selectedTheme);
+            applyTheme(settings.selectedTheme);
+          }
           if (Array.isArray(settings.customTabs)) {
-            const validTabs = settings.customTabs.filter(tab =>
-              typeof tab === "string" &&
-              tab.trim() &&
-              tab.length <= 10 &&
-              /^[a-z0-9_-]+$/.test(tab) &&
-              !["favorites", "recent", "search"].includes(tab) &&
+            const validTabs = settings.customTabs.filter(tab => 
+              typeof tab === "string" && 
+              tab.trim() && 
+              tab.length <= 10 && 
+              /^[a-z0-9_-]+$/.test(tab) && 
+              !["best", "techno", "trance", "ukraine", "pop", "search"].includes(tab) &&
               !customTabs.includes(tab)
             );
             if (validTabs.length + customTabs.length <= 7) {
               customTabs = validTabs;
               localStorage.setItem("customTabs", JSON.stringify(customTabs));
+            } else {
+              console.warn("Imported custom tabs exceed limit of 7, skipping");
             }
           }
           if (settings.userAddedStations && typeof settings.userAddedStations === "object") {
             const validStations = {};
             Object.keys(settings.userAddedStations).forEach(tab => {
-              if (["favorites", "recent", ...customTabs].includes(tab)) {
-                const stations = Array.isArray(settings.userAddedStations[tab])
-                  ? settings.userAddedStations[tab].filter(s =>
-                      s && typeof s === "object" &&
-                      s.name && typeof s.name === "string" &&
-                      s.value && isValidUrl(s.value) &&
-                      s.genre && typeof s.genre === "string" &&
+              if (["techno", "trance", "ukraine", "pop", ...customTabs].includes(tab)) {
+                const stations = Array.isArray(settings.userAddedStations[tab]) 
+                  ? settings.userAddedStations[tab].filter(s => 
+                      s && typeof s === "object" && 
+                      s.name && typeof s.name === "string" && 
+                      s.value && isValidUrl(s.value) && 
+                      s.genre && typeof s.genre === "string" && 
                       s.country && typeof s.country === "string"
                     )
                   : [];
@@ -217,14 +264,6 @@ document.addEventListener("DOMContentLoaded", () => {
             favoriteStations = settings.favoriteStations.filter(name => typeof name === "string");
             localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
           }
-          if (Array.isArray(settings.recentStations)) {
-            recentStations = settings.recentStations.filter(s =>
-              s && typeof s === "object" &&
-              s.name && typeof s.name === "string" &&
-              s.value && isValidUrl(s.value)
-            ).slice(0, 5);
-            localStorage.setItem("recentStations", JSON.stringify(recentStations));
-          }
           if (Array.isArray(settings.pastSearches)) {
             pastSearches = settings.pastSearches.filter(search => typeof search === "string").slice(0, 5);
             localStorage.setItem("pastSearches", JSON.stringify(pastSearches));
@@ -234,16 +273,20 @@ document.addEventListener("DOMContentLoaded", () => {
             deletedStations = settings.deletedStations.filter(name => typeof name === "string");
             localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
           }
-          if (settings.currentTab && ["favorites", "recent", "search", ...customTabs].includes(settings.currentTab)) {
-            currentTab = settings.currentTab;
-            localStorage.setItem("currentTab", currentTab);
+          if (settings.currentTab && typeof settings.currentTab === "string") {
+            const validTabs = ["best", "techno", "trance", "ukraine", "pop", "search", ...customTabs];
+            if (validTabs.includes(settings.currentTab)) {
+              currentTab = settings.currentTab;
+              localStorage.setItem("currentTab", currentTab);
+            }
           }
           loadStations();
           switchTab(currentTab);
-          alert("Налаштування успішно імпортовано!");
+          console.log("Settings imported:", settings);
+          alert("Settings imported successfully!");
         } catch (error) {
-          console.error("Помилка імпорту:", error);
-          alert("Помилка імпорту. Перевірте формат файлу.");
+          console.error("Error importing settings:", error);
+          alert("Error importing settings. Please check the file format.");
         }
         importFileInput.value = "";
       };
@@ -252,52 +295,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function populateSearchSuggestions() {
       const suggestedCountries = [
-        "Україна", "Німеччина", "Франція", "Велика Британія", "Італія", "Іспанія",
-        "Нідерланди", "Швейцарія", "Бельгія", "Швеція", "Норвегія", "Данія",
-        "Австрія", "Польща", "Канада", "США", "Австралія", "Японія", "Південна Корея"
+        "Germany", "France", "United Kingdom", "Italy", "Spain", "Netherlands",
+        "Switzerland", "Belgium", "Sweden", "Norway", "Denmark", "Austria",
+        "Poland", "Ukraine", "Canada", "United States", "Australia", "Japan",
+        "South Korea", "New Zealand"
       ];
       const suggestedGenres = [
-        "Поп", "Рок", "Танцювальна", "Електронна", "Техно", "Транс", "Хаус",
-        "EDM", "Хіп-хоп", "Реп", "Джаз", "Класика", "Кантрі", "Реггі",
-        "Блюз", "Фолк", "Метал", "R&B", "Соул", "Ембієнт"
+        "Pop", "Rock", "Dance", "Electronic", "Techno", "Trance", "House",
+        "EDM", "Hip-Hop", "Rap", "Jazz", "Classical", "Country", "Reggae",
+        "Blues", "Folk", "Metal", "R&B", "Soul", "Ambient"
       ];
 
-      const countryDatalist = document.getElementById("countries");
-      const genreDatalist = document.getElementById("genres");
+      const countryDatalist = document.getElementById("suggestedCountries");
+      const genreDatalist = document.getElementById("suggestedGenres");
 
       countryDatalist.innerHTML = suggestedCountries.map(country => `<option value="${country}">`).join("");
       genreDatalist.innerHTML = suggestedGenres.map(genre => `<option value="${genre}">`).join("");
     }
 
     function updatePastSearches() {
-      const pastSearchesList = document.getElementById("pastSearches");
-      if (pastSearchesList) {
-        pastSearchesList.innerHTML = pastSearches.map(search => `<option value="${search}">`).join("");
-      }
+      pastSearchesList.innerHTML = "";
+      pastSearches.forEach(search => {
+        const option = document.createElement("option");
+        option.value = search;
+        pastSearchesList.appendChild(option);
+      });
     }
 
     function normalizeCountry(country) {
       if (!country) return "";
       const countryMap = {
-        "україна": "Україна", "ukraine": "Україна",
-        "німеччина": "Німеччина", "germany": "Німеччина",
-        "франція": "Франція", "france": "Франція",
-        "велика британія": "Велика Британія", "uk": "Велика Британія",
-        "італія": "Італія", "italy": "Італія",
-        "іспанія": "Іспанія", "spain": "Іспанія",
-        "нідерланди": "Нідерланди", "netherlands": "Нідерланди",
-        "швейцарія": "Швейцарія", "switzerland": "Швейцарія",
-        "бельгія": "Бельгія", "belgium": "Бельгія",
-        "швеція": "Швеція", "sweden": "Швеція",
-        "норвегія": "Норвегія", "norway": "Норвегія",
-        "данія": "Данія", "denmark": "Данія",
-        "австрія": "Австрія", "austria": "Австрія",
-        "польща": "Польща", "poland": "Польща",
-        "канада": "Канада", "canada": "Канада",
-        "сша": "США", "usa": "США",
-        "австралія": "Австралія", "australia": "Австралія",
-        "японія": "Японія", "japan": "Японія",
-        "південна корея": "Південна Корея", "south korea": "Південна Корея"
+        "ukraine": "Ukraine", "italy": "Italy", "german": "Germany",
+        "germany": "Germany", "france": "France", "spain": "Spain",
+        "usa": "United States", "united states": "United States",
+        "uk": "United Kingdom", "united kingdom": "United Kingdom",
+        "netherlands": "Netherlands", "canada": "Canada", "australia": "Australia",
+        "switzerland": "Switzerland", "belgium": "Belgium", "poland": "Poland",
+        "austria": "Austria", "sweden": "Sweden", "norway": "Norway",
+        "denmark": "Denmark", "japan": "Japan", "south korea": "South Korea",
+        "new zealand": "New Zealand"
       };
       const normalized = country.toLowerCase();
       return countryMap[normalized] || country.charAt(0).toUpperCase() + country.slice(1).toLowerCase();
@@ -328,19 +364,21 @@ document.addEventListener("DOMContentLoaded", () => {
       const stationGenreElement = currentStationInfo.querySelector(".station-genre");
       const stationCountryElement = currentStationInfo.querySelector(".station-country");
       const stationIconElement = currentStationInfo.querySelector(".station-icon");
-      if (stationNameElement) stationNameElement.textContent = "Обирайте станцію";
-      if (stationGenreElement) stationGenreElement.textContent = "жанр: -";
-      if (stationCountryElement) stationCountryElement.textContent = "країна: -";
+      if (stationNameElement) stationNameElement.textContent = "Select station";
+      else console.error(".station-name element not found");
+      if (stationGenreElement) stationGenreElement.textContent = "genre: -";
+      else console.error(".station-genre element not found");
+      if (stationCountryElement) stationCountryElement.textContent = "country: -";
+      else console.error(".station-country element not found");
       if (stationIconElement) {
         stationIconElement.innerHTML = "🎵";
         stationIconElement.style.backgroundImage = "none";
-      }
-      currentStationInfo.setAttribute("aria-label", "Поточна станція: Обирайте станцію");
+      } else console.error(".station-icon element not found");
     }
 
     async function loadStations() {
       console.time("loadStations");
-      stationList.innerHTML = "<div class='station-item empty'>Завантаження...</div>";
+      stationList.innerHTML = "<div class='station-item empty'>Loading...</div>";
       try {
         abortController.abort();
         abortController = new AbortController();
@@ -348,6 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
           cache: "no-store",
           signal: abortController.signal
         });
+        console.log(`Response status: ${response.status}`);
         const mergedStationLists = {};
         if (response.ok) {
           const newStations = await response.json();
@@ -364,7 +403,10 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             });
             mergedStationLists[tab] = Array.from(uniqueStations.values());
+            console.log(`Added to ${tab}:`, mergedStationLists[tab].map(s => s.name));
           });
+        } else {
+          console.warn("Failed to load stations.json, using cached data");
         }
         customTabs.forEach(tab => {
           const uniqueStations = new Map();
@@ -379,27 +421,24 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           });
           mergedStationLists[tab] = Array.from(uniqueStations.values());
+          console.log(`Saved for custom tab ${tab}:`, mergedStationLists[tab].map(s => s.name));
         });
         stationLists = mergedStationLists;
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
-        favoriteStations = favoriteStations.filter(name =>
+        favoriteStations = favoriteStations.filter(name => 
           Object.values(stationLists).flat().some(s => s.name === name)
         );
         localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-        recentStations = recentStations.filter(s =>
-          Object.values(stationLists).flat().some(st => st.name === s.name && st.value === s.value)
-        );
-        localStorage.setItem("recentStations", JSON.stringify(recentStations));
-        const validTabs = ["favorites", "recent", "search", ...customTabs];
+        const validTabs = [...Object.keys(stationLists), "best", "search", ...customTabs];
         if (!validTabs.includes(currentTab)) {
-          currentTab = "favorites";
+          currentTab = validTabs[0] || "techno";
           localStorage.setItem("currentTab", currentTab);
         }
         currentIndex = parseInt(localStorage.getItem(`lastStation_${currentTab}`)) || 0;
         switchTab(currentTab);
       } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error("Помилка завантаження станцій:", error);
+        if (error.name !== 'AbortError') {
+          console.error("Error loading stations:", error);
           customTabs.forEach(tab => {
             const uniqueStations = new Map();
             (userAddedStations[tab] || []).forEach(s => {
@@ -415,7 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
             stationLists[tab] = Array.from(uniqueStations.values());
           });
           localStorage.setItem("stationLists", JSON.stringify(stationLists));
-          stationList.innerHTML = "<div class='station-item empty'>Не вдалося завантажити станції</div>";
+          stationList.innerHTML = "<div class='station-item empty'>Failed to load stations</div>";
         }
       } finally {
         console.timeEnd("loadStations");
@@ -423,7 +462,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function searchStations(query, country, genre) {
-      stationList.innerHTML = "<div class='station-item empty'>Пошук...</div>";
+      stationList.innerHTML = "<div class='station-item empty'>Searching...</div>";
       try {
         abortController.abort();
         abortController = new AbortController();
@@ -435,22 +474,28 @@ document.addEventListener("DOMContentLoaded", () => {
         params.append("reverse", "true");
         params.append("limit", "2000");
         const url = `https://de1.api.radio-browser.info/json/stations/search?${params.toString()}`;
-        const response = await fetch(url, { signal: abortController.signal });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        console.log("API request:", url);
+        const response = await fetch(url, {
+          signal: abortController.signal
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
         let stations = await response.json();
         stations = stations.filter(station => station.url_resolved && isValidUrl(station.url_resolved));
+        console.log("Received stations (after HTTPS filter):", stations.length);
         renderSearchResults(stations);
       } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error("Помилка пошуку станцій:", error);
-          stationList.innerHTML = "<div class='station-item empty'>Не вдалося знайти станції</div>";
+        if (error.name !== 'AbortError') {
+          console.error("Error searching stations:", error);
+          stationList.innerHTML = "<div class='station-item empty'>Failed to find stations</div>";
         }
       }
     }
 
     function renderSearchResults(stations) {
       if (!stations.length) {
-        stationList.innerHTML = "<div class='station-item empty'>Нічого не знайдено</div>";
+        stationList.innerHTML = "<div class='station-item empty'>Nothing found</div>";
         stationItems = [];
         return;
       }
@@ -459,17 +504,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const item = document.createElement("div");
         item.className = `station-item ${index === currentIndex ? "selected" : ""}`;
         item.dataset.value = station.url || station.url_resolved;
-        item.dataset.name = station.name || "Невідома";
-        item.dataset.genre = shortenGenre(station.tags || "Невідомий");
-        item.dataset.country = station.country || "Невідома";
+        item.dataset.name = station.name || "Unknown";
+        item.dataset.genre = shortenGenre(station.tags || "Unknown");
+        item.dataset.country = station.country || "Unknown";
         item.dataset.favicon = station.favicon && isValidUrl(station.favicon) ? station.favicon : "";
-        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" onerror="this.outerHTML='🎵'">` : "🎵";
-        item.innerHTML = `
-          ${iconHtml}
-          <span class="station-name">${station.name}</span>
-          <div class="buttons-container">
-            <button class="add-btn">Додати</button>
-          </div>`;
+        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='🎵 '">` : "🎵 ";
+        item.innerHTML = `${iconHtml}<span class="station-name">${station.name}</span><button class="add-btn">ADD</button>`;
         fragment.appendChild(item);
       });
       stationList.innerHTML = "";
@@ -498,30 +538,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function showTabModal(item) {
-      const overlay = document.querySelector(".modal-overlay");
-      const modal = document.querySelector(".new-tab-modal");
+      const overlay = document.createElement("div");
+      overlay.className = "modal-overlay";
+      const modal = document.createElement("div");
+      modal.className = "modal";
       modal.innerHTML = `
-        <h2>Обрати вкладку</h2>
+        <h2>Select tab</h2>
         <div class="modal-tabs">
-          <button class="modal-tab-btn" data-tab="favorites">Favorites</button>
-          <button class="modal-tab-btn" data-tab="recent">Recent</button>
+          <button class="modal-tab-btn" data-tab="techno">TECHNO</button>
+          <button class="modal-tab-btn" data-tab="trance">TRANCE</button>
+          <button class="modal-tab-btn" data-tab="ukraine">UA</button>
+          <button class="modal-tab-btn" data-tab="pop">POP</button>
           ${customTabs.map(tab => `<button class="modal-tab-btn" data-tab="${tab}">${tab.toUpperCase()}</button>`).join('')}
-          <button class="modal-cancel-btn">Відміна</button>
-        </div>`;
-      overlay.style.display = "block";
-      modal.style.display = "block";
+          <button class="modal-cancel-btn">Cancel</button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
       const closeModal = () => {
-        overlay.style.display = "none";
-        modal.style.display = "none";
+        overlay.remove();
+        modal.remove();
       };
-      overlay.addEventListener("click", closeModal, { once: true });
+      overlay.addEventListener("click", closeModal);
       modal.querySelectorAll(".modal-tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
-          saveStation(item, btn.dataset.tab);
+          const targetTab = btn.dataset.tab;
+          saveStation(item, targetTab);
           closeModal();
-        }, { once: true });
+        });
       });
-      modal.querySelector(".modal-cancel-btn").addEventListener("click", closeModal, { once: true });
+      modal.querySelector(".modal-cancel-btn").addEventListener("click", closeModal);
     }
 
     function saveStation(item, targetTab) {
@@ -534,32 +580,30 @@ document.addEventListener("DOMContentLoaded", () => {
           name: item.dataset.name,
           genre: item.dataset.genre,
           country: item.dataset.country,
-          favicon: item.dataset.favicon || ""
+          favicon: item.dataset.favicon || "",
+          isFromSearch: currentTab === "search"
         };
         stationLists[targetTab].unshift(newStation);
         userAddedStations[targetTab].unshift(newStation);
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
         localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
-        if (targetTab === "recent") {
-          recentStations.unshift(newStation);
-          if (recentStations.length > 5) recentStations.pop();
-          localStorage.setItem("recentStations", JSON.stringify(recentStations));
+        console.log(`Added station ${stationName} to ${targetTab}:`, newStation);
+        if (currentTab !== "search") {
+          updateStationList();
         }
-        if (currentTab !== "search") updateStationList();
       } else {
-        alert("Ця станція вже додана до обраної вкладки!");
+        alert("This station is already added to the selected tab!");
       }
     }
 
     function renderTabs() {
-      const fixedTabs = ["favorites", "recent", "search"];
+      const fixedTabs = ["best", "techno", "trance", "ukraine", "pop", "search"];
       tabsContainer.innerHTML = "";
       fixedTabs.forEach(tab => {
         const btn = document.createElement("button");
         btn.className = `tab-btn ${currentTab === tab ? "active" : ""}`;
         btn.dataset.tab = tab;
-        btn.textContent = tab === "favorites" ? "Favorites" : tab === "recent" ? "Recent" : "Search";
-        btn.setAttribute("aria-label", `Вкладка ${btn.textContent}`);
+        btn.textContent = tab === "best" ? "Best" : tab === "ukraine" ? "UA" : tab === "search" ? "Search" : tab.charAt(0).toUpperCase() + tab.slice(1);
         tabsContainer.appendChild(btn);
       });
       customTabs.forEach(tab => {
@@ -568,13 +612,11 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.className = `tab-btn ${currentTab === tab ? "active" : ""}`;
         btn.dataset.tab = tab;
         btn.textContent = tab.toUpperCase();
-        btn.setAttribute("aria-label", `Вкладка ${tab.toUpperCase()}`);
         tabsContainer.appendChild(btn);
       });
       const addBtn = document.createElement("button");
       addBtn.className = "add-tab-btn";
       addBtn.textContent = "+";
-      addBtn.setAttribute("aria-label", "Додати нову вкладку");
       tabsContainer.appendChild(addBtn);
 
       tabsContainer.querySelectorAll(".tab-btn").forEach(btn => {
@@ -593,43 +635,40 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function showNewTabModal() {
-      const overlay = document.querySelector(".modal-overlay");
-      const modal = document.querySelector(".new-tab-modal");
-      modal.innerHTML = `
-        <h2>Створити нову вкладку</h2>
-        <div class="modal-tabs">
-          <input type="text" id="newTabName" placeholder="Назва вкладки">
-          <button class="modal-tab-btn" id="createTabBtn">Створити</button>
-          <button class="modal-cancel-btn">Відміна</button>
-        </div>`;
-      overlay.style.display = "block";
-      modal.style.display = "block";
-      const input = modal.querySelector("#newTabName");
-      const createBtn = modal.querySelector("#createTabBtn");
+      const overlay = document.querySelector(".new-tab-modal");
+      const modal = overlay.querySelector(".modal");
+      const input = document.getElementById("newTabName");
+      const createBtn = document.getElementById("createTabBtn");
       const cancelBtn = modal.querySelector(".modal-cancel-btn");
+
+      overlay.style.display = "block";
+      input.value = "";
       input.focus();
 
       const closeModal = () => {
         overlay.style.display = "none";
-        modal.style.display = "none";
+        createBtn.removeEventListener("click", createTabHandler);
+        cancelBtn.removeEventListener("click", closeModal);
+        overlay.removeEventListener("click", closeModal);
+        input.removeEventListener("keypress", keypressHandler);
       };
 
       const createTabHandler = () => {
         const tabName = input.value.trim().toLowerCase();
         if (!tabName) {
-          alert("Введіть назву вкладки!");
+          alert("Enter tab name!");
           return;
         }
-        if (["favorites", "recent", "search"].includes(tabName) || customTabs.includes(tabName)) {
-          alert("Ця назва вкладки вже існує!");
+        if (["best", "techno", "trance", "ukraine", "pop", "search"].includes(tabName) || customTabs.includes(tabName)) {
+          alert("This tab name already exists!");
           return;
         }
         if (tabName.length > 10 || !/^[a-z0-9_-]+$/.test(tabName)) {
-          alert("Назва вкладки не може перевищувати 10 символів і повинна містити лише латинські літери, цифри, дефіс або підкреслення.");
+          alert("Tab name cannot exceed 10 characters and must contain only Latin letters, numbers, hyphen or underscore.");
           return;
         }
         if (customTabs.length >= 7) {
-          alert("Досягнуто максимум 7 власних вкладок!");
+          alert("Maximum of 7 custom tabs reached!");
           return;
         }
         customTabs.push(tabName);
@@ -638,55 +677,55 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("customTabs", JSON.stringify(customTabs));
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
         localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
+        console.log(`Created new tab ${tabName}`);
         renderTabs();
         switchTab(tabName);
         closeModal();
       };
 
-      createBtn.addEventListener("click", createTabHandler, { once: true });
-      cancelBtn.addEventListener("click", closeModal, { once: true });
-      overlay.addEventListener("click", closeModal, { once: true });
-      input.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") createTabHandler();
-      }, { once: true });
+      const keypressHandler = (e) => {
+        if (e.key === "Enter") createBtn.click();
+      };
+
+      createBtn.addEventListener("click", createTabHandler);
+      cancelBtn.addEventListener("click", closeModal);
+      overlay.addEventListener("click", closeModal);
+      input.addEventListener("keypress", keypressHandler);
     }
 
     function showEditTabModal(tab) {
-      const overlay = document.querySelector(".modal-overlay");
-      const modal = document.querySelector(".edit-tab-modal");
-      modal.innerHTML = `
-        <h2>Дії з вкладкою</h2>
-        <div class="modal-tabs">
-          <input type="text" id="renameTabName" placeholder="Нова назва вкладки" value="${tab}">
-          <button class="modal-tab-btn rename-btn">Перейменувати</button>
-          <button class="modal-tab-btn delete-btn">Видалити</button>
-          <button class="modal-cancel-btn">Відміна</button>
-        </div>`;
-      overlay.style.display = "block";
-      modal.style.display = "block";
-      const input = modal.querySelector("#renameTabName");
-      const renameBtn = modal.querySelector(".rename-btn");
-      const deleteBtn = modal.querySelector(".delete-btn");
+      const overlay = document.querySelector(".edit-tab-modal");
+      const modal = overlay.querySelector(".modal");
+      const input = document.getElementById("renameTabName");
+      const renameBtn = document.getElementById("renameTabBtn");
+      const deleteBtn = document.getElementById("deleteTabBtn");
       const cancelBtn = modal.querySelector(".modal-cancel-btn");
+
+      overlay.style.display = "block";
+      input.value = tab;
       input.focus();
 
       const closeModal = () => {
         overlay.style.display = "none";
-        modal.style.display = "none";
+        renameBtn.removeEventListener("click", renameTabHandler);
+        deleteBtn.removeEventListener("click", deleteTabHandler);
+        cancelBtn.removeEventListener("click", closeModal);
+        overlay.removeEventListener("click", closeModal);
+        input.removeEventListener("keypress", keypressHandler);
       };
 
       const renameTabHandler = () => {
         const newName = input.value.trim().toLowerCase();
         if (!newName) {
-          alert("Введіть нову назву вкладки!");
+          alert("Enter new tab name!");
           return;
         }
-        if (["favorites", "recent", "search"].includes(newName) || customTabs.includes(newName)) {
-          alert("Ця назва вкладки вже існує!");
+        if (["best", "techno", "trance", "ukraine", "pop", "search"].includes(newName) || customTabs.includes(newName)) {
+          alert("This tab name already exists!");
           return;
         }
         if (newName.length > 10 || !/^[a-z0-9_-]+$/.test(newName)) {
-          alert("Назва вкладки не може перевищувати 10 символів і повинна містити лише латинські літери, цифри, дефіс або підкреслення!");
+          alert("Tab name cannot exceed 10 characters and must contain only Latin letters, numbers, hyphen or underscore!");
           return;
         }
         const index = customTabs.indexOf(tab);
@@ -704,37 +743,159 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       const deleteTabHandler = () => {
-        if (confirm(`Ви впевнені, що хочете видалити вкладку "${tab.toUpperCase()}"?`)) {
+        if (confirm(`Are you sure you want to delete the "${tab.toUpperCase()}" tab?`)) {
           customTabs = customTabs.filter(t => t !== tab);
           delete stationLists[tab];
           delete userAddedStations[tab];
           localStorage.setItem("customTabs", JSON.stringify(customTabs));
           localStorage.setItem("stationLists", JSON.stringify(stationLists));
           localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
-          if (currentTab === tab) switchTab("favorites");
+          if (currentTab === tab) {
+            const newTab = customTabs.length > 0 ? customTabs[0] : "techno";
+            switchTab(newTab);
+          }
           renderTabs();
           closeModal();
         }
       };
 
-      renameBtn.addEventListener("click", renameTabHandler, { once: true });
-      deleteBtn.addEventListener("click", deleteTabHandler, { once: true });
-      cancelBtn.addEventListener("click", closeModal, { once: true });
-      overlay.addEventListener("click", closeModal, { once: true });
-      input.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") renameTabHandler();
-      }, { once: true });
+      const keypressHandler = (e) => {
+        if (e.key === "Enter") renameBtn.click();
+      };
+
+      renameBtn.addEventListener("click", renameTabHandler);
+      deleteBtn.addEventListener("click", deleteTabHandler);
+      cancelBtn.addEventListener("click", closeModal);
+      overlay.addEventListener("click", closeModal);
+      input.addEventListener("keypress", keypressHandler);
     }
 
-    function applyTheme() {
-      document.documentElement.setAttribute("data-theme", "cyber-grid");
+    const themes = {
+      "shadow-pulse": {
+        bodyBg: "#000000",
+        containerBg: "#000000",
+        accent: "#00E676",
+        text: "#FFFFFF",
+        accentGradient: "linear-gradient(45deg, #00B248, #00E676)",
+        shadow: "rgba(0, 230, 118, 0.3)"
+      },
+      "dark-abyss": {
+        bodyBg: "#000000",
+        containerBg: "#000000",
+        accent: "#AA00FF",
+        text: "#FFFFFF",
+        accentGradient: "linear-gradient(45deg, #6A1B9A, #AA00FF)",
+        shadow: "rgba(170, 0, 255, 0.3)"
+      },
+      "emerald-glow": {
+        bodyBg: "#000000",
+        containerBg: "#000000",
+        accent: "#2EC4B6",
+        text: "#FFFFFF",
+        accentGradient: "linear-gradient(45deg, #1B998B, #2EC4B6)",
+        shadow: "rgba(46, 196, 182, 0.3)"
+      },
+      "retro-wave": {
+        bodyBg: "#000000",
+        containerBg: "#000000",
+        accent: "#FF69B4",
+        text: "#FFFFFF",
+        accentGradient: "linear-gradient(45deg, #C71585, #FF69B4)",
+        shadow: "rgba(255, 105, 180, 0.3)"
+      },
+      "neon-pulse": {
+        bodyBg: "#000000",
+        containerBg: "#000000",
+        accent: "#00F0FF",
+        text: "#FFFFFF",
+        accentGradient: "linear-gradient(45deg, #0077B6, #00F0FF)",
+        shadow: "rgba(0, 240, 255, 0.3)"
+      },
+      "lime-surge": {
+        bodyBg: "#000000",
+        containerBg: "#000000",
+        accent: "#B2FF59",
+        text: "#FFFFFF",
+        accentGradient: "linear-gradient(45deg, #00B248, #B2FF59)",
+        shadow: "rgba(178, 255, 89, 0.3)"
+      },
+      "flamingo-flash": {
+        bodyBg: "#000000",
+        containerBg: "#000000",
+        accent: "#FF4081",
+        text: "#FFFFFF",
+        accentGradient: "linear-gradient(45deg, #C71585, #FF4081)",
+        shadow: "rgba(255, 64, 129, 0.3)"
+      },
+      "aqua-glow": {
+        bodyBg: "#000000",
+        containerBg: "#000000",
+        accent: "#26C6DA",
+        text: "#FFFFFF",
+        accentGradient: "linear-gradient(45deg, #0077B6, #26C6DA)",
+        shadow: "rgba(38, 198, 218, 0.3)"
+      },
+      "aurora-haze": {
+        bodyBg: "#000000",
+        containerBg: "#000000",
+        accent: "#64FFDA",
+        text: "#FFFFFF",
+        accentGradient: "linear-gradient(45deg, #1B998B, #64FFDA)",
+        shadow: "rgba(100, 255, 218, 0.3)"
+      },
+      "starlit-amethyst": {
+        bodyBg: "#000000",
+        containerBg: "#000000",
+        accent: "#B388FF",
+        text: "#FFFFFF",
+        accentGradient: "linear-gradient(45deg, #6A1B9A, #B388FF)",
+        shadow: "rgba(179, 136, 255, 0.3)"
+      },
+      "lunar-frost": {
+        bodyBg: "#000000",
+        containerBg: "#000000",
+        accent: "#40C4FF",
+        text: "#FFFFFF",
+        accentGradient: "linear-gradient(45deg, #0077B6, #40C4FF)",
+        shadow: "rgba(64, 196, 255, 0.3)"
+      }
+    };
+    let currentTheme = localStorage.getItem("selectedTheme") || "shadow-pulse";
+    if (!themes[currentTheme]) {
+      currentTheme = "shadow-pulse";
+      localStorage.setItem("selectedTheme", currentTheme);
+    }
+
+    function applyTheme(theme) {
+      if (!themes[theme]) {
+        console.warn(`Theme ${theme} not found, using 'shadow-pulse'`);
+        theme = "shadow-pulse";
+        localStorage.setItem("selectedTheme", theme);
+      }
+      const root = document.documentElement;
+      root.style.setProperty("--body-bg", themes[theme].bodyBg);
+      root.style.setProperty("--container-bg", themes[theme].containerBg);
+      root.style.setProperty("--accent", themes[theme].accent);
+      root.style.setProperty("--text", themes[theme].text);
+      root.style.setProperty("--accent-gradient", themes[theme].accentGradient);
+      root.style.setProperty("--shadow", themes[theme].shadow);
+      localStorage.setItem("selectedTheme", theme);
+      currentTheme = theme;
+      document.documentElement.setAttribute("data-theme", theme);
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-      if (themeColorMeta) themeColorMeta.setAttribute("content", "#0D1B2A");
+      if (themeColorMeta) {
+        themeColorMeta.setAttribute("content", themes[theme].accent);
+      }
     }
 
     function toggleTheme() {
-      // Зарезервовано для майбутнього розширення тем
-      applyTheme();
+      const themesOrder = [
+        "shadow-pulse", "dark-abyss", "emerald-glow", "retro-wave",
+        "neon-pulse", "lime-surge", "flamingo-flash", "aqua-glow",
+        "aurora-haze", "starlit-amethyst", "lunar-frost"
+      ];
+      const nextTheme = themesOrder[(themesOrder.indexOf(currentTheme) + 1) % themesOrder.length];
+      applyTheme(nextTheme);
     }
 
     themeToggle.addEventListener("click", toggleTheme);
@@ -747,7 +908,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (newWorker) {
             newWorker.addEventListener("statechange", () => {
               if (newWorker.state === "activated" && navigator.serviceWorker.controller) {
-                if (window.confirm("Доступна нова версія радіо. Оновити?")) {
+                if (window.confirm("New version of radio available. Update?")) {
                   window.location.reload();
                 }
               }
@@ -758,50 +919,87 @@ document.addEventListener("DOMContentLoaded", () => {
 
       navigator.serviceWorker.addEventListener("message", (event) => {
         if (event.data.type === "CACHE_UPDATED") {
+          console.log("Received cache update, updating stationLists");
           const currentCacheVersion = localStorage.getItem("cacheVersion") || "0";
           if (currentCacheVersion !== event.data.cacheVersion) {
-            favoriteStations = favoriteStations.filter(name =>
-              Object.values(stationLists).flat().some(s => s.name === name)
-            );
-            recentStations = recentStations.filter(s =>
-              Object.values(stationLists).flat().some(st => st.name === s.name && st.value === s.value)
+            favoriteStations = favoriteStations.filter((name) =>
+              Object.values(stationLists).flat().some((s) => s.name === name)
             );
             localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-            localStorage.setItem("recentStations", JSON.stringify(recentStations));
             localStorage.setItem("cacheVersion", event.data.cacheVersion);
             loadStations();
           }
         }
         if (event.data.type === "NETWORK_STATUS" && event.data.online && intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
+          console.log("Network restored (SW), trying to play");
+          isAutoPlayPending = false;
           debouncedTryAutoPlay();
+        }
+        if (event.data.type === "CHECK_STATE" && intendedPlaying && !isPlaying && navigator.onLine && stationItems?.length && currentIndex < stationItems.length) {
+          console.log("Service Worker state check, attempting to resume playback");
+          navigator.mediaDevices.enumerateDevices().then(devices => {
+            const audioOutputs = devices.filter(device => device.kind === "audiooutput");
+            if (audioOutputs.length > 0) {
+              isAutoPlayPending = false;
+              debouncedTryAutoPlay();
+            } else {
+              console.log("Service Worker check: No audio output devices available");
+            }
+          }).catch(error => {
+            console.error("Service Worker check: Error checking audio devices:", error);
+          });
         }
       });
     }
 
     let autoPlayTimeout = null;
     function debouncedTryAutoPlay(retryCount = 2, delay = 1000) {
-      if (isAutoPlayPending) return;
+      if (isAutoPlayPending) {
+        console.log("debouncedTryAutoPlay: Skip, previous tryAutoPlay still active");
+        return;
+      }
       const now = Date.now();
       const currentStationUrl = stationItems?.[currentIndex]?.dataset?.value;
       const normalizedCurrentUrl = normalizeUrl(currentStationUrl);
       const normalizedAudioSrc = normalizeUrl(audio.src);
-      if (now - lastSuccessfulPlayTime < 500 && normalizedAudioSrc === normalizedCurrentUrl) return;
-      if (autoPlayTimeout) clearTimeout(autoPlayTimeout);
+      if (now - lastSuccessfulPlayTime < 500 && normalizedAudioSrc === normalizedCurrentUrl) {
+        console.log("debouncedTryAutoPlay: Skip, recently played successfully for same station");
+        return;
+      }
+      if (autoPlayTimeout) {
+        clearTimeout(autoPlayTimeout);
+      }
       autoPlayRequestId++;
       const currentRequestId = autoPlayRequestId;
       autoPlayTimeout = setTimeout(() => tryAutoPlay(retryCount, delay, currentRequestId), 0);
     }
 
     async function tryAutoPlay(retryCount = 2, delay = 1000, requestId) {
-      if (isAutoPlayPending || requestId !== autoPlayRequestId) return;
+      if (isAutoPlayPending) {
+        console.log("tryAutoPlay: Skip, another tryAutoPlay active");
+        return;
+      }
+      if (requestId !== autoPlayRequestId) {
+        console.log("tryAutoPlay: Skip, outdated request ID", { requestId, current: autoPlayRequestId });
+        return;
+      }
       isAutoPlayPending = true;
 
       try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioOutputs = devices.filter(device => device.kind === "audiooutput");
+        if (audioOutputs.length === 0) {
+          console.log("No audio output devices available, skipping playback");
+          alert("No audio output devices detected. Please connect a device to resume playback.");
+          return;
+        }
+
         if (!navigator.onLine) {
-          console.log("Пристрій офлайн: пропуск відтворення");
+          console.log("Device offline: skipping playback");
           return;
         }
         if (!intendedPlaying || !stationItems?.length || currentIndex >= stationItems.length) {
+          console.log("Skip tryAutoPlay: invalid state", { intendedPlaying, hasStationItems: !!stationItems?.length, isIndexValid: currentIndex < stationItems.length });
           document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
           return;
         }
@@ -810,47 +1008,81 @@ document.addEventListener("DOMContentLoaded", () => {
         const normalizedCurrentUrl = normalizeUrl(currentStationUrl);
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc === normalizedCurrentUrl && !audio.paused && !audio.error && audio.readyState >= 2 && audio.currentTime > 0) {
+          console.log("Skip tryAutoPlay: audio already playing with correct src, no errors and active stream");
           return;
         }
         if (!isValidUrl(currentStationUrl)) {
+          console.error("Invalid URL:", currentStationUrl);
           errorCount++;
-          if (errorCount >= ERROR_LIMIT) resetStationInfo();
+          if (errorCount >= ERROR_LIMIT) {
+            console.error("Reached playback error limit");
+            resetStationInfo();
+          }
           return;
         }
 
         const attemptPlay = async (attemptsLeft) => {
           if (streamAbortController) {
             streamAbortController.abort();
+            console.log("Previous audio stream canceled");
             streamAbortController = null;
           }
-          if (stationItems[currentIndex].dataset.value !== initialStationUrl || requestId !== autoPlayRequestId) return;
+          if (stationItems[currentIndex].dataset.value !== initialStationUrl) {
+            console.log("tryAutoPlay: Station changed, canceling playback for", initialStationUrl);
+            return;
+          }
+          if (requestId !== autoPlayRequestId) {
+            console.log("tryAutoPlay: Skip attempt, outdated request ID", { requestId, current: autoPlayRequestId });
+            return;
+          }
 
           streamAbortController = new AbortController();
           audio.pause();
           audio.src = null;
           audio.load();
           audio.src = currentStationUrl + "?nocache=" + Date.now();
+          console.log(`Playback attempt (${attemptsLeft} left):`, audio.src);
 
           try {
             await audio.play();
             errorCount = 0;
             isPlaying = true;
             lastSuccessfulPlayTime = Date.now();
+            console.log("Playback started successfully");
             document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
             localStorage.setItem("isPlaying", isPlaying);
             if (stationItems[currentIndex]) {
               updateCurrentStation(stationItems[currentIndex]);
             }
           } catch (error) {
-            if (error.name === "AbortError") return;
+            if (error.name === 'AbortError') {
+              console.log("Stream request canceled");
+              return;
+            }
+            console.error("Playback error:", error);
             document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+            if (error.name === "NotAllowedError") {
+              alert("Playback blocked by browser. Please interact with the page (e.g., click) to enable auto-resume.");
+              return;
+            }
             if (attemptsLeft > 1) {
-              if (stationItems[currentIndex].dataset.value !== initialStationUrl || requestId !== autoPlayRequestId) return;
+              if (stationItems[currentIndex].dataset.value !== initialStationUrl) {
+                console.log("tryAutoPlay: Station changed during retry, canceling");
+                return;
+              }
+              if (requestId !== autoPlayRequestId) {
+                console.log("tryAutoPlay: Skip retry, outdated request ID", { requestId, current: autoPlayRequestId });
+                return;
+              }
+              console.log(`Retrying in ${delay}ms`);
               await new Promise(resolve => setTimeout(resolve, delay));
               await attemptPlay(attemptsLeft - 1);
             } else {
               errorCount++;
-              if (errorCount >= ERROR_LIMIT) resetStationInfo();
+              if (errorCount >= ERROR_LIMIT) {
+                console.error("Reached playback error limit");
+                resetStationInfo();
+              }
             }
           } finally {
             streamAbortController = null;
@@ -858,6 +1090,11 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         await attemptPlay(retryCount);
+      } catch (error) {
+        console.error("tryAutoPlay error:", error);
+        if (error.name === "NotAllowedError") {
+          alert("Playback blocked by browser. Please interact with the page (e.g., click) to enable auto-resume.");
+        }
       } finally {
         isAutoPlayPending = false;
         streamAbortController = null;
@@ -865,12 +1102,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function switchTab(tab) {
-      const validTabs = ["favorites", "recent", "search", ...customTabs];
-      if (!validTabs.includes(tab)) tab = "favorites";
+      const validTabs = ["best", "techno", "trance", "ukraine", "pop", "search", ...customTabs];
+      if (!validTabs.includes(tab)) {
+        tab = "techno";
+      }
       currentTab = tab;
       localStorage.setItem("currentTab", tab);
       const savedIndex = parseInt(localStorage.getItem(`lastStation_${tab}`)) || 0;
-      const maxIndex = tab === "favorites" ? favoriteStations.length - 1 : tab === "recent" ? recentStations.length - 1 : tab === "search" ? 0 : stationLists[tab]?.length - 1 || 0;
+      const maxIndex = tab === "best" ? favoriteStations.length - 1 : tab === "search" ? 0 : stationLists[tab]?.length - 1 || 0;
       currentIndex = savedIndex <= maxIndex && savedIndex >= 0 ? savedIndex : 0;
       searchInput.style.display = tab === "search" ? "flex" : "none";
       searchQuery.value = "";
@@ -883,24 +1122,32 @@ document.addEventListener("DOMContentLoaded", () => {
         const normalizedCurrentUrl = normalizeUrl(stationItems[currentIndex].dataset.value);
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
+          console.log("switchTab: Starting playback after tab change");
           isAutoPlayPending = false;
           debouncedTryAutoPlay();
+        } else {
+          console.log("switchTab: Skip playback, station already playing");
         }
+      } else {
+        console.log("switchTab: Skip playback, invalid state");
       }
     }
 
     function updateStationList() {
-      if (!stationList) return;
-      let stations = currentTab === "favorites"
-        ? favoriteStations.map(name => Object.values(stationLists).flat().find(s => s.name === name)).filter(s => s)
-        : currentTab === "recent"
-        ? recentStations
+      if (!stationList) {
+        console.error("stationList not found");
+        return;
+      }
+      let stations = currentTab === "best"
+        ? favoriteStations
+            .map(name => Object.values(stationLists).flat().find(s => s.name === name))
+            .filter(s => s)
         : stationLists[currentTab] || [];
 
       if (!stations.length) {
         currentIndex = 0;
         stationItems = [];
-        stationList.innerHTML = `<div class="station-item empty">${currentTab === "favorites" ? "Немає улюблених станцій" : currentTab === "recent" ? "Немає нещодавніх станцій" : "Немає станцій у цій категорії"}</div>`;
+        stationList.innerHTML = `<div class="station-item empty">${currentTab === "best" ? "No favorite stations" : "No stations in this category"}</div>`;
         return;
       }
 
@@ -913,8 +1160,8 @@ document.addEventListener("DOMContentLoaded", () => {
         item.dataset.genre = shortenGenre(station.genre);
         item.dataset.country = station.country;
         item.dataset.favicon = station.favicon && isValidUrl(station.favicon) ? station.favicon : "";
-        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" onerror="this.outerHTML='🎵'">` : "🎵";
-        const deleteButton = ["favorites", "recent", ...customTabs].includes(currentTab)
+        const iconHtml = item.dataset.favicon ? `<img src="${item.dataset.favicon}" alt="${station.name} icon" style="width: 32px; height: 32px; object-fit: contain; margin-right: 10px;" onerror="this.outerHTML='🎵 '; console.warn('Error loading favicon:', '${item.dataset.favicon}');">` : "🎵 ";
+        const deleteButton = ["techno", "trance", "ukraine", "pop", ...customTabs].includes(currentTab)
           ? `<button class="delete-btn">🗑</button>`
           : "";
         item.innerHTML = `
@@ -924,7 +1171,6 @@ document.addEventListener("DOMContentLoaded", () => {
             ${deleteButton}
             <button class="favorite-btn${favoriteStations.includes(station.name) ? " favorited" : ""}">★</button>
           </div>`;
-        item.setAttribute("aria-label", `Станція ${station.name}, жанр: ${station.genre}, країна: ${station.country}`);
         fragment.appendChild(item);
       });
       stationList.innerHTML = "";
@@ -949,7 +1195,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (deleteBtn) {
           e.stopPropagation();
-          if (confirm(`Ви впевнені, що хочете видалити станцію "${item.dataset.name}"?`)) {
+          if (confirm(`Are you sure you want to delete station "${item.dataset.name}" from the list?`)) {
             deleteStation(item.dataset.name);
           }
         }
@@ -967,28 +1213,30 @@ document.addEventListener("DOMContentLoaded", () => {
         favoriteStations.unshift(stationName);
       }
       localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
-      if (currentTab === "favorites") switchTab("favorites");
+      if (currentTab === "best") switchTab("best");
       else updateStationList();
     }
 
     function deleteStation(stationName) {
       if (Array.isArray(stationLists[currentTab])) {
         const station = stationLists[currentTab].find(s => s.name === stationName);
-        if (!station) return;
+        if (!station) {
+          console.warn(`Station ${stationName} not found in ${currentTab}`);
+          return;
+        }
         stationLists[currentTab] = stationLists[currentTab].filter(s => s.name !== stationName);
         userAddedStations[currentTab] = userAddedStations[currentTab]?.filter(s => s.name !== stationName) || [];
-        if (currentTab === "recent") {
-          recentStations = recentStations.filter(s => s.name !== stationName);
-          localStorage.setItem("recentStations", JSON.stringify(recentStations));
-        }
         if (!station.isFromSearch && !deletedStations.includes(stationName)) {
+          if (!Array.isArray(deletedStations)) deletedStations = [];
           deletedStations.push(stationName);
           localStorage.setItem("deletedStations", JSON.stringify(deletedStations));
+          console.log(`Added ${stationName} to deletedStations:`, deletedStations);
         }
         localStorage.setItem("stationLists", JSON.stringify(stationLists));
         localStorage.setItem("userAddedStations", JSON.stringify(userAddedStations));
         favoriteStations = favoriteStations.filter(name => name !== stationName);
         localStorage.setItem("favoriteStations", JSON.stringify(favoriteStations));
+        console.log(`Deleted station ${stationName} from ${currentTab}`);
         if (stationLists[currentTab].length === 0) {
           currentIndex = 0;
         } else if (currentIndex >= stationLists[currentTab].length) {
@@ -1010,27 +1258,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const normalizedCurrentUrl = normalizeUrl(item.dataset.value);
         const normalizedAudioSrc = normalizeUrl(audio.src);
         if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
+          console.log("changeStation: Starting playback after station change");
           isAutoPlayPending = false;
           debouncedTryAutoPlay();
-          if (currentTab !== "recent") {
-            const newStation = {
-              value: item.dataset.value,
-              name: item.dataset.name,
-              genre: item.dataset.genre,
-              country: item.dataset.country,
-              favicon: item.dataset.favicon
-            };
-            recentStations = recentStations.filter(s => s.name !== newStation.name);
-            recentStations.unshift(newStation);
-            if (recentStations.length > 5) recentStations.pop();
-            localStorage.setItem("recentStations", JSON.stringify(recentStations));
-          }
+        } else {
+          console.log("changeStation: Skip playback, station already playing");
         }
+      } else {
+        console.log("changeStation: Skip playback, invalid state");
       }
     }
 
     function updateCurrentStation(item) {
       if (!currentStationInfo || !item.dataset) {
+        console.error("currentStationInfo or item.dataset not found");
         resetStationInfo();
         return;
       }
@@ -1039,25 +1280,42 @@ document.addEventListener("DOMContentLoaded", () => {
       const stationCountryElement = currentStationInfo.querySelector(".station-country");
       const stationIconElement = currentStationInfo.querySelector(".station-icon");
 
-      if (stationNameElement) stationNameElement.textContent = item.dataset.name || "";
-      if (stationGenreElement) stationGenreElement.textContent = `жанр: ${item.dataset.genre || ""}`;
-      if (stationCountryElement) stationCountryElement.textContent = `країна: ${item.dataset.country || ""}`;
+      console.log("Updating currentStationInfo with data:", item.dataset);
+
+      if (stationNameElement) {
+        stationNameElement.textContent = item.dataset.name || "";
+      } else {
+        console.error(".station-name element not found");
+      }
+      if (stationGenreElement) {
+        stationGenreElement.textContent = `genre: ${item.dataset.genre || ""}`;
+      } else {
+        console.error(".station-genre element not found");
+      }
+      if (stationCountryElement) {
+        stationCountryElement.textContent = `country: ${item.dataset.country || ""}`;
+      } else {
+        console.error(".station-country element not found");
+      }
       if (stationIconElement) {
         if (item.dataset.favicon && isValidUrl(item.dataset.favicon)) {
           stationIconElement.innerHTML = "";
           stationIconElement.style.backgroundImage = `url(${item.dataset.favicon})`;
+          stationIconElement.style.backgroundSize = "contain";
+          stationIconElement.style.backgroundRepeat = "no-repeat";
+          stationIconElement.style.backgroundPosition = "center";
         } else {
           stationIconElement.innerHTML = "🎵";
           stationIconElement.style.backgroundImage = "none";
         }
+      } else {
+        console.error(".station-icon element not found");
       }
-      currentStationInfo.setAttribute("aria-label", `Поточна станція: ${item.dataset.name || "Немає"}, гучність: ${Math.round(audio.volume * 100)}%`);
-
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: item.dataset.name || "Невідома станція",
+          title: item.dataset.name || "Unknown Station",
           artist: `${item.dataset.genre || ""} | ${item.dataset.country || ""}`,
-          album: "Radio Music",
+          album: "Radio Music S O",
           artwork: item.dataset.favicon && isValidUrl(item.dataset.favicon) ? [
             { src: item.dataset.favicon, sizes: "96x96", type: "image/png" },
             { src: item.dataset.favicon, sizes: "128x128", type: "image/png" },
@@ -1085,20 +1343,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function togglePlayPause() {
-      if (!playPauseBtn || !audio) return;
+      if (!playPauseBtn || !audio) {
+        console.error("playPauseBtn or audio not found");
+        return;
+      }
       if (audio.paused) {
         isPlaying = true;
         intendedPlaying = true;
         debouncedTryAutoPlay();
-        playPauseBtn.querySelector("span").className = "icon-pause";
-        playPauseBtn.querySelector("span").textContent = "⏸";
+        playPauseBtn.textContent = "⏸";
         document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
       } else {
         audio.pause();
         isPlaying = false;
-        intendedPlaying = false;
-        playPauseBtn.querySelector("span").className = "icon-play";
-        playPauseBtn.querySelector("span").textContent = "▶";
+        intendedPlaying = true; // Залишаємо intendedPlaying=true для відновлення після простою
+        playPauseBtn.textContent = "▶";
         document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
       }
       localStorage.setItem("isPlaying", isPlaying);
@@ -1115,20 +1374,48 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       },
       visibilitychange: () => {
-        if (document.hidden || !intendedPlaying || !navigator.onLine || !stationItems?.length || currentIndex >= stationItems.length) return;
+        if (document.hidden) {
+          console.log("visibilitychange: Tab hidden, pausing checks");
+          return;
+        }
+        if (!intendedPlaying || !navigator.onLine || !stationItems?.length || currentIndex >= stationItems.length) {
+          console.log("visibilitychange: Skip, invalid state");
+          return;
+        }
         const normalizedCurrentUrl = normalizeUrl(stationItems[currentIndex].dataset.value);
         const normalizedAudioSrc = normalizeUrl(audio.src);
-        if (normalizedAudioSrc === normalizedCurrentUrl && !audio.paused && !audio.error && audio.readyState >= 2 && audio.currentTime > 0) return;
-        isAutoPlayPending = false;
-        debouncedTryAutoPlay();
+        if (normalizedAudioSrc === normalizedCurrentUrl && !audio.paused && !audio.error && audio.readyState >= 2 && audio.currentTime > 0) {
+          console.log("visibilitychange: Skip playback, station already playing");
+        } else {
+          console.log("visibilitychange: Starting playback after tab becomes visible");
+          navigator.mediaDevices.enumerateDevices().then(devices => {
+            const audioOutputs = devices.filter(device => device.kind === "audiooutput");
+            if (audioOutputs.length > 0) {
+              isAutoPlayPending = false;
+              debouncedTryAutoPlay();
+            } else {
+              console.log("visibilitychange: No audio output devices available");
+              alert("No audio output devices detected. Please connect a device to resume playback.");
+            }
+          }).catch(error => {
+            console.error("visibilitychange: Error checking audio devices:", error);
+          });
+        }
       },
       resume: () => {
-        if (!intendedPlaying || !navigator.onLine || !stationItems?.length || currentIndex >= stationItems.length) return;
+        if (!intendedPlaying || !navigator.onLine || !stationItems?.length || currentIndex >= stationItems.length) {
+          console.log("resume: Skip, invalid state");
+          return;
+        }
         const normalizedCurrentUrl = normalizeUrl(stationItems[currentIndex].dataset.value);
         const normalizedAudioSrc = normalizeUrl(audio.src);
-        if (normalizedAudioSrc === normalizedCurrentUrl && !audio.paused && !audio.error && audio.readyState >= 2 && audio.currentTime > 0) return;
-        isAutoPlayPending = false;
-        debouncedTryAutoPlay();
+        if (normalizedAudioSrc === normalizedCurrentUrl && !audio.paused && !audio.error && audio.readyState >= 2 && audio.currentTime > 0) {
+          console.log("resume: Skip playback, station already playing");
+        } else {
+          console.log("resume: Starting playback after app resume");
+          isAutoPlayPending = false;
+          debouncedTryAutoPlay();
+        }
       }
     };
 
@@ -1146,8 +1433,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     audio.addEventListener("playing", () => {
       isPlaying = true;
-      playPauseBtn.querySelector("span").className = "icon-pause";
-      playPauseBtn.querySelector("span").textContent = "⏸";
+      playPauseBtn.textContent = "⏸";
       document.querySelectorAll(".wave-line").forEach(line => line.classList.add("playing"));
       localStorage.setItem("isPlaying", isPlaying);
       if (errorTimeout) {
@@ -1158,8 +1444,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     audio.addEventListener("pause", () => {
       isPlaying = false;
-      playPauseBtn.querySelector("span").className = "icon-play";
-      playPauseBtn.querySelector("span").textContent = "▶";
+      playPauseBtn.textContent = "▶";
       document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
       localStorage.setItem("isPlaying", isPlaying);
       if ("mediaSession" in navigator) {
@@ -1169,6 +1454,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     audio.addEventListener("error", () => {
       document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
+      console.error("Audio error:", audio.error?.message || "Unknown error", "for URL:", audio.src);
       if (intendedPlaying && errorCount < ERROR_LIMIT && !errorTimeout) {
         errorCount++;
         errorTimeout = setTimeout(() => {
@@ -1176,17 +1462,17 @@ document.addEventListener("DOMContentLoaded", () => {
           errorTimeout = null;
         }, 1000);
       } else if (errorCount >= ERROR_LIMIT) {
+        console.error("Reached playback error limit");
         resetStationInfo();
       }
     });
 
     audio.addEventListener("volumechange", () => {
-      volumeControl.value = audio.volume * 100;
       localStorage.setItem("volume", audio.volume);
-      currentStationInfo.setAttribute("aria-label", `Поточна станція: ${currentStationInfo.querySelector(".station-name")?.textContent || "Немає"}, гучність: ${Math.round(audio.volume * 100)}%`);
     });
 
     window.addEventListener("online", () => {
+      console.log("Network restored");
       if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
         isAutoPlayPending = false;
         debouncedTryAutoPlay();
@@ -1194,6 +1480,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     window.addEventListener("offline", () => {
+      console.log("Network connection lost");
       document.querySelectorAll(".wave-line").forEach(line => line.classList.remove("playing"));
       errorCount = 0;
     });
@@ -1206,26 +1493,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if ("mediaSession" in navigator) {
       navigator.mediaSession.setActionHandler("play", () => {
-        if (intendedPlaying) return;
-        togglePlayPause();
+        console.log("MediaSession play triggered (e.g., Bluetooth reconnect)");
+        intendedPlaying = true;
+        localStorage.setItem("intendedPlaying", intendedPlaying);
+        isAutoPlayPending = false;
+        debouncedTryAutoPlay();
       });
       navigator.mediaSession.setActionHandler("pause", () => {
-        if (!isPlaying) return;
-        togglePlayPause();
+        console.log("MediaSession pause triggered (e.g., Bluetooth disconnect)");
+        if (isPlaying) {
+          togglePlayPause();
+        }
       });
       navigator.mediaSession.setActionHandler("previoustrack", prevStation);
       navigator.mediaSession.setActionHandler("nexttrack", nextStation);
     }
 
-    applyTheme();
+    applyTheme(currentTheme);
     loadStations();
     if (intendedPlaying && stationItems?.length && currentIndex < stationItems.length) {
       const normalizedCurrentUrl = normalizeUrl(stationItems[currentIndex].dataset.value);
       const normalizedAudioSrc = normalizeUrl(audio.src);
       if (normalizedAudioSrc !== normalizedCurrentUrl || audio.paused || audio.error || audio.readyState < 2 || audio.currentTime === 0) {
+        console.log("initializeApp: Starting playback after initialization");
         isAutoPlayPending = false;
         debouncedTryAutoPlay();
+      } else {
+        console.log("initializeApp: Skip playback, station already playing");
       }
+    } else {
+      console.log("initializeApp: Skip playback, invalid state");
     }
   }
 });
