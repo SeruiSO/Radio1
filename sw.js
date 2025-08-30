@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radio-cache-v160';
+const CACHE_NAME = 'radio-cache-v2372';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -22,7 +22,24 @@ self.addEventListener('install', (event) => {
       });
     })
   );
-  self.skipWaiting();
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      if (event.request.url.endsWith('stations.json')) {
+        return fetch(event.request, { cache: 'no-store', signal: new AbortController().signal }).then((networkResponse) => {
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+          });
+          return networkResponse;
+        }).catch(() => caches.match('/index.html'));
+      }
+      return response || fetch(event.request).then((networkResponse) => {
+        return networkResponse;
+      }).catch(() => caches.match('/index.html'));
+    })
+  );
 });
 
 self.addEventListener('activate', (event) => {
@@ -35,7 +52,7 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    }).then(() => self.clients.claim())
+    })
   );
   self.clients.matchAll().then((clients) => {
     clients.forEach((client) => {
@@ -60,7 +77,7 @@ function startNetworkCheck() {
                 client.postMessage({ type: "NETWORK_STATUS", online: true });
               });
             });
-            stopNetworkCheck();
+            stopNetworkCheck(); // Stop polling once online
           }
         })
         .catch(error => {
@@ -92,7 +109,7 @@ self.addEventListener('online', () => {
         client.postMessage({ type: "NETWORK_STATUS", online: true });
       });
     });
-    stopNetworkCheck();
+    stopNetworkCheck(); // Stop polling when online
   }
 });
 
@@ -104,41 +121,11 @@ self.addEventListener('offline', () => {
         client.postMessage({ type: "NETWORK_STATUS", online: false });
       });
     });
-    startNetworkCheck();
+    startNetworkCheck(); // Start polling when offline
   }
 });
 
-// Періодична перевірка стану кожні 5 хвилин
-setInterval(() => {
-  self.clients.matchAll().then(clients => {
-    clients.forEach(client => {
-      client.postMessage({
-        type: 'CHECK_STATE',
-        timestamp: Date.now()
-      });
-    });
-  });
-}, 300000);
-
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (event.request.url.endsWith('stations.json')) {
-        return fetch(event.request, { cache: 'no-store', signal: new AbortController().signal }).then((networkResponse) => {
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-          });
-          return networkResponse;
-        }).catch(() => caches.match('/index.html'));
-      }
-      return response || fetch(event.request).then((networkResponse) => {
-        return networkResponse;
-      }).catch(() => caches.match('/index.html'));
-    })
-  );
-});
-
-// Початкова перевірка, якщо офлайн
+// Start initial check if already offline
 if (!navigator.onLine && wasOnline) {
   wasOnline = false;
   startNetworkCheck();
