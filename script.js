@@ -1,4 +1,3 @@
-```javascript
 let currentTab = localStorage.getItem("currentTab") || "techno";
 let currentIndex = 0;
 let favoriteStations = JSON.parse(localStorage.getItem("favoriteStations")) || [];
@@ -81,17 +80,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Theme selection functionality
-    themeSelect.addEventListener("change", () => {
-      const selectedTheme = themeSelect.value;
-      document.documentElement.setAttribute("data-theme", selectedTheme);
-      localStorage.setItem("selectedTheme", selectedTheme);
-      console.log(`Theme changed to: ${selectedTheme}`);
-    });
+    if (themeSelect) {
+      themeSelect.addEventListener("change", () => {
+        const selectedTheme = themeSelect.value;
+        if (["default-dark", "calm-blue", "warm-pink", "light-gray"].includes(selectedTheme)) {
+          document.documentElement.setAttribute("data-theme", selectedTheme);
+          localStorage.setItem("selectedTheme", selectedTheme);
+          console.log(`Тема змінена на: ${selectedTheme}`);
+        } else {
+          console.warn("Невалідна тема:", selectedTheme);
+        }
+      });
 
-    // Set initial theme from localStorage
-    const savedTheme = localStorage.getItem("selectedTheme") || "default-dark";
-    document.documentElement.setAttribute("data-theme", savedTheme);
-    themeSelect.value = savedTheme;
+      // Set initial theme from localStorage
+      const savedTheme = localStorage.getItem("selectedTheme") || "default-dark";
+      if (["default-dark", "calm-blue", "warm-pink", "light-gray"].includes(savedTheme)) {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        themeSelect.value = savedTheme;
+      } else {
+        document.documentElement.setAttribute("data-theme", "default-dark");
+        themeSelect.value = "default-dark";
+        localStorage.setItem("selectedTheme", "default-dark");
+      }
+    }
 
     shareButton.addEventListener("click", () => {
       const stationName = currentStationInfo.querySelector(".station-name").textContent || "Radio S O";
@@ -1349,4 +1360,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-```
