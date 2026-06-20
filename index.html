@@ -5,22 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <meta name="theme-color" content="#00E676">
   <meta name="description" content="Radio Music S O - Слухайте улюблені радіостанції з сучасним інтерфейсом та функціями">
-  
-  <!-- PWA підтримка -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="mobile-web-app-capable" content="yes">
-  
-  <!-- Для Bluetooth та інших функцій -->
-  <meta name="bluetooth" content="true">
-  
   <title>Radio Music S O</title>
-  
-  <!-- Підключення сучасних шрифтів -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -28,9 +15,6 @@
 </head>
 <body>
   <div class="container">
-    <!-- Glassmorphism фон -->
-    <div class="glass-bg"></div>
-    
     <!-- Кнопки управління -->
     <button class="theme-toggle" aria-label="Змінити тему">🌙</button>
     <button class="share-button" aria-label="Поділитися поточною станцією">📢</button>
@@ -52,13 +36,10 @@
       <i>↓</i>
     </div>
 
-    <!-- Current Station Info з Glassmorphism -->
+    <!-- Current Station Info -->
     <div id="currentStationInfo" role="region" aria-label="Інформація про поточну станцію">
       <div class="station-info-content">
-        <div class="station-icon-wrapper">
-          <div class="station-icon-glow"></div>
-          <div class="station-icon" role="img" aria-label="Іконка станції">🎵</div>
-        </div>
+        <div class="station-icon" role="img" aria-label="Іконка станції">🎵</div>
         <div class="station-text">
           <div class="station-name" aria-label="Назва станції">Виберіть станцію</div>
           <div class="station-genre" aria-label="Жанр">жанр: -</div>
@@ -76,7 +57,7 @@
       </div>
     </div>
 
-    <!-- Station List з анімацією -->
+    <!-- Station List -->
     <div class="station-list" id="stationList" role="list" aria-label="Список станцій"></div>
 
     <!-- Tabs -->
@@ -97,7 +78,7 @@
       <button class="search-btn" aria-label="Виконати пошук">🔍 Пошук</button>
     </div>
 
-    <!-- Controls з ефектом неону -->
+    <!-- Controls -->
     <div class="controls-container">
       <div class="controls">
         <button class="control-btn" aria-label="Попередня станція">⏮</button>
@@ -108,7 +89,7 @@
 
     <!-- New Tab Modal -->
     <div class="new-tab-modal modal-overlay" style="display: none;" role="dialog" aria-label="Створити нову вкладку">
-      <div class="modal glass-modal">
+      <div class="modal">
         <h2>Створити нову вкладку</h2>
         <input id="newTabName" type="text" placeholder="Введіть назву вкладки (a-z, 0-9, -, _)" aria-label="Назва нової вкладки" maxlength="10" pattern="[a-z0-9_-]+">
         <div class="modal-tabs">
@@ -120,7 +101,7 @@
 
     <!-- Edit Tab Modal -->
     <div class="edit-tab-modal modal-overlay" style="display: none;" role="dialog" aria-label="Редагувати вкладку">
-      <div class="modal glass-modal">
+      <div class="modal">
         <h2>Дії з вкладкою</h2>
         <input id="renameTabName" type="text" placeholder="Введіть нову назву вкладки" aria-label="Нова назва вкладки" maxlength="10" pattern="[a-z0-9_-]+">
         <div class="modal-tabs">
@@ -137,32 +118,10 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(registration => {
-            console.log('ServiceWorker registration successful');
-            registration.update();
-          })
-          .catch(error => {
-            console.log('ServiceWorker registration failed: ', error);
-          });
-      });
-
-      if (navigator.serviceWorker.controller) {
-        navigator.serviceWorker.addEventListener('message', (event) => {
-          if (event.data.type === 'CACHE_UPDATED') {
-            console.log('Cache updated:', event.data.cacheVersion);
-          }
-          if (event.data.type === 'NETWORK_STATUS') {
-            console.log('Network status:', event.data.online);
-          }
-          if (event.data.type === 'NOTIFICATION_ACTION') {
-            console.log('Notification action:', event.data.action);
-          }
-          if (event.data.type === 'ALARM_TRIGGER') {
-            console.log('Alarm triggered:', event.data.station);
-          }
+        navigator.serviceWorker.register('sw.js').catch(error => {
+          console.log('ServiceWorker registration failed: ', error);
         });
-      }
+      });
     }
   </script>
   
