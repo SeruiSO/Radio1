@@ -1,609 +1,215 @@
-/* Updated on August 30, 2025 */
-:root {
-  --body-bg: #121212;
-  --container-bg: #1E1E1E;
-  --accent: #1DB954;
-  --text: #FFFFFF;
-  --secondary-text: #B3B3B3;
-  --accent-gradient: linear-gradient(45deg, #1DB954, #2ECC71);
-  --shadow: rgba(29, 185, 84, 0.2);
-  --font-family: 'Inter', sans-serif;
-  --border-radius: 16px;
-}
+const CACHE_NAME = 'radio-cache-v12314';
 
-[data-theme="default-dark"] {
-  --body-bg: #121212;
-  --container-bg: #1E1E1E;
-  --accent: #1DB954;
-  --text: #FFFFFF;
-  --secondary-text: #B3B3B3;
-  --accent-gradient: linear-gradient(45deg, #1DB954, #2ECC71);
-  --shadow: rgba(29, 185, 84, 0.2);
-}
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll([
+        '/',
+        '/index.html',
+        '/styles.css',
+        '/script.js',
+        '/stations.json',
+        '/manifest.json',
+        '/ping.txt'
+      ]).then(() => {
+        caches.keys().then((cacheNames) => {
+          return Promise.all(cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+          }));
+        });
+      });
+    })
+  );
+  self.skipWaiting();
+});
 
-[data-theme="calm-blue"] {
-  --body-bg: #0A1F44;
-  --container-bg: #1A2C5B;
-  --accent: #007AFF;
-  --text: #FFFFFF;
-  --secondary-text: #B3B3B3;
-  --accent-gradient: linear-gradient(45deg, #007AFF, #4DA8FF);
-  --shadow: rgba(0, 122, 255, 0.2);
-}
-
-[data-theme="warm-pink"] {
-  --body-bg: #2D1B2A;
-  --container-bg: #3F2A44;
-  --accent: #FF2D55;
-  --text: #FFFFFF;
-  --secondary-text: #B3B3B3;
-  --accent-gradient: linear-gradient(45deg, #C71585, #FF2D55);
-  --shadow: rgba(255, 45, 85, 0.2);
-}
-
-[data-theme="light-gray"] {
-  --body-bg: #F5F5F5;
-  --container-bg: #FFFFFF;
-  --accent: #1DB954;
-  --text: #121212;
-  --secondary-text: #666666;
-  --accent-gradient: linear-gradient(45deg, #1DB954, #2ECC71);
-  --shadow: rgba(29, 185, 84, 0.2);
-}
-
-body {
-  font-family: var(--font-family);
-  background: var(--body-bg);
-  color: var(--text);
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  overflow-x: hidden;
-  padding-top: 16px;
-  box-sizing: border-box;
-  transition: background 0.3s ease, color 0.3s ease;
-}
-
-.container {
-  max-width: 95%;
-  width: 100%;
-  background: var(--container-bg);
-  padding: 16px;
-  border-radius: var(--border-radius);
-  margin: 0 auto;
-  min-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  backdrop-filter: blur(10px);
-  transition: background 0.3s ease;
-}
-
-h1 {
-  font-size: 28px;
-  margin: 8px 0;
-  text-align: center;
-  color: var(--accent);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  transition: color 0.3s ease;
-}
-
-.menu-wrapper {
-  position: relative;
-  align-self: flex-end;
-}
-
-.menu-btn {
-  background: transparent;
-  border: none;
-  color: var(--text);
-  font-size: 24px;
-  cursor: pointer;
-  padding: 8px;
-  transition: transform 0.2s ease;
-}
-
-.menu-btn:hover {
-  transform: scale(1.1);
-}
-
-.menu-dropdown {
-  display: none;
-  position: absolute;
-  top: 40px;
-  right: 0;
-  background: var(--container-bg);
-  border-radius: var(--border-radius);
-  padding: 12px;
-  box-shadow: 0 4px 16px var(--shadow);
-  z-index: 100;
-  min-width: 180px;
-  transition: opacity 0.3s ease;
-}
-
-.menu-dropdown.active {
-  display: block;
-  opacity: 1;
-}
-
-.menu-dropdown select,
-.menu-dropdown button {
-  width: 100%;
-  margin-bottom: 8px;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: var(--border-radius);
-  color: var(--text);
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-
-.menu-dropdown select:hover,
-.menu-dropdown button:hover {
-  background: var(--accent-gradient);
-  color: var(--body-bg);
-  transform: scale(1.05);
-}
-
-.search-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-#searchQuery,
-#searchCountry,
-#searchGenre {
-  flex: 1;
-  min-width: 120px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: var(--border-radius);
-  color: var(--text);
-  font-size: 16px;
-  transition: all 0.3s ease;
-}
-
-#searchQuery:focus,
-#searchCountry:focus,
-#searchGenre:focus {
-  box-shadow: 0 0 8px var(--shadow);
-  outline: none;
-}
-
-.search-btn {
-  padding: 12px;
-  background: var(--accent-gradient);
-  border: none;
-  border-radius: var(--border-radius);
-  color: var(--body-bg);
-  font-size: 16px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.search-btn:hover {
-  transform: scale(1.05);
-}
-
-.station-list {
-  flex-grow: 1;
-  overflow-y: auto;
-  max-height: 50vh;
-  margin-bottom: 16px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--accent) var(--container-bg);
-}
-
-.station-item {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--border-radius);
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-
-.station-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: scale(1.02);
-}
-
-.station-item.selected {
-  background: var(--accent-gradient);
-  color: var(--body-bg);
-}
-
-.station-item.empty {
-  justify-content: center;
-  cursor: default;
-}
-
-.station-name {
-  flex-grow: 1;
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.station-icon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  margin-right: 12px;
-}
-
-.favorite-btn,
-.delete-btn,
-.add-btn {
-  background: transparent;
-  border: none;
-  color: var(--text);
-  font-size: 16px;
-  cursor: pointer;
-  padding: 8px;
-  transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.favorite-btn:hover,
-.delete-btn:hover,
-.add-btn:hover {
-  color: var(--accent);
-  transform: scale(1.1);
-}
-
-.favorite-btn.favorited {
-  color: var(--accent);
-}
-
-.buttons-container {
-  display: flex;
-  gap: 8px;
-}
-
-.mini-player {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 16px;
-  border-radius: var(--border-radius);
-  margin-top: auto;
-}
-
-.current-station {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.station-info {
-  flex-grow: 1;
-}
-
-.station-genre,
-.station-country {
-  font-size: 14px;
-  color: var(--secondary-text);
-}
-
-.wave-visualizer {
-  display: flex;
-  gap: 4px;
-}
-
-.wave-circle {
-  width: 12px;
-  height: 12px;
-  background: var(--accent);
-  border-radius: 50%;
-  opacity: 0.5;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-.wave-circle.playing:nth-child(1) {
-  animation: wave 0.6s ease-in-out infinite;
-}
-
-.wave-circle.playing:nth-child(2) {
-  animation: wave 0.6s ease-in-out 0.2s infinite;
-}
-
-.wave-circle.playing:nth-child(3) {
-  animation: wave 0.6s ease-in-out 0.4s infinite;
-}
-
-@keyframes wave {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.5); opacity: 1; }
-}
-
-.controls {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-}
-
-.control-btn {
-  width: 56px;
-  height: 56px;
-  background: var(--accent-gradient);
-  border: none;
-  border-radius: var(--border-radius);
-  color: var(--body-bg);
-  font-size: 24px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.control-btn:hover {
-  transform: scale(1.05);
-}
-
-.tabs-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
-  position: sticky;
-  bottom: 16px;
-  background: var(--container-bg);
-  padding: 8px 0;
-}
-
-.tab-btn {
-  padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: var(--border-radius);
-  color: var(--text);
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-
-.tab-btn:hover {
-  background: var(--accent-gradient);
-  color: var(--body-bg);
-  transform: scale(1.05);
-}
-
-.tab-btn.active {
-  background: var(--accent-gradient);
-  color: var(--body-bg);
-}
-
-.add-tab-btn {
-  width: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: var(--border-radius);
-  color: var(--text);
-  font-size: 18px;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-
-.add-tab-btn:hover {
-  background: var(--accent-gradient);
-  color: var(--body-bg);
-  transform: scale(1.05);
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 99;
-  display: none;
-}
-
-.new-tab-modal,
-.edit-tab-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
-
-.modal {
-  background: var(--container-bg);
-  padding: 20px;
-  border-radius: var(--border-radius);
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 16px var(--shadow);
-}
-
-.modal h2 {
-  color: var(--accent);
-  font-size: 20px;
-  margin: 0 0 12px;
-  text-align: center;
-}
-
-.modal-tabs {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.modal-tab-btn,
-.modal-cancel-btn {
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: var(--border-radius);
-  color: var(--text);
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.modal-tab-btn:hover,
-.modal-cancel-btn:hover {
-  background: var(--accent-gradient);
-  color: var(--body-bg);
-  transform: scale(1.05);
-}
-
-.modal-cancel-btn {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.new-tab-modal input,
-.edit-tab-modal input {
-  width: 100%;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: var(--border-radius);
-  color: var(--text);
-  font-size: 16px;
-  transition: all 0.3s ease;
-}
-
-.new-tab-modal input:focus,
-.edit-tab-modal input:focus {
-  box-shadow: 0 0 8px var(--shadow);
-  outline: none;
-}
-
-@media (max-width: 720px) {
-  h1 {
-    font-size: 24px;
+self.addEventListener('fetch', (event) => {
+  if (event.request.url.includes('api.radio-browser.info')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => response)
+        .catch(() => {
+          return new Response(JSON.stringify({ error: 'Network error' }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        })
+    );
+    return;
   }
 
-  .container {
-    padding: 12px;
-    min-height: 85vh;
-  }
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      if (event.request.url.endsWith('stations.json')) {
+        return fetch(event.request, { cache: 'no-store', signal: new AbortController().signal }).then((networkResponse) => {
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+          });
+          return networkResponse;
+        }).catch(() => caches.match('/index.html'));
+      }
+      return response || fetch(event.request).then((networkResponse) => {
+        return networkResponse;
+      }).catch(() => caches.match('/index.html'));
+    })
+  );
+});
 
-  .station-list {
-    max-height: 45vh;
-  }
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+  self.clients.matchAll().then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({ type: 'CACHE_UPDATED', cacheVersion: CACHE_NAME });
+    });
+  });
+  self.clients.claim();
+});
 
-  .station-item {
-    padding: 10px;
-  }
+let wasOnline = navigator.onLine;
+let checkInterval = null;
 
-  .station-item .station-name {
-    font-size: 14px;
-  }
-
-  .station-item img,
-  .station-item .station-icon {
-    width: 40px;
-    height: 40px;
-  }
-
-  .control-btn {
-    width: 48px;
-    height: 48px;
-    font-size: 20px;
-  }
-
-  .mini-player {
-    padding: 10px;
-  }
-
-  .station-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
-
-  .station-name {
-    font-size: 14px;
-  }
-
-  .station-genre,
-  .station-country {
-    font-size: 12px;
-  }
-
-  .wave-visualizer {
-    width: 40px;
-    height: 40px;
-  }
-
-  .tabs-wrapper {
-    bottom: 64px;
-  }
-
-  .tab-btn,
-  .add-tab-btn {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  .add-tab-btn {
-    width: 32px;
-    font-size: 16px;
-  }
-
-  #searchQuery,
-  #searchCountry,
-  #searchGenre {
-    font-size: 14px;
-    padding: 10px;
-  }
-
-  .search-btn {
-    padding: 10px;
-    font-size: 14px;
-  }
-
-  .modal h2 {
-    font-size: 18px;
-  }
-
-  .modal-tab-btn,
-  .modal-cancel-btn {
-    font-size: 14px;
-    padding: 10px;
-  }
-
-  .new-tab-modal input,
-  .edit-tab-modal input {
-    font-size: 14px;
-    padding: 10px;
+function startNetworkCheck() {
+  if (!checkInterval) {
+    checkInterval = setInterval(() => {
+      fetch("/ping.txt", { method: "HEAD", cache: "no-store" })
+        .then(() => {
+          if (!wasOnline) {
+            wasOnline = true;
+            self.clients.matchAll().then(clients => {
+              clients.forEach(client => {
+                client.postMessage({ type: "NETWORK_STATUS", online: true });
+              });
+            });
+            stopNetworkCheck();
+          }
+        })
+        .catch(error => {
+          if (wasOnline) {
+            wasOnline = false;
+            self.clients.matchAll().then(clients => {
+              clients.forEach(client => {
+                client.postMessage({ type: "NETWORK_STATUS", online: false });
+              });
+            });
+          }
+        });
+    }, 2000);
   }
 }
 
-@media (min-width: 721px) {
-  .station-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 8px;
-  }
-
-  .station-item {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .station-item img,
-  .station-item .station-icon {
-    width: 64px;
-    height: 64px;
+function stopNetworkCheck() {
+  if (checkInterval) {
+    clearInterval(checkInterval);
+    checkInterval = null;
   }
 }
+
+self.addEventListener('online', () => {
+  if (!wasOnline) {
+    wasOnline = true;
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({ type: "NETWORK_STATUS", online: true });
+      });
+    });
+    stopNetworkCheck();
+  }
+});
+
+self.addEventListener('offline', () => {
+  if (wasOnline) {
+    wasOnline = false;
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({ type: "NETWORK_STATUS", online: false });
+      });
+    });
+    startNetworkCheck();
+  }
+});
+
+if (!navigator.onLine && wasOnline) {
+  wasOnline = false;
+  startNetworkCheck();
+}
+
+self.addEventListener('message', (event) => {
+  if (event.data.type === 'NOTIFICATION_ACTION') {
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'NOTIFICATION_ACTION',
+          action: event.data.action
+        });
+      });
+    });
+  }
+  
+  if (event.data.type === 'SET_ALARM') {
+    const { time, station } = event.data;
+    setTimeout(() => {
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'ALARM_TRIGGER',
+            station: station
+          });
+        });
+      });
+    }, time);
+  }
+});
+
+self.addEventListener('push', (event) => {
+  const data = event.data.json();
+  const options = {
+    body: data.body || '🎵 Грає ваша улюблена станція!',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    vibrate: [200, 100, 200],
+    data: {
+      url: data.url || '/',
+      station: data.station || ''
+    },
+    actions: [
+      { action: 'play', title: '⏸ Пауза' },
+      { action: 'next', title: '⏭ Далі' }
+    ]
+  };
+  
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Radio S O', options)
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  const urlToOpen = event.notification.data?.url || '/';
+  const station = event.notification.data?.station || '';
+  
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' }).then(windowClients => {
+      for (let client of windowClients) {
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(urlToOpen + '?station=' + encodeURIComponent(station));
+      }
+    })
+  );
+});
